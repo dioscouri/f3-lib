@@ -4,7 +4,7 @@ A library for the F3 framework
 
 ### Getting Started
 
-Clone the repo somewhere in your F3 project and ensure that the folder is added to your autoloader.
+Clone the repo into a 'dsc' folder somewhere in your F3 project. Ensure that the 'dsc' folder's parent is added to your autoloader.  e.g., if you have /lib/ added to your autoloader, clone this repo into /lib/dsc/
 
 ### Dependencies
 
