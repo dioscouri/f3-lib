@@ -38,6 +38,17 @@ class Apps extends Object
             }
         }
         
+        $path = $f3->get('PATH_ROOT') . 'vendor/dioscouri/';
+        if ($folders = \Joomla\Filesystem\Folder::folders( $path ))
+        {
+            foreach ($folders as $folder)
+            {
+                if (file_exists( $path . $folder . '/bootstrap.php' )) {
+                    require_once $path . $folder . '/bootstrap.php';
+                }
+            }
+        }
+        
         return $this;
     }
 }
