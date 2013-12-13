@@ -34,7 +34,8 @@ class Template extends \View
         $fw = $this->app;
         foreach ($fw->split($fw->get('TEMPLATES')) as $dir)
         {
-            if (is_file($this->template_file_path=$fw->fixslashes($dir.$this->template_name."/".$file)))
+            $this->template_file_path = $fw->fixslashes($dir.$this->template_name."/".$file);
+            if (is_file($this->template_file_path))
             {
                 $this->layout_name = $file;
                 break;

@@ -5,7 +5,7 @@ class Model extends Object
 {
     protected $crud_item_key = "id";
     protected $state = null;
-    protected $filterinput = null;
+    protected $inputfilter = null;
     protected $context = null;
     protected $mapper = null;
     
@@ -36,7 +36,7 @@ class Model extends Object
         $state = empty($config['state']) ? new \Joomla\Registry\Registry : $config['state']; 
         $this->state = ($state instanceof \Joomla\Registry\Registry) ? $state : new \Joomla\Registry\Registry;
         
-        $this->filterinput = new \Joomla\Filter\InputFilter;
+        $this->inputfilter = new \Joomla\Filter\InputFilter;
         
         $this->context = strtolower(get_class($this));
         
@@ -71,7 +71,7 @@ class Model extends Object
     {
         $return = ($property === null) ? $this->state : $this->state->get($property, $default);
 
-        return $this->filterinput->clean( $return, $return_type );
+        return $this->inputfilter->clean( $return, $return_type );
     }
     
     /**
@@ -348,7 +348,7 @@ class Model extends Object
         }
         
         $key = strtolower( get_class() ) . "." . microtime(true);
-        $key = $this->filterinput->clean($key, 'ALNUM');
+        $key = $this->inputfilter->clean($key, 'ALNUM');
         $f3 = \Base::instance();
         $f3->set($key, $values);
         

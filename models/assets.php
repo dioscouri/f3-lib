@@ -142,6 +142,13 @@ class Assets extends Nodes
         if ($filter_slug) {
             $this->filters['metadata.slug'] = $filter_slug;
         }
+        
+        $filter_type = $this->getState('filter.type');
+        if (strlen($filter_type))
+        {
+            $key =  new \MongoRegex('/'. $filter_type .'/i');
+            $this->filters['contentType'] = $key;
+        }
     
         return $this->filters;
     }
