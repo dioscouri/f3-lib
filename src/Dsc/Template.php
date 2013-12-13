@@ -107,7 +107,7 @@ class Template extends \View
                 return $this;
             }
         }
-        user_error(sprintf(Base::E_Open,$file));
+        user_error(sprintf(\Base::E_Open,$file));
     }
     
     /**
