@@ -8,7 +8,7 @@ class Apps extends Object
      * @param unknown_type $app
      * @return \Dsc\Apps
      */
-    public function bootstrap($app=null)
+    public function bootstrap($app=null, $additional_paths=array())
     {
         if (!empty($app)) {
             // bootstrap just a single app from the /apps folder
@@ -27,17 +27,7 @@ class Apps extends Object
             define('JPATH_ROOT', $f3->get('PATH_ROOT'));
         }
         
-        $path = $f3->get('PATH_ROOT') . 'apps/';
-        if ($folders = \Joomla\Filesystem\Folder::folders( $path )) 
-        {
-            foreach ($folders as $folder) 
-            {
-                if (file_exists( $path . $folder . '/bootstrap.php' )) {
-                    require_once $path . $folder . '/bootstrap.php';
-                }
-            }
-        }
-        
+		// do the original apps first        
         $path = $f3->get('PATH_ROOT') . 'vendor/dioscouri/';
         if ($folders = \Joomla\Filesystem\Folder::folders( $path ))
         {
@@ -47,6 +37,32 @@ class Apps extends Object
                     require_once $path . $folder . '/bootstrap.php';
                 }
             }
+        }
+        
+        // then do the custom apps 
+        $path = $f3->get('PATH_ROOT') . 'apps/';
+        if ($folders = \Joomla\Filesystem\Folder::folders( $path ))
+        {
+        	foreach ($folders as $folder)
+        	{
+        		if (file_exists( $path . $folder . '/bootstrap.php' )) {
+        			require_once $path . $folder . '/bootstrap.php';
+        		}
+        	}
+        }
+        
+        // then do any additional paths
+        foreach ($additional_paths as $additional_path) 
+        {
+        	if ($folders = \Joomla\Filesystem\Folder::folders( $additional_path ))
+        	{
+        		foreach ($folders as $folder)
+        		{
+        			if (file_exists( $path . $folder . '/bootstrap.php' )) {
+        				require_once $path . $folder . '/bootstrap.php';
+        			}
+        		}
+        	}        	
         }
         
         return $this;
