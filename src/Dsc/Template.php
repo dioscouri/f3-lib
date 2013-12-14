@@ -8,6 +8,7 @@ class Template extends \View
     protected $template_file = null;
     protected $template_contents = array();
     protected $template_tags = array();
+    protected $view_name = null;
     
     public function __construct($config=array())
     {
@@ -45,9 +46,45 @@ class Template extends \View
         return $this;
     }
     
+    public function renderSpecificLayout($dir, $file, $mime='text/html', array $hive=NULL)
+    {
+        $fw = $this->app;
+        
+        if (is_file($this->view=$fw->fixslashes($dir.$file))) {
+        	if (isset($_COOKIE[session_name()]))
+        		@session_start();
+        	$fw->sync('SESSION');
+        	if (!$hive)
+        		$hive=$fw->hive();
+        	if ($fw->get('ESCAPE'))
+        		$hive=$fw->esc($hive);
+        	if (PHP_SAPI!='cli')
+        		header('Content-Type: '.$mime.'; '.
+        				'charset='.$fw->get('ENCODING'));
+        	return $this->sandbox($hive);
+        }
+    
+        return $this;
+    }
+    
     public function renderLayout( $file, $mime='text/html', array $hive=NULL ) 
     {
-        return parent::render( $file, $mime, $hive );
+        $fw = $this->app;
+        
+        $pieces = $fw->split(str_replace(array("::", ":"), "|", $file));
+        if (count($pieces) > 1) {
+            $view = str_replace("\\", "/", $pieces[0]);
+            $file = $pieces[1];
+            // if the requested specific file exists, use it,
+            // otherwise let render search for the first $file match
+            foreach ($fw->split($fw->get('UI')) as $dir) {
+            	if (strpos($dir, $view) !== false) {
+            		return $this->renderSpecificLayout($dir, $file, $mime, $hive);
+            	}            	
+            }
+        } 
+        
+        return parent::render( $file, $mime, $hive );        
     }
     
     public function render( $file,$mime='text/html',array $hive=NULL ) 
