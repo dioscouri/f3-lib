@@ -55,6 +55,6 @@ class Mapper extends \DB\Mongo\Mapper
         if ($key == 'id') {
             $key = '_id';
         }
-        \Dsc\ArrayHelper::forget( $this->document, $key );
+        \Dsc\ArrayHelper::clear( $this->document, $key );
     }
 }

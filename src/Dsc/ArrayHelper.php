@@ -90,7 +90,7 @@ class ArrayHelper extends \Prefab
 	 * @param  string  $key
 	 * @return void
 	 */
-	public static function forget(&$array, $key)
+	public static function clear(&$array, $key)
 	{
 	    $keys = explode('.', $key);
 	    $count = count($keys);
