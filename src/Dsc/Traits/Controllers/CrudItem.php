@@ -131,7 +131,7 @@ trait CrudItem
             $values = $data;
             unset($values['submitType']);
             //\Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
-            $item = $model->create($values);
+            $this->item = $model->create($values);
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
@@ -151,23 +151,25 @@ trait CrudItem
             // redirect back to the create form with the fields pre-populated
             \Dsc\System::instance()->setUserState('use_flash.' . $this->create_item_route, true);
             $flash->store($data);
-            $f3->reroute( $this->create_item_route );
             
+            $this->setRedirect( $this->create_item_route );
+                        
+            return false;
         }
                 
         // redirect to the editing form for the new item
         \Dsc\System::instance()->addMessage('Item saved');
         
-        if (method_exists($item, 'cast')) {
-            $item_data = $item->cast();
+        if (method_exists($this->item, 'cast')) {
+            $this->item_data = $this->item->cast();
         } else {
-            $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
+            $this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
         }
         
         if ($f3->get('AJAX')) {
             return $this->outputJson( $this->getJsonResponse( array(
                     'message' => \Dsc\System::instance()->renderMessages(),
-                    'result' => $item_data
+                    'result' => $this->item_data
             ) ) );
         }
         
@@ -180,13 +182,13 @@ trait CrudItem
                 $route = $this->list_route;
                 break;
             default:
-                $flash->store($item_data);
-                $id = $item->get( $this->getItemKey() );
+                $flash->store($this->item_data);
+                $id = $this->item->get( $this->getItemKey() );
                 $route = str_replace('{id}', $id, $this->edit_item_route );                
                 break;
         }
 
-        $f3->reroute( $route );
+        $this->setRedirect( $route );
         
         return $this;
     }
@@ -212,7 +214,7 @@ trait CrudItem
         $f3 = \Base::instance();
         $flash = \Dsc\Flash::instance();
         $model = $this->getModel();
-        $item = $this->getItem();
+        $this->item = $this->getItem();
         
         // save
         $save_as = false;
@@ -222,12 +224,12 @@ trait CrudItem
             //\Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
             if ($data['submitType'] == 'save_as') 
             {
-                $item = $model->saveAs($item, $values);
+                $this->item = $model->saveAs($this->item, $values);
                 \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.');
             } 
             else 
             {
-                $item = $model->update($item, $values);
+                $this->item = $model->update($this->item, $values);
                 \Dsc\System::instance()->addMessage('Item updated');
             }
             
@@ -250,22 +252,25 @@ trait CrudItem
         
             // redirect back to the create form with the fields pre-populated
             $flash->store($data);
-            $id = $item->get( $this->getItemKey() );
+            $id = $this->item->get( $this->getItemKey() );
             $route = str_replace('{id}', $id, $this->edit_item_route );
-            $f3->reroute( $route );            
+            
+            $this->setRedirect( $route );
+            
+            return false;           
         }
         
         // redirect to the editing form for the new item
-        if (method_exists($item, 'cast')) {
-            $item_data = $item->cast();
+        if (method_exists($this->item, 'cast')) {
+            $this->item_data = $this->item->cast();
         } else {
-            $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
+            $this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
         }
         
         if ($f3->get('AJAX')) {
             return $this->outputJson( $this->getJsonResponse( array(
                     'message' => \Dsc\System::instance()->renderMessages(),
-                    'result' => $item_data
+                    'result' => $this->item_data
             ) ) );
         }
         
@@ -280,12 +285,12 @@ trait CrudItem
             case "save_as":
             default:
                 $flash->store($item_data);
-                $id = $item->get( $this->getItemKey() );
+                $id = $this->item->get( $this->getItemKey() );
                 $route = str_replace('{id}', $id, $this->edit_item_route );
                 break;
         }
 
-        $f3->reroute( $route );
+        $this->setRedirect( $route );
         
         return $this;        
     }
@@ -298,10 +303,10 @@ trait CrudItem
         
         $f3 = \Base::instance();
         $model = $this->getModel();
-        $item = $this->getItem();
+        $this->item = $this->getItem();
         
         try {
-            $model->delete( $item );
+            $model->delete( $this->item );
             \Dsc\System::instance()->addMessage('Item deleted');
         }
         catch (\Exception $e) {
@@ -321,7 +326,9 @@ trait CrudItem
             }
         
             // redirect back to the list view
-            $f3->reroute( $this->list_route );
+            $this->setRedirect( $this->list_route );
+            
+            return false;
         }
         
         if ($f3->get('AJAX')) {
@@ -330,7 +337,9 @@ trait CrudItem
             ) ) );
         }
 
-        $f3->reroute( $this->list_route );
+        $this->setRedirect( $this->list_route );
+        
+        return $this;
     }
 
 }

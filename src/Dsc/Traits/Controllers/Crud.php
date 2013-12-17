@@ -15,7 +15,13 @@ trait Crud
             throw new \Exception('Not allowed to create record');
         }
         
-        return $this->doCreate($data);
+        $this->doCreate($data);
+        
+        if ($route = $this->getRedirect()) {
+            \Base::instance()->reroute( $route );
+        }
+        
+        return;
     }
     
     /**
@@ -30,7 +36,13 @@ trait Crud
             throw new \Exception('Not allowed to read record');
         }
         
-        return $this->doRead($data, $this->getItemKey());    
+        $this->doRead($data, $this->getItemKey());
+
+        if ($route = $this->getRedirect()) {
+            \Base::instance()->reroute( $route );
+        }
+        
+        return;
     }
     
     /**
@@ -45,7 +57,13 @@ trait Crud
             throw new \Exception('Not allowed to update record');
         }
         
-        return $this->doUpdate($data, $this->getItemKey());    
+        $this->doUpdate($data, $this->getItemKey());
+
+        if ($route = $this->getRedirect()) {
+            \Base::instance()->reroute( $route );
+        }
+        
+        return;
     }
     
     /**
@@ -60,7 +78,13 @@ trait Crud
             throw new \Exception('Not allowed to delete record');
         }
         
-        return $this->doDelete($data, $this->getItemKey());    
+        $this->doDelete($data, $this->getItemKey());
+
+        if ($route = $this->getRedirect()) {
+            \Base::instance()->reroute( $route );
+        }
+        
+        return;
     }
     
     /**
@@ -75,7 +99,13 @@ trait Crud
             throw new \Exception('Not allowed to add record');
         }
     
-        return $this->doAdd($data);
+        $this->doAdd($data);
+        
+        if ($route = $this->getRedirect()) {
+            \Base::instance()->reroute( $route );
+        }
+        
+        return;
     }
     
     /**
@@ -90,7 +120,13 @@ trait Crud
             throw new \Exception('Not allowed to edit record');
         }
     
-        return $this->doEdit($data, $this->getItemKey());
+        $this->doEdit($data, $this->getItemKey());
+        
+        if ($route = $this->getRedirect()) {
+            $f3->reroute( $route );
+        }
+        
+        return;
     }
     
     protected function canCreate(array $data)

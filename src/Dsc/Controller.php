@@ -5,6 +5,13 @@ class Controller extends Object
 {
     use \Dsc\Traits\Meta;
     
+    /**
+     * URL for redirection.
+     *
+     * @var    string
+     */
+    protected $redirect;
+    
     public function __construct($config=array())
     {
         parent::__construct($config);
@@ -59,6 +66,20 @@ class Controller extends Object
         }
         
         return $response;
+    }
+    
+    public function setRedirect( $url )
+    {
+        $this->redirect = $url;
+    }
+    
+    public function getRedirect()
+    {
+        if (!empty($this->redirect)) {
+            return $this->redirect;
+        }
+        
+        return null;
     }
 }
 ?>
