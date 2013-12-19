@@ -57,7 +57,7 @@ class Template extends \View
         	if (!$hive)
         		$hive=$fw->hive();
         	if ($fw->get('ESCAPE'))
-        		$hive=$fw->esc($hive);
+        		$hive=$this->esc($hive);
         	if (PHP_SAPI!='cli')
         		header('Content-Type: '.$mime.'; '.
         				'charset='.$fw->get('ENCODING'));
