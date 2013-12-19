@@ -58,8 +58,8 @@ class Apps extends Object
         	{
         		foreach ($folders as $folder)
         		{
-        			if (file_exists( $path . $folder . '/bootstrap.php' )) {
-        				require_once $path . $folder . '/bootstrap.php';
+        			if (file_exists( $additional_path . $folder . '/bootstrap.php' )) {
+        				require_once $additional_path . $folder . '/bootstrap.php';
         			}
         		}
         	}        	
