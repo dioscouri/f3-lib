@@ -284,7 +284,7 @@ trait CrudItem
                 break;
             case "save_as":
             default:
-                $flash->store($item_data);
+                $flash->store($this->item_data);
                 $id = $this->item->get( $this->getItemKey() );
                 $route = str_replace('{id}', $id, $this->edit_item_route );
                 break;
