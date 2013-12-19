@@ -67,7 +67,7 @@ class Template extends \View
         return $this;
     }
     
-    public function renderLayout( $file, $mime='text/html', array $hive=NULL ) 
+    public function renderLayout( $file, $mime='text/html', array $hive=NULL, $ttl=0 ) 
     {
         $fw = $this->app;
         
@@ -84,10 +84,10 @@ class Template extends \View
             }
         } 
         
-        return parent::render( $file, $mime, $hive );        
+        return parent::render( $file, $mime, $hive, $ttl );        
     }
     
-    public function render( $file,$mime='text/html',array $hive=NULL ) 
+    public function render( $file,$mime='text/html',array $hive=NULL, $ttl=0 ) 
     {
         $this->setContents( $this->renderLayout( $file, $mime, $hive ), 'view' );
         $this->setContents( $this->renderLayout( "system-messages.php", $mime, $hive ), 'system.messages' );
