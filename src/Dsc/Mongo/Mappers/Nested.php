@@ -114,6 +114,12 @@ class Nested extends \Dsc\Mongo\Mapper
         if ($moving)
         {
             $this->rebuildTree( (string) $this->tree );
+            
+            // if we just removed a leaf/branch to a new tree, rebuild the old tree too 
+            if ($this->tree != $node->tree) 
+            {
+                $this->rebuildTree( (string) $node->tree );
+            }
         }
         
         return $return;
@@ -126,7 +132,7 @@ class Nested extends \Dsc\Mongo\Mapper
                 array(
                     'lft' => array('$gte' => $this->lft ),
                     'rgt' => array('$lte' => $this->rgt ),
-                    'tree' => $this->tree
+                    'tree' => (string) $this->tree
                 )
         );
         
@@ -187,13 +193,14 @@ class Nested extends \Dsc\Mongo\Mapper
         return false;
     }
     
-    public function getDescendants( $mapper )
+    public function getChildren( $mapper )
     {
         $filter = array(
         	'parent' => (string) $mapper->id
         );
         
         $this->cursor = $this->collection->find( $filter, array() );
+        $this->cursor = $this->cursor->sort(array('ordering' => 1));
         
         $result = array();
         while ($this->cursor->hasnext()) {
@@ -205,6 +212,30 @@ class Nested extends \Dsc\Mongo\Mapper
             $out[] = $this->factory($doc);
         }
             
+        return $out;
+    }
+    
+    public function getDescendants( $mapper )
+    {
+        $filter = array(
+            'lft' => array('$gte' => $mapper->lft ),
+            'rgt' => array('$lte' => $mapper->rgt ),
+            'tree' => $mapper->tree
+        );
+    
+        $this->cursor = $this->collection->find( $filter, array() );
+        $this->cursor = $this->cursor->sort(array('ordering' => 1));
+    
+        $result = array();
+        while ($this->cursor->hasnext()) {
+            $result[] = $this->cursor->getnext();
+        }
+    
+        $out = array();
+        foreach ($result as $doc) {
+            $out[] = $this->factory($doc);
+        }
+    
         return $out;
     }
     
@@ -244,7 +275,7 @@ class Nested extends \Dsc\Mongo\Mapper
         $right = $left + 1;
         
         // get all children of this node
-        if ($children = $this->getDescendants( $node )) 
+        if ($children = $this->getChildren( $node )) 
         {
             foreach ($children as $child) 
             {
@@ -266,6 +297,120 @@ class Nested extends \Dsc\Mongo\Mapper
         $return = $right + 1;
         
         return $return;
+    }
+    
+    /**
+     * Move a node one position to the left in the same level of the tree
+     */
+    public function moveUp() 
+    {
+        // Get the sibling immediately to the left of this node
+        $sibling = clone $this;
+        $sibling->reset();
+        $sibling->load(array('tree' => (string) $this->tree, 'rgt' => $this->lft - 1 ));
+
+        // fail of no sibling found
+        if (empty($sibling->id)) {
+            return false;
+        }
+        
+        $ids = array();
+        // Get the primary keys of descendant nodes, including this node's
+        if ($descendants = $this->getDescendants( $this )) {
+            $ids = \Joomla\Utilities\ArrayHelper::getColumn( $descendants, '_id' );
+        }
+
+        $width = (int) ($this->rgt - $this->lft + 1);
+        $sibling_width = (int) ($sibling->rgt - $sibling->lft + 1);
+        
+        // Shift left and right values for the node and its children.
+        $result = $this->collection->update(
+                array(
+                    'lft' => array('$gte' => $this->lft, '$lte' => $this->rgt ),
+                    'tree' => (string) $this->tree
+                ),
+                array(
+                    '$inc' => array( 'lft' => -$sibling_width, 'rgt' => -$sibling_width )
+                ),
+                array(
+                    'multiple'=> true
+                )
+        );
+
+        // Shift left and right values for the sibling and its children 
+        // explicitly excluding the node's descendants 
+        $result = $this->collection->update(
+                array(
+                    '_id' => array('$nin' => $ids ),
+                    'lft' => array('$gte' => $sibling->lft, '$lte' => $sibling->rgt ),
+                    'tree' => (string) $this->tree
+                ),
+                array(
+                    '$inc' => array( 'lft' => $width, 'rgt' => $width )
+                ),
+                array(
+                    'multiple'=> true
+                )
+        );        
+
+        return $result;
+    }
+    
+    /**
+     * Move a node one position to the right in the same level of the tree
+     */
+    public function moveDown()
+    {
+        // Get the sibling immediately to the left of this node
+        $sibling = clone $this;
+        $sibling->reset();
+        $sibling->load(array('tree' => (string) $this->tree, 'lft' => $this->rgt + 1 ));
+    
+        // fail of no sibling found
+        if (empty($sibling->id)) {
+            return false;
+        }
+    
+        $ids = array();
+        // Get the primary keys of descendant nodes, including this node's
+        if ($descendants = $this->getDescendants( $this )) {
+            $ids = \Joomla\Utilities\ArrayHelper::getColumn( $descendants, '_id' );
+        }
+    
+        $width = (int) ($this->rgt - $this->lft + 1);
+        $sibling_width = (int) ($sibling->rgt - $sibling->lft + 1);
+    
+        // Shift left and right values for the node and its children.
+        $result = $this->collection->update(
+                array(
+                    'lft' => array('$gte' => $this->lft, '$lte' => $this->rgt ),
+                    'tree' => (string) $this->tree
+                ),
+                array(
+                    '$inc' => array( 'lft' => $sibling_width, 'rgt' => $sibling_width )
+                ),
+                array(
+                    'multiple'=> true
+                )
+        );
+    
+        // Shift left and right values for the sibling and its children
+        // explicitly excluding the node's descendants
+        $result = $this->collection->update(
+                array(
+                    '_id' => array('$nin' => $ids ),
+                    'lft' => array('$gte' => $sibling->lft, '$lte' => $sibling->rgt ),
+                    'tree' => (string) $this->tree
+                ),
+                array(
+                    '$inc' => array( 'lft' => -$width, 'rgt' => -$width )
+                ),
+                array(
+                    'multiple'=> true
+                )
+        );
+    
+        return $result;
     }
 }
 ?>

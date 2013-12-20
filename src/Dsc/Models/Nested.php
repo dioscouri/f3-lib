@@ -42,15 +42,23 @@ abstract class Nested extends \Dsc\Models\Db\Mongo
         return $this->filters;
     }
     
-    /**
-     * An alias for the save command
-     *
-     * @param unknown_type $values
-     * @param unknown_type $options
-     */
-    public function create( $values, $options=array() )
+    public function reorder($options=array())
     {
-        
-        return parent::create( $values, $options );
+        if (!empty($options['trees']) && is_array($options['trees'])) {
+            foreach ($options['trees'] as $tree) 
+            {
+                $mapper = $this->getMapper()->rebuildTree( $tree );
+            }
+        }
+    }
+    
+    public function moveUp( $mapper ) 
+    {
+        return $mapper->moveUp();
+    }
+    
+    public function moveDown( $mapper )
+    {
+        return $mapper->moveDown();
     }
 }
