@@ -100,6 +100,24 @@ class Model extends Object
         
         return $this;
     }
+
+
+    /**
+     * Method to set model filter variables, this is to allow you to direct effect filters without setting the state
+     *
+     * @param   string  $property  The name of the property.
+     * @param   mixed   $value     The value of the property to set or null.
+     *
+     * @return  mixed  The previous value of the property or null if not set.
+     */
+    public function setFilter($filter, $value) {
+        $this->filters[$filter] = $value;
+    }
+
+    public function getFilter($filter) {
+        return $this->filters[$filter];
+    }
+    
     
     /**
      * Method to auto-populate the model state.
