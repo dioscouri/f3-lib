@@ -115,7 +115,7 @@ class Model extends Object
     }
 
     public function getFilter($filter) {
-        return $this->filters[$filter];
+       return isset() ? $this->filters[$filter] : null;
     }
     
     
