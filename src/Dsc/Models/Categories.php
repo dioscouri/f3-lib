@@ -55,9 +55,9 @@ class Categories extends \Dsc\Models\Db\Mongo
         }
         
         $filter_parent = $this->getState('filter.parent');
-        if (strlen($filter_parent))
+        if (!empty($filter_parent))
         {
-            $this->filters['parent'] = (string) $filter_parent;
+            $this->filters['parent'] = new \MongoId((string) $filter_parent);
         }
         
         $filter_ids = $this->getState('filter.ids');
@@ -98,6 +98,8 @@ class Categories extends \Dsc\Models\Db\Mongo
         if (!isset($values['parent']) || $values['parent'] == "null")
         {
             $values['parent'] = null;
+        } else {
+        	$values['parent'] = new \MongoId((string) $values['parent']);
         }
         
         if (empty($values['path']))
@@ -150,6 +152,8 @@ class Categories extends \Dsc\Models\Db\Mongo
         if (!isset($values['parent']) || $values['parent'] == "null")
         {
             $values['parent'] = null;
+        } else {
+        	$values['parent'] = new \MongoId((string) $values['parent']);
         }
         
         $parent_title = null;
@@ -207,8 +211,17 @@ class Categories extends \Dsc\Models\Db\Mongo
     {
         $update_children = isset($options['update_children']) ? $options['update_children'] : false;
         
+        if (!isset($values['parent']) || $values['parent'] == "null")
+        {
+        	$values['parent'] = null;
+        	$values['ancestors'] = null;
+        } else {
+        	$values['parent'] = new \MongoId((string) $values['parent']);
+        	unset($values['ancestors']);
+        }
+        
         // if the mapper's parent is different from the $values['parent'], then we also need to update all the children
-        if ($mapper->parent != @$values['parent']) {
+        if ($mapper->parent != @$values['parent'] || $mapper->title != @$values['title']) {
             // update children after save
             $update_children = true;
         }
