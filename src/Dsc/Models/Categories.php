@@ -242,9 +242,8 @@ class Categories extends \Dsc\Models\Db\Mongo
         }
         
         // get the parent's path, append the slug
-        $model = Categories::instance()->setState('filter.id', $parent_id);
-        $mapper = $model->getItem();
-        $model->emptyState();
+        $mapper = $this->emptyState()->setState('filter.id', $parent_id)->getItem();
+        $this->emptyState();
         
         if (!empty($mapper->path)) {
             $path = $mapper->path;
