@@ -61,4 +61,9 @@ abstract class Nested extends \Dsc\Models\Db\Mongo
     {
         return $mapper->moveDown();
     }
+    
+    public function getDescendants( $mapper )
+    {
+    	return $mapper->getDescendants( $mapper );
+    }
 }
