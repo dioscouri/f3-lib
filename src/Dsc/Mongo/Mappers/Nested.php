@@ -10,10 +10,10 @@ class Nested extends \Dsc\Mongo\Mapper
         $parent->reset();
         if (empty( $this->parent ) && empty( $this->is_root ))
         {
-			$root = $this->getRoot( (string) $this->tree );
-			$this->parent = (string) $root->id;
+			$root = $this->getRoot( $this->tree );
+			$this->parent = $root->id;
 			
-			$parent->load( array('_id'=> new \MongoId( $this->parent ) ) );
+			$parent->load( array('_id'=> new \MongoId( (string) $this->parent ) ) );
         }
         
         if ($parent->hasDescendants())
@@ -24,7 +24,7 @@ class Nested extends \Dsc\Mongo\Mapper
             $result = $this->collection->update(
                     array(
                         'rgt' => array( '$gte' => $rgt ),
-                        'tree' => (string) $this->tree
+                        'tree' => $this->tree
                     ),
                     array(
                         '$inc' => array( 'rgt' => 2 )
@@ -38,7 +38,7 @@ class Nested extends \Dsc\Mongo\Mapper
             $result = $this->collection->update(
                     array(
                         'lft' => array( '$gt' => $rgt ),
-                        'tree' => (string) $this->tree
+                        'tree' => $this->tree
                     ),
                     array(
                         '$inc' => array( 'lft' => 2 )
@@ -61,7 +61,7 @@ class Nested extends \Dsc\Mongo\Mapper
             $result = $this->collection->update(
                     array(
                         'rgt' => array( '$gt' => $lft ),
-                        'tree' => (string) $this->tree
+                        'tree' => $this->tree
                     ),
                     array(
                         '$inc' => array( 'rgt' => 2 )
@@ -75,7 +75,7 @@ class Nested extends \Dsc\Mongo\Mapper
             $result = $this->collection->update(
                     array(
                         'lft' => array( '$gt' => $lft ),
-                        'tree' => (string) $this->tree
+                        'tree' => $this->tree
                     ),
                     array(
                         '$inc' => array( 'lft' => 2 )
@@ -113,12 +113,12 @@ class Nested extends \Dsc\Mongo\Mapper
         
         if ($moving)
         {
-            $this->rebuildTree( (string) $this->tree );
+            $this->rebuildTree( $this->tree );
             
             // if we just removed a leaf/branch to a new tree, rebuild the old tree too 
             if ($this->tree != $node->tree) 
             {
-                $this->rebuildTree( (string) $node->tree );
+                $this->rebuildTree( $node->tree );
             }
         }
         
@@ -132,7 +132,7 @@ class Nested extends \Dsc\Mongo\Mapper
                 array(
                     'lft' => array('$gte' => $this->lft ),
                     'rgt' => array('$lte' => $this->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 )
         );
         
@@ -151,7 +151,7 @@ class Nested extends \Dsc\Mongo\Mapper
         $result = $this->collection->update(
                 array(
                     'rgt' => array( '$gt' => $this->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 ),
                 array(
                     '$inc' => array( 'rgt' => -$width )
@@ -165,7 +165,7 @@ class Nested extends \Dsc\Mongo\Mapper
         $result = $this->collection->update(
                 array(
                     'lft' => array( '$gt' => $this->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 ),
                 array(
                     '$inc' => array( 'lft' => -$width )
@@ -196,7 +196,7 @@ class Nested extends \Dsc\Mongo\Mapper
     public function getChildren( $mapper )
     {
         $filter = array(
-        	'parent' => (string) $mapper->id
+        	'parent' => $mapper->id
         );
         
         $this->cursor = $this->collection->find( $filter, array() );
@@ -257,7 +257,7 @@ class Nested extends \Dsc\Mongo\Mapper
         $root = clone $this;
         $root->reset();
         $root->load(array(
-        	'tree' => (string) $tree,
+        	'tree' => new \MongoId((string) $tree),
             'is_root' => true
         ));
         
@@ -307,7 +307,7 @@ class Nested extends \Dsc\Mongo\Mapper
         // Get the sibling immediately to the left of this node
         $sibling = clone $this;
         $sibling->reset();
-        $sibling->load(array('tree' => (string) $this->tree, 'rgt' => $this->lft - 1 ));
+        $sibling->load(array('tree' => $this->tree, 'rgt' => $this->lft - 1 ));
 
         // fail of no sibling found
         if (empty($sibling->id)) {
@@ -327,7 +327,7 @@ class Nested extends \Dsc\Mongo\Mapper
         $result = $this->collection->update(
                 array(
                     'lft' => array('$gte' => $this->lft, '$lte' => $this->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 ),
                 array(
                     '$inc' => array( 'lft' => -$sibling_width, 'rgt' => -$sibling_width )
@@ -343,7 +343,7 @@ class Nested extends \Dsc\Mongo\Mapper
                 array(
                     '_id' => array('$nin' => $ids ),
                     'lft' => array('$gte' => $sibling->lft, '$lte' => $sibling->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 ),
                 array(
                     '$inc' => array( 'lft' => $width, 'rgt' => $width )
@@ -364,7 +364,7 @@ class Nested extends \Dsc\Mongo\Mapper
         // Get the sibling immediately to the left of this node
         $sibling = clone $this;
         $sibling->reset();
-        $sibling->load(array('tree' => (string) $this->tree, 'lft' => $this->rgt + 1 ));
+        $sibling->load(array('tree' => $this->tree, 'lft' => $this->rgt + 1 ));
     
         // fail of no sibling found
         if (empty($sibling->id)) {
@@ -384,7 +384,7 @@ class Nested extends \Dsc\Mongo\Mapper
         $result = $this->collection->update(
                 array(
                     'lft' => array('$gte' => $this->lft, '$lte' => $this->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 ),
                 array(
                     '$inc' => array( 'lft' => $sibling_width, 'rgt' => $sibling_width )
@@ -400,7 +400,7 @@ class Nested extends \Dsc\Mongo\Mapper
                 array(
                     '_id' => array('$nin' => $ids ),
                     'lft' => array('$gte' => $sibling->lft, '$lte' => $sibling->rgt ),
-                    'tree' => (string) $this->tree
+                    'tree' => $this->tree
                 ),
                 array(
                     '$inc' => array( 'lft' => -$width, 'rgt' => -$width )

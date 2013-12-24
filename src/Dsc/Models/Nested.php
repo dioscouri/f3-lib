@@ -34,7 +34,7 @@ abstract class Nested extends \Dsc\Models\Db\Mongo
         }
     
         $filter_id = $this->getState('filter.id');
-        if (strlen($filter_id))
+        if (!empty($filter_id))
         {
             $this->filters['_id'] = new \MongoId((string) $filter_id);
         }
