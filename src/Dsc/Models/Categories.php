@@ -160,8 +160,7 @@ class Categories extends \Dsc\Models\Db\Mongo
         // get the parent's details if it exists
         if (!empty($values['parent'])) 
         {
-            $model = Categories::instance()->setState('filter.id', $values['parent']);
-            $parent = $model->getItem();
+            $parent = $this->emptyState()->setState('filter.id', $values['parent'])->getItem();
             
             if (!empty($parent->title))
             {
@@ -179,7 +178,7 @@ class Categories extends \Dsc\Models\Db\Mongo
             {
                 $parent_ancestors = $parent->ancestors;
             }
-            $model->emptyState();
+            $this->emptyState();
             $parent->reset();
         }
         
@@ -206,7 +205,8 @@ class Categories extends \Dsc\Models\Db\Mongo
     
     public function update( $mapper, $values, $options=array() )
     {
-        $update_children = false;
+        $update_children = isset($options['update_children']) ? $options['update_children'] : false;
+        
         // if the mapper's parent is different from the $values['parent'], then we also need to update all the children
         if ($mapper->parent != @$values['parent']) {
             // update children after save
@@ -217,14 +217,14 @@ class Categories extends \Dsc\Models\Db\Mongo
         {
             if ($update_children) 
             {
-                if ($children = $this->emptyState()->setState('filter.parent', $updated->_id)->getList()) 
+                if ($children = $this->emptyState()->setState('filter.parent', $updated->id)->getList()) 
                 {
                     foreach ($children as $child) 
                     {
                         $child_values = $child->cast();
                         unset($child_values['ancestors']);
                         unset($child_values['path']);
-                        $this->update( $child, $child_values );
+                        $this->update( $child, $child_values, array('update_children' => true) );
                     }
                 }
             }
