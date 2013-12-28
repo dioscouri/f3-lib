@@ -243,5 +243,16 @@ class Template extends \View
 
         return $retarray;
     }
+    
+    public function trigger( $eventName, $arguments=array() ) 
+    {
+        $event = new \Joomla\Event\Event( $eventName );
+        foreach ($arguments as $key => $value ) 
+        {
+            $event->addArgument( $key, $value );
+        }
+        
+        return \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
+    }
 }
 ?>
