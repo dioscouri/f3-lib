@@ -365,7 +365,7 @@ class Model extends Object
             $this->validate( $values, $options, $mapper );
         }
         
-        $key = strtolower( get_class() ) . "." . microtime(true);
+        $key = strtolower( get_class($this) ) . "." . microtime(true);
         $key = $this->inputfilter->clean($key, 'ALNUM');
         $f3 = \Base::instance();
         $f3->set($key, $values);
@@ -376,13 +376,31 @@ class Model extends Object
         }
         $mapper->copyFrom( $key );
         $f3->clear($key);
-       
+
+        $eventNameSuffix = $this->inputfilter->clean(get_class($this), 'ALNUM');
+        
+        $event = new \Joomla\Event\Event( 'onBeforeSave' . $eventNameSuffix );
+        $event->addArgument('model', $this)->addArgument('mapper', $mapper);
+        $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
+        
+        if ($event->isStopped()) {
+            $this->setError( $event->getArgument('error') );
+            return $this->checkErrors();
+        }
+        
         // do the save
         try {
             $mapper->save();
         } catch (\Exception $e) {
             $this->setError( $e->getMessage() );
             return $this->checkErrors();
+        }
+        
+        $event = new \Joomla\Event\Event( 'onAfterSave' . $eventNameSuffix );
+        $event->addArgument('model', $this)->addArgument('mapper', $mapper);
+        $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
+        if ($event->hasArgument('mapper')) {
+            $mapper = $event->getArgument('mapper');
         }
         
         return $mapper;

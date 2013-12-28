@@ -412,5 +412,20 @@ class Nested extends \Dsc\Mongo\Mapper
     
         return $result;
     }
+    
+    public function getDepth( &$mapper=null ) 
+    {
+        if (empty($mapper)) 
+        {
+            $mapper = &$this;
+        }
+        
+        if (!isset($mapper->depth)) 
+        {
+            $mapper->depth = substr_count( $mapper->path, "/" );
+        }
+        
+        return $mapper->depth;
+    }
 }
 ?>
