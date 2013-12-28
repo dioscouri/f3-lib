@@ -64,11 +64,13 @@ class Template extends \View
         	return $this->sandbox($hive);
         }
     
-        return $this;
+        return null;
     }
     
     public function renderLayout( $file, $mime='text/html', array $hive=NULL, $ttl=0 ) 
     {
+        $string = null;
+        
         $fw = $this->app;
         
         $pieces = $fw->split(str_replace(array("::", ":"), "|", $file));
@@ -79,12 +81,36 @@ class Template extends \View
             // otherwise let render search for the first $file match
             foreach ($fw->split($fw->get('UI')) as $dir) {
             	if (strpos($dir, $view) !== false) {
-            		return $this->renderSpecificLayout($dir, $file, $mime, $hive);
+            		$string = $this->renderSpecificLayout($dir, $file, $mime, $hive);
             	}            	
             }
         } 
         
-        return parent::render( $file, $mime, $hive, $ttl );        
+        if (is_null($string)) {
+            $string = parent::render( $file, $mime, $hive, $ttl );        
+        }
+        
+        /*
+        // The following will run the string through event listeners
+        $key = $file;
+        $inputfilter = new \Joomla\Filter\InputFilter;
+        $pathinfo = pathinfo($key);
+        if (!empty($pathinfo['extension'])) {
+            $key = str_replace('.'.$pathinfo['extension'], '', $key);
+        }
+        $key = str_replace('/', ' ', $key);
+        $key = \Joomla\String\Normalise::toCamelCase($key);
+        $eventNameSuffix = $inputfilter->clean($key, 'PATH');
+
+        $event = new \Joomla\Event\Event( 'onAfterRender' . $eventNameSuffix );
+        $event->addArgument('string', $string)->addArgument('file', $file)->addArgument('mime', $mime);
+        $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
+        if ($event->hasArgument('string')) {
+            $string = $event->getArgument('string');
+        }
+        */
+        
+        return $string;
     }
     
     public function render( $file,$mime='text/html',array $hive=NULL, $ttl=0 ) 
