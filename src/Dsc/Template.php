@@ -91,7 +91,8 @@ class Template extends \View
         }
         
         /*
-        // The following will run the string through event listeners
+        // The following will run the string through event listeners,
+        // The event for the layout \Blog\Admin::posts/edit.php would be onAfterRenderBlogAdminPostsEdit 
         $key = $file;
         $inputfilter = new \Joomla\Filter\InputFilter;
         $pathinfo = pathinfo($key);
