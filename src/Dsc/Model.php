@@ -378,8 +378,8 @@ class Model extends Object
         $f3->clear($key);
 
         //TEMP FIX FOR USING REQUEST IN POSTING
-        unset( $mapper->PHPSESSID);
-        
+        unset( @$mapper->PHPSESSID);
+
         $eventNameSuffix = $this->inputfilter->clean(get_class($this), 'ALNUM');
         
         $event = new \Joomla\Event\Event( 'onBeforeSave' . $eventNameSuffix );
