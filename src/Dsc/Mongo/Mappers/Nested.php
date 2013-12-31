@@ -200,7 +200,7 @@ class Nested extends \Dsc\Mongo\Mapper
         );
         
         $this->cursor = $this->collection->find( $filter, array() );
-        $this->cursor = $this->cursor->sort(array('ordering' => 1));
+        $this->cursor = $this->cursor->sort(array('lft' => 1));
         
         $result = array();
         while ($this->cursor->hasnext()) {
