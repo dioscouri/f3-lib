@@ -377,6 +377,9 @@ class Model extends Object
         $mapper->copyFrom( $key );
         $f3->clear($key);
 
+        //TEMP FIX FOR USING REQUEST IN POSTING
+        unset( $mapper->PHPSESSID);
+        
         $eventNameSuffix = $this->inputfilter->clean(get_class($this), 'ALNUM');
         
         $event = new \Joomla\Event\Event( 'onBeforeSave' . $eventNameSuffix );
