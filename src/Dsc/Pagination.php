@@ -23,13 +23,27 @@ class Pagination
     private $current_page;
     private $template = 'common/pagination.php';
     private $routeKey;
-    private $routeKeyPrefix = "page-";
+    private $routeKeyPrefix = "page/";
     private $linkPath;
     private $fw;
 
     const
     TEXT_MissingItemsAttr='You need to specify items attribute for a pagination.';
     
+    /*
+    * EXAMPLE:: 
+    * To make this work, Your routes need to map to your display functions when the page has the suffix,
+    * and a number in the route. 
+    * $f3->route("GET|POST /{$base}/@resource/page/@page", "{$namespace}@resource->display");
+    * $f3->route("GET|POST /{$base}/@resource/@action/page/@page", "{$namespace}@resource->@action");    
+    *  
+    * if you want you can over ride the routeKeyPrefix in your config files, 
+    * PAGINATION_KEY=split/ PAGINATION_KEY=somethingelse/
+    *
+    */
+
+
+
     /**
      * create new pagination
      * @param $items array|integer max items or array to count
@@ -41,6 +55,11 @@ class Pagination
         $this->items_count = is_array($items)?count($items):$items;
         $this->routeKey = $routeKey;
         $this->setLimit($limit);
+
+        if($key = $this->fw->get('PAGINATION_KEY')) {
+            $this->setRouteKeyPrefix($key);
+        }
+
     }
 
     /**
@@ -204,6 +223,22 @@ class Pagination
     }
 
     /**
+     * checks the route 
+     * @return string
+     */
+    protected function checkRoute($route) { 
+       
+        $len = strlen($this->routeKeyPrefix);
+        //checks if the prefix is already appended to the very last of the route.
+        // if so remove it
+        if(substr_compare($route,$this->routeKeyPrefix, -$len, $len) == 0) {  
+          $route = str_replace($this->routeKeyPrefix, '', $route);
+        }
+        return $route;
+    }
+
+
+    /**
      * generates the pagination output
      * @return string
      */
@@ -216,6 +251,11 @@ class Pagination
             $route.= '/';
         } else
             $route = $this->linkPath;
+
+            $route = $this->checkRoute($route);
+           //TODO this is problably not the solution,  but we are getting two page suffixes in the links
+             
+
         $this->fw->set('pg.route',$route);
         $this->fw->set('pg.prefix',$this->routeKeyPrefix);
         $this->fw->set('pg.currentPage',$this->current_page);
