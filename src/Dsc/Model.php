@@ -112,6 +112,7 @@ class Model extends Object
      */
     public function setFilter($filter, $value) {
         $this->filters[$filter] = $value;
+        return $this;
     }
 
     public function getFilter($filter) {
