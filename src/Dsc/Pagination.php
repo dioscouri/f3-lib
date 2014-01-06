@@ -252,10 +252,9 @@ class Pagination
         } else
             $route = $this->linkPath;
 
-            $route = $this->checkRoute($route);
-           //TODO this is problably not the solution,  but we are getting two page suffixes in the links
-             
-
+        $route = $this->checkRoute($route);
+        //TODO this is problably not the solution,  but we are getting two page suffixes in the links
+        
         $this->fw->set('pg.route',$route);
         $this->fw->set('pg.prefix',$this->routeKeyPrefix);
         $this->fw->set('pg.currentPage',$this->current_page);
