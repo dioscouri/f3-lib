@@ -182,7 +182,9 @@ class System extends Object
         return null;
     }
     
-    
+    /**
+     * 
+     */
     public function getDispatcher()
     {
         if (empty($this->dispatcher)) {
@@ -190,8 +192,32 @@ class System extends Object
         }
         
         return $this->dispatcher;
+    }
+    
+    /**
+     * Trigger an event using the system dispatcher
+     * 
+     * @param unknown $eventName
+     * @param unknown $arguments
+     */
+    public function trigger( $eventName, $arguments=array() )
+    {
+        $event = new \Joomla\Event\Event( $eventName );
+        foreach ($arguments as $key => $value )
+        {
+            $event->addArgument( $key, $value );
+        }
         
-        
+        return $this->getDispatcher()->triggerEvent($event);
+    }
+    
+    /**
+     * Trigger the preflight event for any listeners that need to run something before the app executes
+     * 
+     */
+    public function preflight()
+    {
+        return $this->trigger('onPreflight');
     }
 }
 ?>
