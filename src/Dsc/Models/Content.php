@@ -12,9 +12,9 @@ class Content extends Nodes
     {
         parent::__construct($config);
         
-        $this->filter_fields = $this->filter_fields + array(
-                'details.copy'
-        );
+        $this->filter_fields = array_merge( $this->filter_fields, array(
+            'details.copy'
+        ) );
     }
     
     protected function fetchFilters()
