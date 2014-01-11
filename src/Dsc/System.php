@@ -17,7 +17,7 @@ class System extends Object
      * @param unknown_type $message
      * @param unknown_type $type
      */
-    public function addMessage($message, $type='message') 
+    public static function addMessage($message, $type='message') 
     {
         $messages = \Base::instance()->get('SESSION.messages') ? \Base::instance()->get('SESSION.messages') : array();
         

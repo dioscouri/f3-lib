@@ -119,6 +119,20 @@ class Template extends \View
         $this->setContents( $this->renderLayout( $file, $mime, $hive ), 'view' );
         $this->setContents( $this->renderLayout( "system-messages.php", $mime, $hive ), 'system.messages' );
         $this->loadTemplate()->parseTemplate();
+        
+        if (class_exists('\\Modules\\Factory')) 
+        {
+            // Render the requested modules
+            foreach ($this->template_tags as $full_string => $args)
+            {
+                if (in_array(strtolower($args['type']), array('modules') ) && !empty($args['name'])) {
+                    // get the requested module position content
+                    $content = \Modules\Factory::render( $args['name'], \Base::instance()->get('PARAMS.0') );
+                    $this->setContents( $content, $args['type'], $args['name']);
+                }
+            }
+        }
+        
         $string = $this->renderTemplate();
         
         return $string;
@@ -182,7 +196,7 @@ class Template extends \View
     {
         $replace = array();
         $with = array();
-        
+
         foreach ($this->template_tags as $full_string => $args)
         {
             $replace[] = $full_string;
