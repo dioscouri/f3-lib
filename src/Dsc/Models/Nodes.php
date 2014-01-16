@@ -41,12 +41,18 @@ abstract class Nodes extends \Dsc\Models\Db\Mongo
             if (!empty($mapper->{'metadata.creator'})) {
                 $values['metadata']['creator'] = $mapper->{'metadata.creator'};
             }
-            elseif ($user = \Base::instance()->get('SESSION.user')) {
+            elseif ($user = \Base::instance()->get('SESSION.admin.user')) {
                 $values['metadata']['creator'] = array(
                         'id' => $user->id,
                         'name' => $user->name
                 );
             }
+            elseif ($user = \Base::instance()->get('SESSION.user')) {
+                $values['metadata']['creator'] = array(
+                        'id' => $user->id,
+                        'name' => $user->name
+                );
+            }            
         }
         
         if (empty($values['metadata']['type'])) {
