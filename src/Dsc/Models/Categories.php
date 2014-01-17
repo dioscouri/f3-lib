@@ -110,7 +110,7 @@ class Categories extends \Dsc\Models\Db\Mongo
         // is the path unique?
         if ($existing = $this->pathExists( $values['path'])) 
         {
-            if (empty($mapper->_id) || $existing->_id != $mapper->_id) 
+            if ((empty($mapper->_id) || $existing->_id != $mapper->_id) && $existing->{'type'} == $this->type) 
             {
                 $this->setError('A category with this title already exists with this parent.');
             }            
@@ -270,7 +270,7 @@ class Categories extends \Dsc\Models\Db\Mongo
     public function pathExists( $path )
     {
         $mapper = $this->getMapper();
-        $mapper->load(array('path'=>$path));
+        $mapper->load(array('path'=>$path, 'type'=>$this->type));
         
         if (!empty($mapper->_id)) {
             return $mapper;

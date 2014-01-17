@@ -5,7 +5,7 @@ class Assets extends Nodes
 {
     protected $collection = 'common.assets.files';
     protected $collection_gridfs = 'common.assets';
-    protected $type = 'common.assets';    
+    protected $type = 'common.assets';
 
     public function getMapper()
     {
