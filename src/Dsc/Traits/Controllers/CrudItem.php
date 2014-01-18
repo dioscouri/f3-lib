@@ -135,6 +135,7 @@ trait CrudItem
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
+            \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
             foreach ($model->getErrors() as $error)
             {
                 \Dsc\System::instance()->addMessage($error, 'error');
