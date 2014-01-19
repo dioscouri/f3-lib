@@ -6,6 +6,8 @@ class Assets extends Nodes
     protected $collection = 'common.assets.files';
     protected $collection_gridfs = 'common.assets';
     protected $type = 'common.assets';
+    protected $default_ordering_direction = '-1';
+    protected $default_ordering_field = 'metadata.created.time';    
 
     public function getMapper()
     {
@@ -143,11 +145,20 @@ class Assets extends Nodes
             $this->filters['metadata.slug'] = $filter_slug;
         }
         
-        $filter_type = $this->getState('filter.type');
-        if (strlen($filter_type))
+        $filter_content_type = $this->getState('filter.content_type');
+        if (strlen($filter_content_type))
         {
-            $key =  new \MongoRegex('/'. $filter_type .'/i');
+            $key =  new \MongoRegex('/'. $filter_content_type .'/i');
             $this->filters['contentType'] = $key;
+        }
+        
+        $filter_type = $this->getState('filter.type');
+        if ($filter_type) {
+            if (is_bool($filter_type) && $filter_type) {
+                $this->filters['metadata.type'] = $this->type;
+            } elseif (strlen($filter_type)) {
+                $this->filters['metadata.type'] = $filter_type;
+            }
         }
     
         return $this->filters;
