@@ -74,7 +74,45 @@ class Template extends \View
         $fw = $this->app;
         
         $pieces = $fw->split(str_replace(array("::", ":"), "|", $file));
+        
+        // Overrides!
+        // if the overrides folder is set (e.g. /apps/Overrides), let's check for the presence of an override for the requested file
+        if ($ui_overrides = $fw->get('UI_OVERRIDES')) {
+            if (count($pieces) > 1) 
+            {
+                // we're looking for a specific layout (e.g. Blog\Site\View::posts/category.php)
+                $view = str_replace("\\", "/", $pieces[0]);
+                $file = $pieces[1];
+                
+                foreach ($fw->split($ui_overrides) as $dir) {
+                    $path = $dir . $view . "/";
+                    if (file_exists( $path . $file )) {
+                        $string = $this->renderSpecificLayout($path, $file, $mime, $hive);
+                        break;
+                    }
+                }                
+            }
+            
+            // if is_null($string), look for an override of the non-specific layout (e.g. posts/category.php) that has been requested
+            if (is_null($string)) {
+                foreach ($fw->split($ui_overrides) as $dir) {
+                    if (file_exists( $dir . $file )) {
+                        $string = $this->renderSpecificLayout($dir, $file, $mime, $hive);
+                        break;
+                    }
+                }                
+            }
+            
+        }
+        
+        // if the overrides section above has set $string, then return it, otherwise continue
+        if (!is_null($string)) {
+            return $string;
+        }
+        
         if (count($pieces) > 1) {
+            // $file is a specific app's view/layout.php, so try to find & render it
+            
             $view = str_replace("\\", "/", $pieces[0]);
             $file = $pieces[1];
             // if the requested specific file exists, use it,
@@ -82,6 +120,7 @@ class Template extends \View
             foreach ($fw->split($fw->get('UI')) as $dir) {
             	if (strpos($dir, $view) !== false) {
             		$string = $this->renderSpecificLayout($dir, $file, $mime, $hive);
+            		break;
             	}            	
             }
         } 
@@ -93,6 +132,7 @@ class Template extends \View
         /*
         // The following will run the string through event listeners,
         // The event for the layout \Blog\Admin::posts/edit.php would be onAfterRenderBlogAdminPostsEdit 
+        // but i'm not entirely fond of the overhead...
         $key = $file;
         $inputfilter = new \Joomla\Filter\InputFilter;
         $pathinfo = pathinfo($key);
