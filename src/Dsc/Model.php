@@ -45,7 +45,7 @@ class Model extends Object
             $this->filter_fields = $config['filter_fields'];
         }
         
-        $this->order_directions = array('1', '-1', 'ASC', 'DESC', 'asc', 'desc');
+        $this->order_directions = array('1', '-1', 'ASC', 'DESC', 'asc', 'desc', 'SORT_ASC', 'SORT_DESC');
         if (isset($config['order_directions']))
         {
             $this->order_directions = $config['order_directions'];
