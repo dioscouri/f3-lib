@@ -142,12 +142,12 @@ class Content extends Nodes
     
     public function generateSlug( $values, $mapper=null, $unique=true )
     {
-        if (empty($values['metadata.title'])) {
-            $this->setError('Title is required');
+        if (empty($values['metadata']['title'])) {
+            $this->setError('A title is required for generating the slug');
         }
         $this->checkErrors();
 
-        $slug = \Web::instance()->slug( $values['metadata.title'] );
+        $slug = \Web::instance()->slug( $values['metadata']['title'] );
         
         if ($unique) 
         {
