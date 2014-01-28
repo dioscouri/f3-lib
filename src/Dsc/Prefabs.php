@@ -53,7 +53,7 @@ abstract class Prefabs extends \Magic
             {
                 if (!in_array($key, $this->options['ignored']))
                 {
-                    $this->$key = $value;
+                    $this->set($key, $value);
                 }
             }
         } 
@@ -66,7 +66,7 @@ abstract class Prefabs extends \Magic
                 {
                     if (isset($source[$key]))
                     {
-                        $this->$key = $source[$key];
+                        $this->set($key, $source[$key]);
                     }                    
                 }
             }            

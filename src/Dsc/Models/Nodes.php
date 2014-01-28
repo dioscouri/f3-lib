@@ -92,7 +92,7 @@ abstract class Nodes extends \Dsc\Models\Db\Mongo
     public function slugExists( $slug )
     {
         $mapper = $this->getMapper();
-        $mapper->load(array('metadata.slug'=>$slug));
+        $mapper->load(array('metadata.slug'=>$slug, 'type'=>$this->type));
     
         if ($mapper->id) {
             return $mapper;
