@@ -61,16 +61,8 @@ class Content extends Nodes
     
     public function validate( $values, $options=array(), $mapper=null )
     {
-        if (empty($values['metadata']['creator']) && empty($mapper->{'metadata.creator'})) {
-            $this->setError('An author is required');
-        }
-                
         if (empty($values['metadata']['title']) && empty($mapper->{'metadata.title'})) {
             $this->setError('Title is required');
-        }
-        
-        if (empty($values['details']['copy']) && empty($mapper->{'details.copy'})) {
-            $this->setError('Body copy is required');
         }
         
         // if no slug exists, generate it
