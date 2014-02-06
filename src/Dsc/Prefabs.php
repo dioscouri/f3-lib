@@ -29,9 +29,28 @@ abstract class Prefabs extends \Magic
             $this->options['ignored'] = \Base::instance()->split($this->options['ignored']);
         }
                 
-        return $this->options;
+        return $this;
     }
     
+    public function getOptions()
+    {
+        return $this->options;
+    }
+        
+    public function setDocument( $document ) 
+    {
+    	$this->document = $document;
+    	
+    	return $this;
+    }
+    
+    public function mergeIntoDocument( $document )
+    {
+        $this->document = array_merge_recursive( $this->document, $document );
+         
+        return $this;
+    }    
+
     public function bind( $source, $options=array() )
     {
         $this->setOptions($options);
@@ -60,14 +79,11 @@ abstract class Prefabs extends \Magic
             else 
         {
             // ignore unknown keys
-            foreach ($this->document as $key=>$value)
+            foreach ($source as $key=>$value)
             {
-                if (!in_array($key, $this->options['ignored']))
+                if (!in_array($key, $this->options['ignored']) && $this->exists($key))
                 {
-                    if (isset($source[$key]))
-                    {
-                        $this->set($key, $source[$key]);
-                    }                    
+                    $this->set($key, $value);
                 }
             }            
         }
