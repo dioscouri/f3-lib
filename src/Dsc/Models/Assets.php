@@ -64,7 +64,7 @@ class Assets extends Nodes
      * @param unknown_type $ext
      * @return binary|NULL
      */
-    public function getThumbFromExtension( $ext ) 
+    public function getThumbFromExtension( $ext, $options=array() ) 
     {
         $f3 = \Base::instance();
         $path = $f3->get('PATH_ROOT') . "public/dsc/images/filetypes/" . $ext . ".png";
@@ -81,19 +81,25 @@ class Assets extends Nodes
      */
     public function getThumbFromGDResource( $gd_resource )
     {
+        $width = !empty($options['width']) ? (int) $options['width'] : 460;
+        $height = !empty($options['height']) ? (int) $options['height'] : 308;
+                
         /*
         $gd_resource = imagecreatefromstring($buffer);
         */
         
         $image = new \Dsc\Image( $gd_resource );
-        $thumb = $image->resize(64, 64, false);
+        $thumb = $image->resize($width, $height, false);
         return $thumb->toBuffer();
     }
     
-    public function getThumbFromImagick( $imagick )
+    public function getThumbFromImagick( $imagick, $options=array() )
     {
+        $width = !empty($options['width']) ? (int) $options['width'] : 460;
+        $height = !empty($options['height']) ? (int) $options['height'] : 308;
+        
         $imagick->setImageFormat("jpeg");
-        $imagick->thumbnailImage(64, 64, true);
+        $imagick->thumbnailImage($width, $height, true);
         return $imagick->getImageBlob();
     }
     
@@ -107,12 +113,12 @@ class Assets extends Nodes
         } 
     }
     
-    public function getThumb( $buffer, $ext=null )
+    public function getThumb( $buffer, $ext=null, $options=array() )
     {
         if ($this->isBlobImage( $buffer )) {
-            return $this->getThumbFromImagick( $this->imagick );
+            return $this->getThumbFromImagick( $this->imagick, $options );
         } elseif ($ext) {
-            return $this->getThumbFromExtension( $ext );
+            return $this->getThumbFromExtension( $ext, $options );
         }
         
         return null;
