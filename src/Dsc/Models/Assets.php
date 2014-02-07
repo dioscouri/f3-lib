@@ -45,7 +45,9 @@ class Assets extends Nodes
             $n = 1;
             while ($this->slugExists($slug))
             {
-                $slug = $base_slug . '-' . $n;
+                $now = microtime(true);
+                $suffix = md5( $now . "." . $n );
+                $slug = $base_slug . '-' . $suffix;
                 $n++;
             }
         }
@@ -211,5 +213,77 @@ class Assets extends Nodes
         }
     
         return parent::save( $values, $options, $mapper );
+    }
+    
+    public function createFromUrl( $url, $options=array() )
+    {
+        $options = $options + array('width'=>460, 'height'=>308);
+        
+        $app = \Base::instance();
+        $web = \Web::instance();
+    
+        $request = array();
+        $result = array();
+    
+        $request = $web->request( $url );
+        if (!empty($request['body']))
+        {
+            $model = $this;
+            $db = $model->getDb();
+            $grid = $db->getGridFS( $model->getGridFSCollectionName() );
+
+            $url_path = parse_url( $url , PHP_URL_PATH );
+            $pathinfo = pathinfo( $url_path );
+            $filename = $this->inputfilter->clean( $url_path );
+            $buffer = $request['body'];
+            $originalname = str_replace( "/", "-", $filename );
+
+            $thumb = null;
+            if ( $thumb_binary_data = $model->getThumb( $buffer, null, $options )) {
+                $thumb = new \MongoBinData( $thumb_binary_data, 2 );
+            }
+
+            $values = array(
+                'storage' => 'gridfs',
+                'contentType' => $model->getMimeType( $buffer ),
+                'md5' => md5( $filename ),
+                'thumb' => $thumb,
+                'url' => null,
+                'metadata' => array(
+                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter->clean( $originalname ) )
+                ),
+                'details' => array(
+                    "filename" => $filename,
+                    "source_url" => $url
+                )
+            );
+
+            if (empty($values['metadata']['title'])) {
+                $values['metadata']['title'] = $values['md5'];
+            }
+
+            $values['metadata']['slug'] = $model->generateSlug( $values );
+            $values['url'] = "/asset/" . $values['metadata']['slug'];
+
+            // save the file
+            if ($storedfile = $grid->storeBytes( $buffer, $values ))
+            {
+                $mapper = $model->getMapper();
+                $mapper->load(array('_id'=>$storedfile));
+                $mapper = $model->update( $mapper, $values );
+            }
+
+            // $storedfile has newly stored file's Document ID
+            $result["asset_id"] = (string) $storedfile;
+            $result["slug"] = $mapper->{'metadata.slug'};
+            $result['error'] = false;
+        } 
+            else 
+        {
+            $result['error'] = true;
+            $result['message'] = 'Could not download asset from provided URL';
+        }
+    
+        return $result;
     }
 }
