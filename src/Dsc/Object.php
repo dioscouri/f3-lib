@@ -38,6 +38,15 @@ abstract class Object extends \Prefab
     }
     
     /**
+     * Resets all error messages
+     */
+    public function clearErrors()
+    {
+        $this->errors = array();
+        return $this;
+    }
+    
+    /**
      * Any errors set?  If so, check fails
      *
      */
@@ -49,7 +58,9 @@ abstract class Object extends \Prefab
             return $this;
         }
         
-        throw new \Exception('Errors encountered');
+        $messages = implode(". ", $errors);
+        
+        throw new \Exception('Errors encountered - ' . $messages );
     }
 }
 ?>
