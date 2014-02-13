@@ -40,6 +40,18 @@ class Content extends Nodes
             $this->filters['_id'] = new \MongoId((string) $filter_id);
         }
         
+        $filter_slug = $this->getState('filter.slug');
+        if (strlen($filter_slug))
+        {
+            $this->filters['metadata.slug'] = $filter_slug;
+        }
+        
+        $filter_title = $this->getState('filter.title');
+        if (strlen($filter_title))
+        {
+            $this->filters['metadata.title'] = $filter_title;
+        }
+        
         $filter_copy_contains = $this->getState('filter.copy-contains');
         if (strlen($filter_copy_contains))
         {

@@ -54,6 +54,18 @@ class Categories extends \Dsc\Models\Db\Mongo
             $this->filters['_id'] = new \MongoId((string) $filter_id);
         }
         
+        $filter_slug = $this->getState('filter.slug');
+        if (strlen($filter_slug))
+        {
+            $this->filters['slug'] = $filter_slug;
+        }
+        
+        $filter_title = $this->getState('filter.title');
+        if (strlen($filter_title))
+        {
+            $this->filters['title'] = $filter_title;
+        }
+        
         $filter_parent = $this->getState('filter.parent');
         if (!empty($filter_parent))
         {

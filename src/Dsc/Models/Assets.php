@@ -138,7 +138,8 @@ class Assets extends Nodes
             $where = array();
             $where[] = array('metadata.title'=>$key);
             $where[] = array('metadata.creator.name'=>$key);
-    
+            $where[] = array('metadata.slug'=>$key);
+            
             $this->filters['$or'] = $where;
         }
     
