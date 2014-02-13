@@ -68,10 +68,11 @@ trait CrudItem
     
         $f3->set('model', $model );
         $f3->set('item', $item );
-    
+        
+        $item_data = array();
         if (method_exists($item, 'cast')) {
             $item_data = $item->cast();
-        } else {
+        } elseif (is_object($item)) {
             $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
         }
         $flash->store($item_data);
@@ -91,10 +92,11 @@ trait CrudItem
     
         $f3->set('model', $model );
         $f3->set('item', $item );
-    
+        
+        $item_data = array();
         if (method_exists($item, 'cast')) {
             $item_data = $item->cast();
-        } else {
+        } elseif (is_object($item)) {
             $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
         }
         $flash->store($item_data);
