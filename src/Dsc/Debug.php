@@ -12,97 +12,10 @@ class Debug
 	* @since	1.5
 	* @static
 	*/
-	public static function dump( $var, $public_only = true, $ignore_underscore = true, $htmlSafe = true )
+	public static function dump( $var, $public_only=true, $htmlSafe = true )
 	{
-	    if (!$public_only)
-	    {
-	        $result = self::_dump( $var, $public_only, $ignore_underscore );
-	        return '<pre>'.( $htmlSafe ? htmlspecialchars( $result ) : $result).'</pre>';
-	    }
-	     
-	    if (!is_object($var) && !is_array($var))
-	    {
-	        $result = self::_dump( $var, $public_only, $ignore_underscore );
-	        return '<pre>'.( $htmlSafe ? htmlspecialchars( $result ) : $result).'</pre>';
-	    }
-	    	     
-	    // TODO do a recursive remove of underscored keys, rather than only two levels
-	    if (is_object($var))
-	    {
-	        $keys = get_object_vars($var);
-	        foreach ($keys as $key=>$value)
-	        {
-	            if (substr($key, 0, 1) == '_' )
-	            {
-	                unset($var->$key);
-	            }
-	            else
-	            {
-	                if (is_object($var->$key))
-	                {
-	                    $sub_keys = get_object_vars($var->$key);
-	                    foreach ($sub_keys as $sub_key=>$sub_key_value)
-	                    {
-	                        if (substr($sub_key, 0, 1) == '_')
-	                        {
-	                            unset($var->$key->$sub_key);
-	                        }
-	                    }
-	                }
-	                elseif (is_array($var->$key))
-	                {
-	                    foreach ($var->$key as $sub_key=>$sub_key_value)
-	                    {
-	                        if (substr($sub_key, 0, 1) == '_')
-	                        {
-	                            unset($var->$key[$sub_key]);
-	                        }
-	                    }
-	                }
-	            }
-	             
-	             
-	        }
-	        $result = self::_dump( $var, $public_only, $ignore_underscore );
-	        return '<pre>'.( $htmlSafe ? htmlspecialchars( $result ) : $result).'</pre>';
-	    }
-	     
-	    if (is_array($var))
-	    {
-	        foreach ($var as $key=>$value)
-	        {
-	            if (substr($key, 0, 1) == '_')
-	            {
-	                unset($var[$key]);
-	            }
-	            else
-	            {
-	                if (is_object($var[$key]))
-	                {
-	                    $sub_keys = get_object_vars($var[$key]);
-	                    foreach ($sub_keys as $sub_key=>$sub_key_value)
-	                    {
-	                        if (substr($sub_key, 0, 1) == '_')
-	                        {
-	                            unset($var[$key]->$sub_key);
-	                        }
-	                    }
-	                }
-	                elseif (is_array($var[$key]))
-	                {
-	                    foreach ($var[$key] as $sub_key=>$sub_key_value)
-	                    {
-	                        if (substr($sub_key, 0, 1) == '_')
-	                        {
-	                            unset($var[$key][$sub_key]);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        $result = self::_dump( $var, $public_only, $ignore_underscore );
-	        return '<pre>'.( $htmlSafe ? htmlspecialchars( $result ) : $result).'</pre>';
-	    }
+        $result = self::_dump( $var, $public_only );
+        return '<pre>'.( $htmlSafe ? htmlspecialchars( $result ) : $result).'</pre>';
 	}
 	
 	/**
@@ -110,7 +23,7 @@ class Debug
 	 * Enter description here ...
 	 * @param unknown_type $data
 	 */
-	private static function _dump( $var, $public_only=true, $ignore_underscore = true )
+	private static function _dump( $var, $public_only=true )
 	{
 	    $data = @print_r( $var, true );
 	    //return $data;
@@ -123,7 +36,7 @@ class Debug
 	    {
 	        $line = $lines[$key];
 	        $is_protected = false;
-	        if (strpos($line, ':protected]') !== false)
+	        if (strpos($line, ':protected]') !== false || strpos($line, ':private]') !== false)
 	        {
 	            $is_protected = true;
 	        }

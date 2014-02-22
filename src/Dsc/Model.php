@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc;
 
-class Model extends Object 
+class Model extends Singleton 
 {
     protected $crud_item_key = "id";
     protected $state = null;

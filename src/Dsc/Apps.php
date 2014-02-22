@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc;
 
-class Apps extends Object
+class Apps extends Singleton
 {
     /**
      * 

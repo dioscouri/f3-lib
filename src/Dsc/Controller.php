@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc;
 
-class Controller extends Object 
+class Controller extends Singleton 
 {
     use \Dsc\Traits\Meta;
     

@@ -102,7 +102,7 @@ namespace Dsc;
      *  + Added support for Shiretoko
      */
 
-    class Browser 
+    class Browser extends Singleton
     {
         private $_agent = '';
         private $_browser_name = '';

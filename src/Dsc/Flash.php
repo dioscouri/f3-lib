@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc;
 
-class Flash extends Object
+class Flash extends Singleton
 {
     protected $context = '\dsc\flash';
 

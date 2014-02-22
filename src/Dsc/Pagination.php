@@ -17,6 +17,8 @@ namespace Dsc;
 
 class Pagination
 {
+    public $items;
+    
     private $items_count;
     private $items_per_page;
     private $range = 3;

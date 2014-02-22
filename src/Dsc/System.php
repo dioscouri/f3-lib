@@ -1,15 +1,39 @@
 <?php 
 namespace Dsc;
 
-class System extends Object
+class System extends Singleton
 {
-    public $input = null;
+    public $container = null;
     
     public function __construct($config=array())
     {
         parent::__construct( $config );
+
+        $this->container = new \Dsc\Container;
         
-        $this->input = new \Joomla\Input\Input;
+        foreach ($config as $key=>$value) 
+        {
+        	$this->container->share( $key, $value );
+        }
+    }
+    
+    public function get($key, $forceNew = false)
+    {
+        if (strtolower($key) === "container") {
+        	return $this->container;
+        }
+        
+        return $this->container->get($key, $forceNew);
+    }
+    
+    public function set($key, $value, $shared = false, $protected = false)
+    {
+        if (strtolower($key) === "container") {
+            $this->container = $value;
+            return $this;
+        }
+    
+        return $this->container->set($key, $value, $shared, $protected);
     }
         
     /**

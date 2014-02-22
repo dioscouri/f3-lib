@@ -1,20 +1,17 @@
 <?php 
 namespace Dsc;
 
-abstract class Object extends \Prefab
+class Singleton extends \Prefab
 {
     protected $errors = array();
 
-    public function __construct($config=array())
-    {
-    
-    }
+    public function __construct($config=array()){}
     
     /**
      * Add an error message.
      * 
      * @param string $error
-     * @return \Dsc\Object
+     * @return \Dsc\Singleton
      */
     public function setError($error)
     {

@@ -9,7 +9,8 @@ class Mongo extends \Dsc\Models\Db\Base
     protected function createDb()
     {
         $db_name = \Base::instance()->get('db.mongo.name');
-        $this->db = new \DB\Mongo('mongodb://localhost:27017', $db_name);
+        $db_host = \Base::instance()->get('db.mongo.host');
+        $this->db = new \DB\Mongo('mongodb://'.$db_host, $db_name);
         
         return $this;
     }

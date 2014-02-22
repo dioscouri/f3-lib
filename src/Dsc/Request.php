@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc;
 
-class Request extends Object
+class Request extends Singleton
 {
     /**
      * Attempts to load the specified controller and execute the requested method with the provided arguments
