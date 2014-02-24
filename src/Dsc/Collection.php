@@ -551,6 +551,11 @@ class Collection extends \Magic
         return $this;
     }
     
+    public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
+    {
+        return $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->item();
+    }
+    
     public function save()
     {
         if (!empty($this->_id)) {
@@ -668,5 +673,4 @@ class Collection extends \Magic
     
         throw new \Exception( $messages );
     }
-    
 }
