@@ -63,6 +63,23 @@ class Theme extends \View
         
         return $this;
     }
+    
+    /**
+     * Alias for render.  Only keeping it to ease transition from \Dsc\Template to \Dsc\Theme
+     *
+     * @param unknown $file
+     * @param string $mime
+     * @param array $hive
+     * @param number $ttl
+     */
+    public function render( $file, $mime='text/html', array $hive=NULL, $ttl=0 )
+    {
+        return static::renderTheme( $file, array(
+                        'mime' => $mime,
+                        'hive' => $hive,
+                        'ttl' => $ttl
+        ) );
+    }
 
     /**
      * Renders a theme, template, and view, defaulting to the currently set theme if none is specified
