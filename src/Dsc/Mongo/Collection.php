@@ -1,6 +1,12 @@
 <?php
-namespace Dsc;
+namespace Dsc\Mongo;
 
+/**
+ * Collection class is used to represent and request items in a single Mongo collection
+ *   
+ * @author Rafael Diaz-Tushman
+ *
+ */
 class Collection extends \Magic
 {
     protected $__doc = array();
@@ -9,6 +15,7 @@ class Collection extends \Magic
     
     protected $__model_config = array(
         'cache_enabled' => true,
+        'cache_lifetime' => 0,
         'track_states' => true,
         'context' => null,
         'default_sort' => array(
@@ -257,7 +264,7 @@ class Collection extends \Magic
      * that uses the model's state
      * and implements caching (if enabled)
      */
-    public function item()
+    public function item($refresh=false)
     {
         // TODO Store the state
         // TODO Implement caching
@@ -290,20 +297,8 @@ class Collection extends \Magic
      */
     public function paginate($refresh=false)
     {
-        $pos = $this->getState('list.offset', 0, 'int');
         $size = $this->getState('list.limit', 10, 'int');
         $total = $this->collection()->count( $this->getParam( 'conditions' ) );
-        $count = ceil($total/$size);
-        $pos = max(0,min($pos,$count-1));
-        /*
-        $config = array(
-                        'items'=>$this->items($refresh),
-                        'total_items'=>$total,
-                        'items_per_page'=>$size,
-                        'total_pages'=>$count,
-                        'pos'=>$pos<$count?$pos:0
-        );
-        */
         
         $result = new \Dsc\Pagination( $total, $size );
         $result->items = $this->items($refresh);

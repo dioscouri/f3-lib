@@ -17,6 +17,11 @@ class System extends Singleton
         }
     }
     
+    public function __get($key) 
+    {
+    	return $this->get($key);
+    }
+    
     public function get($key, $forceNew = false)
     {
         if (strtolower($key) === "container") {
