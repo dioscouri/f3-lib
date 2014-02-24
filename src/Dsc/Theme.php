@@ -74,17 +74,17 @@ class Theme extends \View
             'hive' => null, 
             'ttl' => 0
         ); 
-        
-        // Render the view, the most precise of the parts
+
+        // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error
+        // Render the theme
+        $theme = $this->loadFile( $this->getThemePath( $this->getCurrentTheme() ) . $this->getCurrentVariant() );
+                
+        // Render the view
         $view_string = $this->renderView( $view, $params );
         
         // render the system messages
         $messages = \Dsc\System::instance()->renderMessages();
         $this->setBuffer( $messages, 'system.messages' );
-        
-        // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error
-        // Render the theme
-        $theme = $this->loadFile( $this->getThemePath( $this->getCurrentTheme() ) . $this->getCurrentVariant() );
         
         // get the view and the theme tags
         $view_tags = $this->getTags( $view_string );
@@ -117,6 +117,23 @@ class Theme extends \View
 
         return $string;
     }
+    
+    /**
+     * Alias for renderView.  Only keeping it to ease transition from \Dsc\Template to \Dsc\Theme
+     *  
+     * @param unknown $file
+     * @param string $mime
+     * @param array $hive
+     * @param number $ttl
+     */
+    public function renderLayout( $file, $mime='text/html', array $hive=NULL, $ttl=0 )
+    {
+        return static::renderView( $file, array(
+            'mime' => $mime,
+            'hive' => $hive,
+            'ttl' => $ttl
+        ) );
+    }
 
     public function renderView( $view, array $params = array() )
     {
@@ -133,8 +150,6 @@ class Theme extends \View
             "::",
             ":" 
         ), "|", $view ) );
-        
-        \FB::log($pieces);
         
         // Overrides!
         // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
@@ -162,10 +177,8 @@ class Theme extends \View
             if ($path = \Dsc\Filesystem\Path::real( $path ))
             {
                 $path_pattern = $path . $requested_filename;
-                \FB::log($path_pattern, 'OVERRIDE PATH');
                 if (file_exists($path_pattern))
                 {
-                    \FB::log($path_pattern, 'OVERRIDE EXISTS!');
                 	$string = $this->loadFile($path_pattern);
                 }
             }
@@ -189,7 +202,6 @@ class Theme extends \View
             if ($path_pattern) {
                 $string = $this->loadFile($path_pattern);
             }
-            \FB::log($path_pattern);
         }
         
         if (is_null( $string ))
