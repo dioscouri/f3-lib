@@ -17,12 +17,15 @@ namespace Dsc;
 
 class Pagination
 {
+    public $total_items;
+    public $items_per_page;
+    public $total_pages;
+    public $current_page;
+    public $next_page;
+    public $prev_page;
     public $items;
     
-    private $items_count;
-    private $items_per_page;
-    private $range = 3;
-    private $current_page;
+    private $range = 3;    
     private $template = 'common/pagination.php';
     private $routeKey;
     private $routeKeyPrefix = "page/";
@@ -54,14 +57,16 @@ class Pagination
      */
     public function __construct( $items, $limit = 10, $routeKey = 'page' ) {
         $this->fw = \Base::instance();
-        $this->items_count = is_array($items)?count($items):$items;
+        $this->total_items = is_array($items)?count($items):$items;
         $this->routeKey = $routeKey;
         $this->setLimit($limit);
 
         if($key = $this->fw->get('PAGINATION_KEY')) {
             $this->setRouteKeyPrefix($key);
         }
-
+        $this->total_pages = $this->getMax();
+        $this->next_page = $this->getNext();
+        $this->prev_page = $this->getPrev();
     }
 
     /**
@@ -151,7 +156,7 @@ class Pagination
      * @return int
      */
     public function getItemCount() {
-        return $this->items_count;
+        return $this->total_items;
     }
 
     /**
@@ -159,7 +164,7 @@ class Pagination
      * @return int
      */
     public function getMax() {
-        return ceil($this->items_count / $this->items_per_page);
+        return ceil($this->total_items / $this->items_per_page);
     }
 
 

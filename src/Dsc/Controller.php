@@ -81,5 +81,20 @@ class Controller extends Singleton
         
         return null;
     }
+    
+    public function isAllowed( $identity, $resource, $method )
+    {
+        \Dsc\System::addMessage( \Dsc\Debug::dump( '\Dsc\Controller\isAllowed will check if the following identity has accessing to the resource & method below' ) );
+        \Dsc\System::addMessage( \Dsc\Debug::dump( $identity ) );
+        \Dsc\System::addMessage( \Dsc\Debug::dump('$resource: ' . $resource) );
+        \Dsc\System::addMessage( \Dsc\Debug::dump('$method: ' . $method) );
+    }
+    
+    public function getIdentity()
+    {
+        // TODO Make this reference an DI object
+        $current_user = new \Users\Admin\Models\Users;
+        return $current_user;
+    }
 }
 ?>

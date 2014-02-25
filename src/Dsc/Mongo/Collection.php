@@ -614,6 +614,8 @@ class Collection extends \Magic
         {
         	$this->setError($validator->getError());
         }
+        
+        return $this;
     }
     
     /**
@@ -624,8 +626,11 @@ class Collection extends \Magic
      */
     public function setError($error)
     {
-        $error = trim( $error );
-        if (!empty($error))
+        if (is_string($error)) {
+        	$error = new Exception( $error );
+        }
+        
+        if (is_a($error, 'Exception'))
         {
             array_push($this->__errors, $error);
         }
@@ -663,8 +668,13 @@ class Collection extends \Magic
         {
             return $this;
         }
-    
-        $messages = implode(". ", $errors);
+        
+        $messages = array();
+        foreach ($errors as $exception) 
+        {
+            $messages[] = $exception->getMessage();        	
+        }
+        $messages = implode(". ", $messages);
     
         throw new \Exception( $messages );
     }
