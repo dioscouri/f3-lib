@@ -7,8 +7,8 @@ namespace Dsc\Routes;
  * 
  * @author Lukas Polak
  */
-class Group{
-
+abstract class Group
+{
 	private $default_params;
 	private $routes = array();
 	
@@ -23,10 +23,10 @@ class Group{
 	
 	/**
 	 * Initializes all routes for this group
+	 * 
 	 * NOTE: This method should be overriden by every group
 	 */
-	public function initialize(){
-	}
+	abstract public function initialize();
 	
 	/**
 	 * Sets default parameters
