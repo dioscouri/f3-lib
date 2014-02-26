@@ -31,6 +31,10 @@ class Container extends \Joomla\DI\Container
         $this->share( 'theme', function() {
             return new \Dsc\Theme;
         } );                    
+        
+        $this->share( 'router', function() {
+        	return new \Dsc\Routes\Router;
+        });
     }
 }
 ?>

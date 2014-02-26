@@ -173,7 +173,7 @@ class Theme extends \View
         $dir = \Dsc\Filesystem\Path::clean( $this->getThemePath( $this->getCurrentTheme() ) . "Overrides/" );
         if ($dir = \Dsc\Filesystem\Path::real( $dir ))
         {
-            if (count( $pieces ) > 1)
+        	if (count( $pieces ) > 1)
             {
                 // we're looking for a specific view (e.g. Blog/Site/View::posts/category.php)
                 $view_string = $pieces[0];
