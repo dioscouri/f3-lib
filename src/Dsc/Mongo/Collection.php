@@ -12,16 +12,26 @@ class Collection extends \Magic
     protected $__doc = array();
 
     protected $__collection_name = null;
-    
-    protected $__model_config = array(
+        
+    protected $__default_config = array(
         'cache_enabled' => true,
         'cache_lifetime' => 0,
         'track_states' => true,
         'context' => null,
         'default_sort' => array(
             '_id' => 1 
-        ) 
+        ),
+        'crud_item_key' => '_id',
+        'append' => true,
+        'ignored' => array()
     );
+    
+    /**
+     * Child classes should override this to customize their config
+     * 
+     * @var unknown
+     */
+    protected $__config = array();
     
     protected $__query_params = array(
         'conditions' => array(),
@@ -30,14 +40,12 @@ class Collection extends \Magic
         'limit' => null,
         'skip' => 0 
     );
-
-    protected $__options = array();
-    
-    protected $__default_options = array();
     
     protected $__model_state = null;
     
     protected $__errors = array();
+    
+    protected $__last_operation = null;
     
     /**
      *	Instantiate class
@@ -47,9 +55,12 @@ class Collection extends \Magic
      **/
     public function __construct($data=null, $options=array()) 
     {
+        $this->emptyState();
+        $this->setConfig($options);
+        
         if (!empty($data)) {
         	$this->bind($data, $options);
-        }        
+        }
     }
     
     /**
@@ -101,11 +112,11 @@ class Collection extends \Magic
     
     public function context()
     {
-        if (empty($this->__model_config['context'])) {
-            $this->__model_config['context'] = strtolower(get_class($this));
+        if (empty($this->__config['context'])) {
+            $this->__config['context'] = strtolower(get_class($this));
         }
     
-        return $this->__model_config['context'];
+        return $this->__config['context'];
     }
     
     public function inputFilter()
@@ -140,7 +151,7 @@ class Collection extends \Magic
     
         if (is_null($this->getState('list.sort')))
         {
-            $this->setState('list.sort', $this->__model_config['default_sort']);
+            $this->setState('list.sort', $this->__config['default_sort']);
         }
     
         return $this;
@@ -225,11 +236,24 @@ class Collection extends \Magic
     }
     
     /**
+     * Returns the key name for the model
+     */
+    public function getItemKey()
+    {
+        return $this->__config['crud_item_key'];
+    }
+    
+    public function getList($refresh=false) 
+    {
+    	return $this->getItems($refresh);
+    }
+    
+    /**
      * An alias for find()
      * that uses the model's state
      * and implements caching (if enabled)
      */
-    public function items($refresh=false)
+    public function getItems($refresh=false)
     {
         // TODO Store the state
         // TODO Implement caching
@@ -264,7 +288,7 @@ class Collection extends \Magic
      * that uses the model's state
      * and implements caching (if enabled)
      */
-    public function item($refresh=false)
+    public function getItem($refresh=false)
     {
         // TODO Store the state
         // TODO Implement caching
@@ -301,7 +325,7 @@ class Collection extends \Magic
         $total = $this->collection()->count( $this->getParam( 'conditions' ) );
         
         $result = new \Dsc\Pagination( $total, $size );
-        $result->items = $this->items($refresh);
+        $result->items = $this->getItems($refresh);
     
         return $result;
     }
@@ -440,20 +464,20 @@ class Collection extends \Magic
     
     /**
      * Returns an associative array of object's public properties
-     * removing any that begin with an underscore (_) 
+     * removing any that begin with a double-underscore (__) 
      *
      * @param   boolean  $public  If true, returns only the public properties.
      *
      * @return  array
      */
-    public function properties($public = true)
+    public function cast($public = true)
     {
         $vars = get_object_vars($this);
         if ($public)
         {
             foreach ($vars as $key => $value)
             {
-                if (strncmp($key, '__', 2) || !$this->isPublic($key))
+                if (substr($key, 0, 2) == '__' || !$this->isPublic($key))
                 {
                     unset($vars[$key]);
                 }
@@ -491,7 +515,7 @@ class Collection extends \Magic
     
     public function bind( $source, $options=array() )
     {
-        $this->setOptions($options);
+        $this->setConfig($options);
         
         if (!is_object($source) && !is_array($source))
         {
@@ -505,12 +529,12 @@ class Collection extends \Magic
         
         $this->__doc = $source;
     
-        if ($this->__options['append']) 
+        if ($this->__config['append']) 
         {
             // add unknown keys to the object
             foreach ($source as $key=>$value)
             {
-                if (!in_array($key, $this->__options['ignored']))
+                if (!in_array($key, $this->__config['ignored']))
                 {
                     $this->set($key, $value);
                 }
@@ -521,7 +545,7 @@ class Collection extends \Magic
             // ignore unknown keys
             foreach ($source as $key=>$value)
             {
-                if (!in_array($key, $this->__options['ignored']) && $this->isPublic($key))
+                if (!in_array($key, $this->__config['ignored']) && $this->isPublic($key))
                 {
                     $this->set($key, $value);
                 }
@@ -531,73 +555,142 @@ class Collection extends \Magic
         return $this;
     }
     
-    public function setOptions( $options=array() )
+    public function setConfig( $config=array() )
     {
-        $this->__options = $options + $this->__default_options + array(
-            'append' => false,
-            'ignored' => array() 
-        );
-    
-        if (!is_array($this->__options['ignored']))
+        $this->__config = $config + $this->__config + $this->__default_config;
+        
+        if (!is_array($this->__config['ignored']))
         {
-            $this->__options['ignored'] = \Base::instance()->split($this->__options['ignored']);
+            $this->__config['ignored'] = \Base::instance()->split($this->__config['ignored']);
         }
-    
+        
         return $this;
     }
     
     public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
     {
-        return $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->item();
+        return $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem();
     }
     
-    public function save()
+    public function save($document=array(), $options=array())
     {
         if (!empty($this->_id)) {
-        	return $this->overwrite();
+        	return $this->overwrite($document, $options);
         }
-        return $this->insert();
+        return $this->insert($document, $options);
     }
     
-    public function insert()
+    /**
+     * Clone an item.  Data from $values takes precedence of data from cloned object.
+     *
+     * @param unknown_type $mapper
+     * @param unknown_type $values
+     * @param unknown_type $options
+     */
+    public function saveAs( $document=array(), $options=array() )
     {
+        $item_data = $this->cast();
+        $new_values = array_merge( $document, array_diff_key( $item_data, $document ) );
+        unset($new_values[$this->getItemKey()]);
+        $item = new static( $new_values );
+            
+        return $item->insert(array(), $options);
+    }
+    
+    /**
+     * An Alias for insert()
+     * 
+     * @param unknown $document
+     * @param unknown $options
+     */
+    public function create($document=array(), $options=array())
+    {
+        return $this->insert( $document, $options );
+    }
+    
+    public function insert($document=array(), $options=array())
+    {
+        $this->bind($document, $options);
+        
         if (!empty($this->_id)) {
-        	return $this->overwrite();
+        	return $this->overwrite($document, $options);
         }
         
-        return $this->collection()->insert( $this->document );
+        // TODO add _pre and _post plugin events - Validate & Create
+        $this->beforeValidate();
+        $this->validate();
+        $this->beforeSave();
+        $this->beforeCreate();
+        
+        if ($this->__last_operation = $this->collection()->insert( $this->cast() )) 
+        {
+        	$this->set('_id', $this->__doc['_id']);
+        }
+        
+        return $this;
     }
     
-    public function update($overwrite=true, array $new_object=array())
+    public function update($document=array(), $options=array())
     {
-        if ($overwrite===true) {
-        	return $this->overwrite();
+        if (!isset($options['overwrite']) || $options['overwrite']===true) {
+        	return $this->overwrite($document, $options);
         }
+        
+        // TODO add _pre and _post plugin events - Update
+        $this->beforeSave();
+        $this->beforeUpdate();
+        
         // otherwise do a selective update with $set = array() and multi=false
-        return $this->collection()->update(
-                array('_id'=> new \MongoId((string) $this->_id ) ),
-                array('$set' => $new_object ),
+        $this->__last_operation = $this->collection()->update(
+                array('_id'=> new \MongoId((string) $this->get('_id') ) ),
+                array('$set' => $document ),
                 array('multiple'=>false)
         );        
+        
+        return $this->lastOperation();
     }
     
-    public function overwrite()
+    public function overwrite($document=array(), $options=array())
     {
-        return $this->collection()->update(
-                array('_id'=> new \MongoId((string) $this->_id ) ),
-                $this->document,
-                array('upsert'=>false)
+        $this->bind($document, $options);
+
+        // TODO add _pre and _post plugin events - Validate & Update        
+        $this->beforeValidate();
+        $this->validate();
+        $this->beforeSave();
+        $this->beforeUpdate();
+        
+        $this->__last_operation = $this->collection()->update(
+                array('_id'=> new \MongoId((string) $this->get('_id') ) ),
+                $this->cast(),
+                array('upsert'=>false, 'multiple'=>false)
         );
+        
+        return $this;
     }
     
     public function remove()
     {
-        return $this->collection()->remove(
-                array('_id'=> new \MongoId((string) $this->_id ) )
-        );    
+        // TODO add _pre and _post plugin events - Delete
+        $this->beforeDelete();
+        
+        $this->__last_operation = $this->collection()->remove(
+                array('_id'=> new \MongoId((string) $this->get('_id') ) )
+        );
+        
+        return $this->lastOperation();
     }
     
-    public function validation()
+    public function delete( $model=null )
+    {
+        if (!empty($model)) {
+        	return $model->remove();
+        }
+        
+        return $this->remove();
+    }
+    
+    public function validate()
     {
         $errors = $this->getErrors();
         if (!empty($errors))
@@ -608,7 +701,7 @@ class Collection extends \Magic
         return $this;
     }
     
-    public function validate( $validator )
+    public function validateWith( $validator )
     {
         if (!$validator->validate($this)) 
         {
@@ -677,5 +770,35 @@ class Collection extends \Magic
         $messages = implode(". ", $messages);
     
         throw new \Exception( $messages );
+    }
+    
+    public function lastOperation()
+    {
+        return $this->__last_operation;
+    }
+    
+    protected function beforeValidate()
+    {
+        return $this->checkErrors();
+    }
+    
+    protected function beforeSave()
+    {
+        return $this->checkErrors();
+    }
+    
+    protected function beforeCreate()
+    {
+        return $this->checkErrors();
+    }
+    
+    protected function beforeUpdate()
+    {
+        return $this->checkErrors();
+    }
+    
+    protected function beforeDelete()
+    {
+        return $this->checkErrors();
     }
 }
