@@ -231,6 +231,11 @@ class Model extends Singleton
         return $pagination;
     }
     
+    public function getItems( $refresh=false ) 
+    {
+    	return $this->getList($refresh);
+    }
+    
     public function getList( $refresh=false )
     {
         $fields = $this->getFields();
@@ -377,9 +382,6 @@ class Model extends Singleton
         }
         $mapper->copyFrom( $key );
         $f3->clear($key);
-
-        //TEMP FIX FOR USING REQUEST IN POSTING
-        if(!empty($mapper->PHPSESSID)) { unset($mapper->PHPSESSID); }
        
         $eventNameSuffix = $this->inputfilter->clean(get_class($this), 'ALNUM');
         

@@ -65,18 +65,22 @@ trait CrudItem
     
         $model = $this->getModel();
         $item = $this->getItem();
-    
+        
         $f3->set('model', $model );
         $f3->set('item', $item );
         
-        $item_data = array();
-        if (method_exists($item, 'cast')) {
-            $item_data = $item->cast();
-        } elseif (is_object($item)) {
-            $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
+        $use_flash = \Dsc\System::instance()->getUserState('use_flash.' . $this->edit_item_route);
+        if (!$use_flash) {
+            $item_data = array();
+            if (method_exists($item, 'cast')) {
+                $item_data = $item->cast();
+            } elseif (is_object($item)) {
+                $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
+            }
+            $flash->store($item_data);
         }
-        $flash->store($item_data);
-    
+        \Dsc\System::instance()->setUserState('use_flash.' . $this->edit_item_route, false);        
+        
         $this->displayEdit();
     
         return $this;
@@ -227,12 +231,12 @@ trait CrudItem
             //\Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
             if ($data['submitType'] == 'save_as') 
             {
-                $this->item = $model->saveAs($this->item, $values);
+                $this->item = $this->item->saveAs($values);
                 \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.');
             } 
             else 
             {
-                $this->item = $model->update($this->item, $values);
+                $this->item = $this->item->update($values);
                 \Dsc\System::instance()->addMessage('Item updated');
             }
             
@@ -253,11 +257,12 @@ trait CrudItem
                 ) ) );
             }
         
-            // redirect back to the create form with the fields pre-populated
+            // redirect back to the edit form with the fields pre-populated
+            \Dsc\System::instance()->setUserState('use_flash.' . $this->edit_item_route, true);
             $flash->store($data);
             $id = $this->item->get( $this->getItemKey() );
             $route = str_replace('{id}', $id, $this->edit_item_route );
-            
+                        
             $this->setRedirect( $route );
             
             return false;           
@@ -309,7 +314,7 @@ trait CrudItem
         $this->item = $this->getItem();
         
         try {
-            $model->delete( $this->item );
+            $this->item->remove();
             \Dsc\System::instance()->addMessage('Item deleted');
         }
         catch (\Exception $e) {
