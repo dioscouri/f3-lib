@@ -93,7 +93,10 @@ class Controller extends Singleton
     public function getIdentity()
     {
         // TODO Make this reference an DI object
-        $current_user = new \Users\Admin\Models\Users;
+        $current_user = new \Users\Models\Users;
+        $old_user = \Base::instance()->get('SESSION.admin.user');
+        $current_user->bind($old_user);
+        
         return $current_user;
     }
 }

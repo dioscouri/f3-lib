@@ -20,11 +20,11 @@ class Container extends \Joomla\DI\Container
             return new \Joomla\Filter\InputFilter;
         } );
         
-        $db_name = \Base::instance()->get('db.mongo.name');
-        $db_host = \Base::instance()->get('db.mongo.host');
-        if ($db_name && $db_host) {
-            $this->share( 'mongo', function() use ($db_host, $db_name) {
-                return new \DB\Mongo('mongodb://'.$db_host, $db_name);
+        $db_name = \Base::instance()->get('db.mongo.database');
+        $db_server = \Base::instance()->get('db.mongo.server');
+        if ($db_name && $db_server) {
+            $this->share( 'mongo', function() use ($db_server, $db_name) {
+                return new \DB\Mongo($db_server, $db_name);
             } );
         }
         
