@@ -72,7 +72,10 @@ abstract class Group
 				'exclude' => array()
 		);
 		$params = array_merge($orig_params, $params);
-
+		if( strlen( $params['prefix_url'] ) == 0 ){ // use controller name as fallback option
+			$params['prefix_url'] = '/'.strtolower( $controller );
+		}
+		
 		// this array defines parameters for all CRUD operations for an item
 		$operation_list = array(
 			'add' => array(
@@ -140,6 +143,9 @@ abstract class Group
 				'exclude' => array()
 		);
 		$params = array_merge($orig_params, $params);
+		if( strlen( $params['prefix_url'] ) == 0 ){ // use controller name as fallback option
+			$params['prefix_url'] = '/'.strtolower( $controller );
+		}
 	
 		// this array defines parameters for all CRUD operations for an item
 		$operation_list = array(
@@ -201,7 +207,6 @@ abstract class Group
 			}
 		}
 	}
-	
 	
 	/**
 	 * This method returns array of correctly formatted routes and operations assigned to them
