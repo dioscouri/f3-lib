@@ -9,8 +9,8 @@ namespace Dsc\Routes;
  */
 abstract class Group
 {
-	private $default_params;
-	private $routes = array();
+	protected $default_params;
+	protected $routes = array(); // initialized routes
 	
 	function __construct(){
 		$this->default_params = array(
@@ -36,7 +36,7 @@ abstract class Group
 	public function setDefaults($params){
 		$this->default_params = array_merge( $this->default_params, $params);
 	}
-	
+
 	/**
 	 * Adds a route to the group
 	 * 
@@ -58,6 +58,150 @@ abstract class Group
 								 'type' => 	$request_type,
 								 'params' =>$params);
 	}
+
+	/**
+	 * Adds CRUD item routes for selected controller
+	 *
+	 * @param $controller  Name of controller
+	 * @param $params 	   Parameters of the route (prefix_url is required)
+	 *
+	 */
+	public function addCrudItem($controller, $params = array()){
+		$orig_params = array(
+				'prefix_url' => '',
+				'exclude' => array()
+		);
+		$params = array_merge($orig_params, $params);
+
+		// this array defines parameters for all CRUD operations for an item
+		$operation_list = array(
+			'add' => array(
+						'action' => 'add',
+						'request' => 'POST',
+						'route' => '/add'
+						),
+			'create' => array(
+							array(
+									'action' => 'create',
+									'request' => 'GET',
+									'route' => '/create'
+							),
+							array(
+									'action' => 'create',
+									'request' => 'GET',
+									'route' => ''
+							)
+						),
+			'read' => array(
+						'action' => 'read',
+						'request' => 'GET',
+						'route' => '/@id/read'
+						),
+			'edit' => array(
+						'action' => 'edit',
+						'request' => 'GET',
+						'route' => '/@id/edit'
+						),
+			'update' => array(
+						'action' => 'update',
+						'request' => 'POST',
+						'route' => '/@id/update'
+						),
+			'delete' => array(
+						'action' => 'delete',
+						'request' => array('GET', 'DELETE'),
+						'route' => '/@id/delete'
+						)
+		);
+		
+		$available_operations = array_keys($operation_list);
+		$operations = array_diff($available_operations, (array)$params['exclude']);
+		$routes = array();
+		foreach( $operations as $op ){
+			$routes []= $operation_list[$op];
+		}
+
+		// add all routes you can
+		if(count ($routes ) ){
+			$this->addBulkRoutes( $routes, $controller, $params['prefix_url'] );
+		}
+	}
+	
+	/**
+	 * Adds CRUD list routes for selected controller
+	 *
+	 * @param $controller  Name of controller
+	 * @param $params 	   Parameters of the route (prefix_url is required)
+	 *
+	 */
+	public function addCrudList($controller, $params = array()){
+		$orig_params = array(
+				'prefix_url' => '',
+				'exclude' => array()
+		);
+		$params = array_merge($orig_params, $params);
+	
+		// this array defines parameters for all CRUD operations for an item
+		$operation_list = array(
+				'list' => array(
+						array(
+								'action' => 'index',
+								'request' => array('GET', 'POST'),
+								'route' => '/page/@page'
+						),
+						array(
+								'action' => 'index',
+								'request' => array('GET', 'POST'),
+								'route' => ''
+						)
+				),
+				'delete' => array(
+						'action' => 'delete',
+						'request' => array('GET', 'POST'),
+						'route' => '/delete'
+				)
+		);
+	
+		$available_operations = array_keys($operation_list);
+		$operations = array_diff($available_operations, (array)$params['exclude']);
+		$routes = array();
+		foreach( $operations as $op ){
+			$routes []= $operation_list[$op];
+		}
+
+		// add all routes you can
+		if(count ($routes ) ){
+			$this->addBulkRoutes( $routes, $controller, $params['prefix_url'] );
+		}
+	}
+	
+	/**
+	 * Adds routes in bulk
+	 * 
+	 * @param $routes_list List of routes to add
+	 * @param $controller Controller for all added routes
+	 * @param $prefix_url Prefix for all added routes
+	 */
+	private function addBulkRoutes($routes_list, $controller, $prefix_url){
+		foreach( $routes_list as $routes ){
+			// consider multiple routes for the same operation
+			if( !isset($routes[0]) ){
+				$routes = array( $routes );
+			}
+		
+			foreach( $routes as $route ){
+				$this->add($prefix_url.$route['route'],
+						$route['request'],
+						array(
+								'controller' => $controller,
+								'action' => $route['action']
+						)
+				);
+		
+			}
+		}
+	}
+	
 	
 	/**
 	 * This method returns array of correctly formatted routes and operations assigned to them
