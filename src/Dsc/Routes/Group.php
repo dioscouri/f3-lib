@@ -140,7 +140,8 @@ abstract class Group
 	public function addCrudList($controller, $params = array()){
 		$orig_params = array(
 				'prefix_url' => '',
-				'exclude' => array()
+				'exclude' => array(),
+				'pagination_list' => true
 		);
 		$params = array_merge($orig_params, $params);
 		if( strlen( $params['prefix_url'] ) == 0 ){ // use controller name as fallback option
@@ -153,11 +154,6 @@ abstract class Group
 						array(
 								'action' => 'index',
 								'request' => array('GET', 'POST'),
-								'route' => '/page/@page'
-						),
-						array(
-								'action' => 'index',
-								'request' => array('GET', 'POST'),
 								'route' => ''
 						)
 				),
@@ -167,6 +163,14 @@ abstract class Group
 						'route' => '/delete'
 				)
 		);
+		
+		if( (bool)($params['pagination_list']) ){
+			$operation_list['list'] []= array(
+											'action' => 'index',
+											'request' => array('GET', 'POST'),
+											'route' => '/page/@page'
+										);
+		}
 	
 		$available_operations = array_keys($operation_list);
 		$operations = array_diff($available_operations, (array)$params['exclude']);
@@ -179,6 +183,30 @@ abstract class Group
 		if(count ($routes ) ){
 			$this->addBulkRoutes( $routes, $controller, $params['prefix_url'] );
 		}
+	}
+
+	/**
+	 * Adds routes for settings
+	 *
+	 * @param $prefix_url  Prefix of URL
+	 *
+	 */
+	public function addSettingsRoutes($prefix_url){
+		$routes = array(
+					array(
+							'action' => 'index',
+							'request' => 'GET',
+							'route' => '/settings'
+					),
+					array(
+							'action' => 'save',
+							'request' => 'POST',
+							'route' => '/settings'
+					)
+				);
+	
+		// add all routes you can
+		$this->addBulkRoutes( $routes, 'Settings', $prefix_url );
 	}
 	
 	/**
