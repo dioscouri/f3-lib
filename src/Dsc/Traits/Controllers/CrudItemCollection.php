@@ -4,7 +4,7 @@ namespace Dsc\Traits\Controllers;
 /**
  * Handle redirects after saves/creations, system messages, etc
  */
-trait CrudItem
+trait CrudItemCollection
 {
     use \Dsc\Traits\Controllers\Crud;
     
@@ -13,9 +13,9 @@ trait CrudItem
      * Here is a typical format.
      * 
     protected $list_route = '/admin/items';
-    protected $create_item_route = '/admin/item/create';
-    protected $get_item_route = '/admin/item/read/{id}';    
-    protected $edit_item_route = '/admin/item/edit/{id}';
+    protected $create_item_route = '/admin/item';
+    protected $get_item_route = '/admin/item/{id}';    
+    protected $edit_item_route = '/admin/item/{id}/edit';
     */
         
     abstract protected function getModel();
@@ -231,12 +231,12 @@ trait CrudItem
             //\Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
             if ($data['submitType'] == 'save_as') 
             {
-                $this->item = $model->saveAs($this->item, $values);
+                $this->item = $this->item->saveAs($values);
                 \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.');
             } 
             else 
             {
-                $this->item = $model->update($this->item, $values);
+                $this->item = $this->item->update($values);
                 \Dsc\System::instance()->addMessage('Item updated');
             }
             
@@ -314,7 +314,7 @@ trait CrudItem
         $this->item = $this->getItem();
         
         try {
-            $model->delete( $this->item );
+            $this->item->remove();
             \Dsc\System::instance()->addMessage('Item deleted');
         }
         catch (\Exception $e) {

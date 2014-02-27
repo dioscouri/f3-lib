@@ -7,7 +7,7 @@ namespace Dsc\Mongo;
  * @author Rafael Diaz-Tushman
  *
  */
-class Collection extends \Magic
+class Collection extends \Dsc\Magic
 {
     protected $__doc = array();
 
@@ -485,6 +485,11 @@ class Collection extends \Magic
         }
     
         return $vars;
+    }
+    
+    protected function visible($key) 
+    {
+    	return $this->isPublic($key);
     }
     
     /**
