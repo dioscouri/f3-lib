@@ -69,6 +69,7 @@ abstract class Group
 	public function addCrudItem($controller, $params = array()){
 		$orig_params = array(
 				'prefix_url' => '',
+				'rest_actions' => true,
 				'exclude' => array()
 		);
 		$params = array_merge($orig_params, $params);
@@ -79,10 +80,12 @@ abstract class Group
 		// this array defines parameters for all CRUD operations for an item
 		$operation_list = array(
 			'add' => array(
-						'action' => 'add',
-						'request' => 'POST',
-						'route' => '/add'
-						),
+						array(
+							'action' => 'add',
+							'request' => 'POST',
+							'route' => '/add'
+							)
+						), 
 			'create' => array(
 							array(
 									'action' => 'create',
@@ -96,9 +99,11 @@ abstract class Group
 							)
 						),
 			'read' => array(
-						'action' => 'read',
-						'request' => 'GET',
-						'route' => '/read/@id'
+							array(
+							'action' => 'read',
+							'request' => 'GET',
+							'route' => '/read/@id'
+							)
 						),
 			'edit' => array(
 						'action' => 'edit',
@@ -106,16 +111,46 @@ abstract class Group
 						'route' => '/edit/@id'
 						),
 			'update' => array(
-						'action' => 'update',
-						'request' => 'POST',
-						'route' => '/update/@id'
+							array(
+									'action' => 'update',
+									'request' => 'POST',
+									'route' => '/update/@id'
+							)
 						),
 			'delete' => array(
-						'action' => 'delete',
-						'request' => array('GET', 'DELETE'),
-						'route' => '/delete/@id'
+							array(
+									'action' => 'delete',
+									'request' => array('GET', 'DELETE'),
+									'route' => '/delete/@id'
+							)
 						)
-		);
+			);
+		if( (bool)$params['rest_actions']) {
+			$operations['add'] []= 	array(
+										'action' => 'add',
+										'request' => 'PUT',
+										'route' => ''
+									);
+			
+			$operations['read'] []= 	array(
+										'action' => 'read',
+										'request' => 'GET',
+										'route' => '/@id'
+									);
+			
+			$operations['update'] []= 	array(
+										'action' => 'update',
+										'request' => 'POST',
+										'route' => '/@id'
+									);
+			
+			$operations['delete'] []= array(
+										'action' => 'delete',
+										'request' => 'DELETE',
+										'route' => '/@id'
+								);
+		}
+		
 		
 		$available_operations = array_keys($operation_list);
 		$operations = array_diff($available_operations, (array)$params['exclude']);
