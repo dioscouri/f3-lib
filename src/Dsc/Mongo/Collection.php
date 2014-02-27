@@ -627,6 +627,7 @@ class Collection extends \Dsc\Magic
         $this->beforeSave();
         $this->beforeCreate();
         
+        $this->set('_id', new \MongoId );
         if ($this->__last_operation = $this->collection()->insert( $this->cast() )) 
         {
         	$this->set('_id', $this->__doc['_id']);
@@ -725,7 +726,7 @@ class Collection extends \Dsc\Magic
     public function setError($error)
     {
         if (is_string($error)) {
-        	$error = new Exception( $error );
+        	$error = new \Exception( $error );
         }
         
         if (is_a($error, 'Exception'))
