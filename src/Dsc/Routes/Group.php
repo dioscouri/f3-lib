@@ -98,22 +98,22 @@ abstract class Group
 			'read' => array(
 						'action' => 'read',
 						'request' => 'GET',
-						'route' => '/@id/read'
+						'route' => '/read/@id'
 						),
 			'edit' => array(
 						'action' => 'edit',
 						'request' => 'GET',
-						'route' => '/@id/edit'
+						'route' => '/edit/@id'
 						),
 			'update' => array(
 						'action' => 'update',
 						'request' => 'POST',
-						'route' => '/@id/update'
+						'route' => '/update/@id'
 						),
 			'delete' => array(
 						'action' => 'delete',
 						'request' => array('GET', 'DELETE'),
-						'route' => '/@id/delete'
+						'route' => '/delete/@id'
 						)
 		);
 		
