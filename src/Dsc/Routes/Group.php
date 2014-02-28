@@ -69,7 +69,7 @@ abstract class Group
 	public function addCrudItem($controller, $params = array()){
 		$orig_params = array(
 				'prefix_url' => '',
-				'rest_actions' => true,
+				'rest_actions' => false,
 				'exclude' => array()
 		);
 		$params = array_merge($orig_params, $params);
@@ -83,7 +83,7 @@ abstract class Group
 						array(
 							'action' => 'add',
 							'request' => 'POST',
-							'route' => '/add'
+							'route' => '/create'
 							)
 						), 
 			'create' => array(
@@ -91,11 +91,6 @@ abstract class Group
 									'action' => 'create',
 									'request' => 'GET',
 									'route' => '/create'
-							),
-							array(
-									'action' => 'create',
-									'request' => 'GET',
-									'route' => ''
 							)
 						),
 			'read' => array(
@@ -114,7 +109,7 @@ abstract class Group
 							array(
 									'action' => 'update',
 									'request' => 'POST',
-									'route' => '/update/@id'
+									'route' => '/edit/@id'
 							)
 						),
 			'delete' => array(
@@ -226,7 +221,7 @@ abstract class Group
 	 * @param $prefix_url  Prefix of URL
 	 *
 	 */
-	public function addSettingsRoutes($prefix_url){
+	public function addSettingsRoutes($prefix_url = ''){
 		$routes = array(
 					array(
 							'action' => 'index',
