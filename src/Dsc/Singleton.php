@@ -3,7 +3,7 @@ namespace Dsc;
 
 class Singleton extends \Prefab
 {
-    protected $errors = array();
+    protected $__errors = array();
 
     public function __construct($config=array()){}
     
@@ -15,10 +15,13 @@ class Singleton extends \Prefab
      */
     public function setError($error)
     {
-        $error = trim( $error );
-        if (!empty($error))
+        if (is_string($error)) {
+        	$error = new \Exception( $error );
+        }
+        
+        if (is_a($error, 'Exception'))
         {
-            array_push($this->errors, $error);
+            array_push($this->__errors, $error);
         }
         
         return $this;
@@ -31,7 +34,7 @@ class Singleton extends \Prefab
      */
     public function getErrors()
     {
-        return $this->errors;
+        return $this->__errors;
     }
     
     /**
@@ -39,7 +42,7 @@ class Singleton extends \Prefab
      */
     public function clearErrors()
     {
-        $this->errors = array();
+        $this->__errors = array();
         return $this;
     }
     
@@ -55,9 +58,24 @@ class Singleton extends \Prefab
             return $this;
         }
         
-        $messages = implode(". ", $errors);
-        
-        throw new \Exception('Errors encountered - ' . $messages );
+        $messages = array();
+        foreach ($errors as $exception) 
+        {
+            $messages[] = $exception->getMessage();        	
+        }
+        $messages = implode(". ", $messages);
+    
+        throw new \Exception( $messages );
+    }
+    
+    /**
+     * Gets a key from the DI
+     * 
+     * @param unknown $key
+     */
+    public function __get($key) 
+    {
+    	return \Dsc\System::instance()->get($key);
     }
 }
 ?>

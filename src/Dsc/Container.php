@@ -35,6 +35,19 @@ class Container extends \Joomla\DI\Container
         $this->share( 'router', function() {
         	return new \Dsc\Routes\Router;
         });
+        
+        $this->share( 'acl', function() {
+            return new \Users\Lib\Acl;
+        });
+        
+        $this->share( 'auth', function() {
+            return new \Users\Lib\Auth;
+        });
+        
+        $store = new \DB\Mongo\Session($this->get('mongo'));
+        $this->share( 'session', function() use($store) {
+            return new \Dsc\Session($store);
+        });
     }
 }
 ?>
