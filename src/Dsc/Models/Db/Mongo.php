@@ -8,9 +8,7 @@ class Mongo extends \Dsc\Models\Db\Base
     
     protected function createDb()
     {
-        $db_database = \Base::instance()->get('db.mongo.database');
-        $db_server = \Base::instance()->get('db.mongo.server');
-        $this->db = new \DB\Mongo($db_server, $db_database);
+        $this->db = \Dsc\System::instance()->get('mongo');
         
         return $this;
     }
