@@ -15,9 +15,21 @@ class Router{
 	 * Mounts group of routes to the router
 	 * 
 	 * @param $group Object containing a group of routes
+	 * @param $name Name of the routing group, in case we want to request it directly
 	 */
-	public function mount($group){
-		$this->groups []= $group;
+	public function mount($group, $name = ''){
+		if( strlen( $name ) == 0 ){
+			$name = '_all';
+		}
+		if( is_array( $this->groups ) == false ){
+			$this->groups = array();
+		}
+		
+		if( isset($this->groups[$name]) ){
+			$this->groups[$name] []= $group;
+		} else {
+			$this->groups[$name] = array( $group );
+		}
 	}
 	
 	/**
@@ -26,12 +38,14 @@ class Router{
 	public function registerRoutes(){
 		if( count( $this->groups ) ){
 			$f3 = \Base::instance();
-			foreach( $this->groups as $group ){
-				$group->initialize();
-				$routes = $group->getListRoutes();
-				if( count( $routes ) ){
-					foreach( $routes as $route ){
-						$f3->route( $route[0], $route[1]);
+			foreach( $this->groups as $group_list ){
+				foreach( $group_list as $group ){
+					$group->initialize();
+					$routes = $group->getListRoutes();
+					if( count( $routes ) ){
+						foreach( $routes as $route ){
+							$f3->route( $route[0], $route[1]);
+						}
 					}
 				}
 			}
