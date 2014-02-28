@@ -222,12 +222,6 @@ abstract class Group
 						'request' => 'GET',
 						'route' => '/all'
 							);
-			$routes []= array(
-						'action' => 'getCheckboxes',
-						'ajax'	=>  true,
-						'request' => array( 'GET', 'POST' ),
-						'route' => '/checkboxes'
-							);
 		}
 		
 		// add all routes you can
