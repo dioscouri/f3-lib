@@ -63,7 +63,7 @@ abstract class Group
 	 * Adds CRUD item routes for selected controller
 	 *
 	 * @param $controller  Name of controller
-	 * @param $params 	   Parameters of the route (prefix_url is required)
+	 * @param $params 	   Parameters of the route
 	 *
 	 */
 	public function addCrudItem($controller, $params = array()){
@@ -126,25 +126,25 @@ abstract class Group
 						)
 			);
 		if( (bool)$params['rest_actions']) {
-			$operations['add'] []= 	array(
+			$operation_list['add'] []= 	array(
 										'action' => 'add',
 										'request' => 'PUT',
 										'route' => ''
 									);
 			
-			$operations['read'] []= 	array(
+			$operation_list['read'] []= 	array(
 										'action' => 'read',
 										'request' => 'GET',
 										'route' => '/@id'
 									);
 			
-			$operations['update'] []= 	array(
+			$operation_list['update'] []= 	array(
 										'action' => 'update',
 										'request' => 'POST',
 										'route' => '/@id'
 									);
 			
-			$operations['delete'] []= array(
+			$operation_list['delete'] []= array(
 										'action' => 'delete',
 										'request' => 'DELETE',
 										'route' => '/@id'
