@@ -69,7 +69,7 @@ abstract class Group
 	public function addCrudItem($controller, $params = array()){
 		$orig_params = array(
 				'prefix_url' => '',
-				'rest_actions' => true,
+				'rest_actions' => false,
 				'exclude' => array()
 		);
 		$params = array_merge($orig_params, $params);
@@ -83,7 +83,7 @@ abstract class Group
 						array(
 							'action' => 'add',
 							'request' => 'POST',
-							'route' => '/add'
+							'route' => '/create'
 							)
 						), 
 			'create' => array(
@@ -91,11 +91,6 @@ abstract class Group
 									'action' => 'create',
 									'request' => 'GET',
 									'route' => '/create'
-							),
-							array(
-									'action' => 'create',
-									'request' => 'GET',
-									'route' => ''
 							)
 						),
 			'read' => array(
@@ -114,7 +109,7 @@ abstract class Group
 							array(
 									'action' => 'update',
 									'request' => 'POST',
-									'route' => '/update/@id'
+									'route' => '/edit/@id'
 							)
 						),
 			'delete' => array(
@@ -176,6 +171,7 @@ abstract class Group
 		$orig_params = array(
 				'prefix_url' => '',
 				'exclude' => array(),
+				'databable_links' => false,				
 				'pagination_list' => true
 		);
 		$params = array_merge($orig_params, $params);
@@ -206,14 +202,34 @@ abstract class Group
 											'route' => '/page/@page'
 										);
 		}
-	
+		
 		$available_operations = array_keys($operation_list);
 		$operations = array_diff($available_operations, (array)$params['exclude']);
 		$routes = array();
 		foreach( $operations as $op ){
 			$routes []= $operation_list[$op];
 		}
-
+		if( (bool)($params['databable_links']) ){
+			$routes []= array( 
+						'action' => 'getDatatable',
+						'ajax'	=>  true,
+						'request' => 'GET',
+						'route' => ''
+							);
+			$routes []= array(
+						'action' => 'getAll',
+						'ajax'	=>  true,
+						'request' => 'GET',
+						'route' => '/all'
+							);
+			$routes []= array(
+						'action' => 'getCheckboxes',
+						'ajax'	=>  true,
+						'request' => array( 'GET', 'POST' ),
+						'route' => '/checkboxes'
+							);
+		}
+		
 		// add all routes you can
 		if(count ($routes ) ){
 			$this->addBulkRoutes( $routes, $controller, $params['prefix_url'] );
@@ -226,7 +242,7 @@ abstract class Group
 	 * @param $prefix_url  Prefix of URL
 	 *
 	 */
-	public function addSettingsRoutes($prefix_url){
+	public function addSettingsRoutes($prefix_url = ''){
 		$routes = array(
 					array(
 							'action' => 'index',
@@ -259,11 +275,13 @@ abstract class Group
 			}
 		
 			foreach( $routes as $route ){
+				$ajax = isset( $route['ajax'] ) ? (bool)$route['ajax'] : false;
 				$this->add($prefix_url.$route['route'],
 						$route['request'],
 						array(
 								'controller' => $controller,
-								'action' => $route['action']
+								'action' => $route['action'],
+								'ajax' => $ajax
 						)
 				);
 		
