@@ -12,14 +12,6 @@ class Controller extends Singleton
      */
     protected $redirect;
     
-    public function __construct($config=array())
-    {
-        parent::__construct($config);
-        
-        $this->input = new \Joomla\Input\Input;
-        $this->inputfilter = new \Joomla\Filter\InputFilter;
-    }
-    
     protected function outputJson($response)
     {
         $callback = $this->input->getAlnum('callback');
@@ -82,21 +74,37 @@ class Controller extends Singleton
         return null;
     }
     
-    public function isAllowed( $identity, $resource, $method )
+    public function checkAccess( $resource, $method, $require_identity=true )
     {
+        $identity = $this->getIdentity();
+        
+        if ($require_identity && empty($identity->id)) 
+        {
+            \Dsc\System::addMessage( 'Please sign in.' );
+            \Base::instance()->reroute('/admin/login');
+            return false;
+        }
+        
         \Dsc\System::addMessage( \Dsc\Debug::dump( '\Dsc\Controller\isAllowed will check if the following identity has accessing to the resource & method below' ) );
         \Dsc\System::addMessage( \Dsc\Debug::dump( $identity ) );
         \Dsc\System::addMessage( \Dsc\Debug::dump('$resource: ' . $resource) );
         \Dsc\System::addMessage( \Dsc\Debug::dump('$method: ' . $method) );
+        
+        if ($hasAccess = \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $resource, $method))
+        {
+            return true;
+        }
+        
+        \Dsc\System::addMessage( 'You do not have access to perform that action.' );
+        \Base::instance()->reroute('/admin');
+        
+        return false;        
     }
     
     public function getIdentity()
     {
-        // TODO Make this reference an DI object
-        $current_user = new \Users\Models\Users;
-        $old_user = \Base::instance()->get('SESSION.admin.user');
-        $current_user->bind($old_user);
-        
+        // Make this reference an DI object
+        $current_user = $this->auth->getIdentity();
         return $current_user;
     }
 }

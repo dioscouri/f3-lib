@@ -43,6 +43,13 @@ class Collection extends \Dsc\Magic
     
     protected $__model_state = null;
     
+    /**
+     * Desired options during CRUD actions
+     * 
+     * @var unknown
+     */
+    protected $__options = array();
+    
     protected $__errors = array();
     
     protected $__last_operation = null;
@@ -579,6 +586,8 @@ class Collection extends \Dsc\Magic
     
     public function save($document=array(), $options=array())
     {
+        $this->__options = $options;
+        
         if (!empty($this->_id)) {
         	return $this->overwrite($document, $options);
         }
@@ -615,6 +624,8 @@ class Collection extends \Dsc\Magic
     
     public function insert($document=array(), $options=array())
     {
+        $this->__options = $options;
+        
         $this->bind($document, $options);
         
         if (!empty($this->_id)) {
@@ -633,11 +644,16 @@ class Collection extends \Dsc\Magic
         	$this->set('_id', $this->__doc['_id']);
         }
         
+        $this->afterCreate();
+        $this->afterSave();
+        
         return $this;
     }
     
     public function update($document=array(), $options=array())
     {
+        $this->__options = $options;
+        
         if (!isset($options['overwrite']) || $options['overwrite']===true) {
         	return $this->overwrite($document, $options);
         }
@@ -651,13 +667,18 @@ class Collection extends \Dsc\Magic
                 array('_id'=> new \MongoId((string) $this->get('_id') ) ),
                 array('$set' => $document ),
                 array('multiple'=>false)
-        );        
-        
+        );
+                
+        $this->afterUpdate();
+        $this->afterSave();
+                
         return $this->lastOperation();
     }
     
     public function overwrite($document=array(), $options=array())
     {
+        $this->__options = $options;
+        
         $this->bind($document, $options);
 
         // TODO add _pre and _post plugin events - Validate & Update        
@@ -671,6 +692,9 @@ class Collection extends \Dsc\Magic
                 $this->cast(),
                 array('upsert'=>false, 'multiple'=>false)
         );
+
+        $this->afterUpdate();
+        $this->afterSave();
         
         return $this;
     }
@@ -683,6 +707,8 @@ class Collection extends \Dsc\Magic
         $this->__last_operation = $this->collection()->remove(
                 array('_id'=> new \MongoId((string) $this->get('_id') ) )
         );
+        
+        $this->afterDelete();
         
         return $this->lastOperation();
     }
@@ -807,4 +833,12 @@ class Collection extends \Dsc\Magic
     {
         return $this->checkErrors();
     }
+
+    protected function afterSave(){}
+    
+    protected function afterCreate(){}
+    
+    protected function afterUpdate(){}
+    
+    protected function afterDelete(){}    
 }
