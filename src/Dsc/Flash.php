@@ -3,7 +3,7 @@ namespace Dsc;
 
 class Flash extends Singleton
 {
-    protected $context = '\dsc\flash';
+    protected $context = 'dsc.flash';
 
     /**
      * Store an input array to the session.
@@ -79,9 +79,9 @@ class Flash extends Singleton
      */
     public function set( $key, $value ) 
     {
-        $system = \Dsc\System::instance();
         $key = $this->context . "." . $key;
-        $system->setUserState($key, $value);
+        
+        \Base::instance()->set($key, $value);
         
         return $this;
     }
@@ -94,9 +94,13 @@ class Flash extends Singleton
      */
     public function get( $key, $default=null )
     {
-        $system = \Dsc\System::instance();
         $key = $this->context . "." . $key;
-        $value = $system->getUserState($key, $default);        
+        
+        $value = $default;
+        if (\Base::instance()->exists($key)) 
+        {
+            $value = \Base::instance()->get($key);
+        }
         
         return $value;
     }
