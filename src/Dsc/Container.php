@@ -44,7 +44,7 @@ class Container extends \Joomla\DI\Container
             return new \Users\Lib\Auth;
         });
         
-        $store = new \DB\Mongo\Session($this->get('mongo'));
+        $store = null;
         $this->share( 'session', function() use($store) {
             return new \Dsc\Session($store);
         });
