@@ -489,7 +489,6 @@ class Collection extends \Dsc\Magic
                 }
             }
         }
-    
         return $vars;
     }
     
@@ -626,7 +625,6 @@ class Collection extends \Dsc\Magic
         $this->__options = $options;
         
         $this->bind($document, $options);
-        
         if (!empty($this->_id)) {
         	return $this->overwrite($document, $options);
         }

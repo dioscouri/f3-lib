@@ -63,4 +63,8 @@ abstract class Settings extends \Dsc\Models\Db\Mongo
         
         return parent::save( $values, $options, $mapper );
     }
+    
+    public function populateState(){
+    	return parent::populateState()->setState( 'filter.type', $this->type);
+    }
 }
