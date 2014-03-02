@@ -9,6 +9,8 @@ namespace Dsc\Mongo;
  */
 class Collection extends \Dsc\Magic
 {
+    public $_id; // MongoId
+    
     protected $__doc = array();
 
     protected $__collection_name = null;
@@ -370,7 +372,24 @@ class Collection extends \Dsc\Magic
     protected function fetchConditions()
     {
         $this->__query_params['conditions'] = array();
-    
+        
+        $filter_id = $this->getState('filter.id');
+        if (strlen($filter_id))
+        {
+            $this->setCondition('_id', new \MongoId((string) $filter_id));
+        }
+        
+        $filter_ids = $this->getState('filter.ids');
+        if (!empty($filter_ids) && is_array($filter_ids))
+        {
+            $_ids = array();
+            foreach ($filter_ids as $_filter_id) 
+            {
+            	$_ids = new \MongoId( (string) $_filter_id);
+            }
+            $this->setCondition('_id', array('$in' => $_ids) );
+        }
+        
         return $this;
     }
     

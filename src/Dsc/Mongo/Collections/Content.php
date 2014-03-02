@@ -1,0 +1,190 @@
+<?php 
+namespace Dsc\Mongo\Collections;
+
+class Content extends \Dsc\Mongo\Collection 
+{
+    /**
+     * Default Document Structure
+     * @var unknown
+     */
+    public $slug; // string INDEX
+    public $title; // string INDEX
+    public $copy;
+    public $tags; // array
+    public $publication = array(
+    	'status' => 'published',
+        'start_date' => null,
+        'start_time' => null,
+        'end_date' => null,
+        'end_time' => null,
+        'start' => null,
+        'end' => null
+    );
+    
+    protected $__collection_name = 'common.content';
+    protected $__type = 'common.content';
+    protected $__config = array(
+        'default_sort' => array(
+            'metadata.created.time' => 1
+        ),
+    );
+    
+    protected function fetchConditions()
+    {
+        parent::fetchConditions();
+    
+        $filter_keyword = $this->getState('filter.keyword');
+        if ($filter_keyword && is_string($filter_keyword))
+        {
+            $key =  new \MongoRegex('/'. $filter_keyword .'/i');
+    
+            $where = array();
+            $where[] = array('slug'=>$key);
+            $where[] = array('title'=>$key);
+            $where[] = array('copy'=>$key);            
+            $where[] = array('metadata.creator.name'=>$key);
+
+            $this->setCondition('$or', $where);
+        }
+        
+        $filter_slug = $this->getState('filter.slug');
+        if (strlen($filter_slug))
+        {
+            $this->setCondition('slug', $filter_slug);
+        }
+        
+        $filter_title = $this->getState('filter.title');
+        if (strlen($filter_title))
+        {
+            $this->setCondition('title', $filter_title);
+        }
+        
+        $filter_copy_contains = $this->getState('filter.copy-contains');
+        if (strlen($filter_copy_contains))
+        {
+            $key =  new \MongoRegex('/'. $filter_copy_contains .'/i');
+            $this->setCondition('copy', $key);
+        }
+        
+        $filter_tag = $this->getState('filter.tag');
+        if (strlen($filter_tag))
+        {
+            $this->setCondition('tags', $filter_tag);
+        }
+        
+        // TODO Add conditions for publication date range and status
+        
+        return $this;
+    }
+    
+    protected function beforeValidate()
+    {
+        if (empty($this->slug) && !empty($this->title))
+        {
+            $this->slug = $this->generateSlug();
+        }
+        
+        return parent::beforeValidate();
+    }
+    
+    public function validate()
+    {
+        if (empty($this->title)) {
+            $this->setError('Title is required');
+        }
+        
+        if (empty($this->slug)) {
+            $this->setError('A slug is required');
+        }
+        
+        if ($existing = $this->slugExists( $this->slug ))
+        {
+            if (empty($this->id) || $existing->id != $this->id)
+            {
+                $this->setError('An item with this slug already exists.  Slugs must be unique.');
+            }
+        }
+    
+        return parent::validate();
+    }
+    
+    protected function beforeSave()
+    {
+        if (!empty($this->tags) && !is_array($this->tags))
+        {
+            $this->tags = trim($this->tags);
+            if (!empty($this->tags)) {
+                $this->tags = \Base::instance()->split( (string) $this->tags );
+            }
+        }
+        
+        if (empty($this->{'publication.start'})) {
+            $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate( $this->{'publication.start_date'} . ' ' . $this->{'publication.start_time'} );
+        }
+        
+        if (empty($this->{'publication.end'}) && !empty($this->{'publication.end_date'})) {
+            $string = $this->{'publication.end_date'};
+            if (!empty($this->{'publication.end_time'})) {
+                $string .= ' ' . $this->{'publication.end_time'};
+            }
+            $this->{'publication.end'} = \Dsc\Mongo\Metastamp::getDate( trim( $string ) );
+        }        
+        
+        return parent::beforeSave();
+    }
+    
+    public function generateSlug( $unique=true )
+    {
+        if (empty($this->title)) {
+            $this->setError('A title is required for generating the slug');
+            return $this->checkErrors();
+        }
+        
+        $slug = \Web::instance()->slug( $this->title );
+        
+        if ($unique) 
+        {
+            $base_slug = $slug;
+            $n = 1;
+            while ($this->slugExists($slug))
+            {
+                $slug = $base_slug . '-' . $n;
+                $n++;
+            }
+        }
+    
+        return $slug;
+    }
+    
+    /**
+     *
+     * @param array $types
+     * @return unknown
+     */
+    public function getTags($types=array())
+    {
+        // TODO if $types, only get tags used by items of those types
+        $tags = $this->collection()->distinct("tags");
+        $tags = array_values( array_filter( $tags ) );
+    
+        return $tags;
+    }
+    
+    /**
+     *
+     *
+     * @param string $slug
+     * @return unknown|boolean
+     */
+    public function slugExists( $slug )
+    {
+        $clone = clone $this;
+        $item = $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
+    
+        if ($item->id) {
+            return $item;
+        }
+    
+        return false;
+    }
+}
