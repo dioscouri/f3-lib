@@ -329,8 +329,7 @@ class Collection extends \Dsc\Magic
     public function paginate($refresh=false)
     {
         $size = $this->getState('list.limit', 10, 'int');
-        $total = $this->collection()->count( $this->getParam( 'conditions' ) );
-        
+        $total = $this->collection()->count( $this->conditions() );
         $result = new \Dsc\Pagination( $total, $size );
         $result->items = $this->getItems($refresh);
     
