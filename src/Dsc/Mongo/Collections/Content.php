@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc\Mongo\Collections;
 
-class Content extends \Dsc\Mongo\Collections\Nodes 
+class Content extends \Dsc\Mongo\Collections\Taggable 
 {
     /**
      * Default Document Structure
@@ -10,7 +10,6 @@ class Content extends \Dsc\Mongo\Collections\Nodes
     public $title; // string INDEX
     public $slug; // string INDEX    
     public $copy; // text
-    public $tags = array();
     public $publication = array(
     	'status' => 'published',
         'start_date' => null,
@@ -66,12 +65,6 @@ class Content extends \Dsc\Mongo\Collections\Nodes
             $this->setCondition('copy', $key);
         }
         
-        $filter_tag = $this->getState('filter.tag');
-        if (strlen($filter_tag))
-        {
-            $this->setCondition('tags', $filter_tag);
-        }
-        
         // TODO Add conditions for publication date range and status
         
         return $this;
@@ -110,14 +103,6 @@ class Content extends \Dsc\Mongo\Collections\Nodes
     
     protected function beforeSave()
     {
-        if (!empty($this->tags) && !is_array($this->tags))
-        {
-            $this->tags = trim($this->tags);
-            if (!empty($this->tags)) {
-                $this->tags = \Base::instance()->split( (string) $this->tags );
-            }
-        }
-        
         if (empty($this->{'publication.start'})) {
             $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate( $this->{'publication.start_date'} . ' ' . $this->{'publication.start_time'} );
         }
@@ -154,20 +139,6 @@ class Content extends \Dsc\Mongo\Collections\Nodes
         }
     
         return $slug;
-    }
-    
-    /**
-     *
-     * @param array $types
-     * @return unknown
-     */
-    public function getTags($types=array())
-    {
-        // TODO if $types, only get tags used by items of those types
-        $tags = $this->collection()->distinct("tags");
-        $tags = array_values( array_filter( $tags ) );
-    
-        return $tags;
     }
     
     /**
