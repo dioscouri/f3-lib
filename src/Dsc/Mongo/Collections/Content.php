@@ -1,16 +1,16 @@
 <?php 
 namespace Dsc\Mongo\Collections;
 
-class Content extends \Dsc\Mongo\Collection 
+class Content extends \Dsc\Mongo\Collections\Nodes 
 {
     /**
      * Default Document Structure
      * @var unknown
      */
-    public $slug; // string INDEX
     public $title; // string INDEX
-    public $copy;
-    public $tags; // array
+    public $slug; // string INDEX    
+    public $copy; // text
+    public $tags = array();
     public $publication = array(
     	'status' => 'published',
         'start_date' => null,
@@ -104,7 +104,11 @@ class Content extends \Dsc\Mongo\Collection
                 $this->setError('An item with this slug already exists.  Slugs must be unique.');
             }
         }
-    
+        
+        if (empty($this->copy)) {
+            $this->setError('Body copy is required');
+        }
+        
         return parent::validate();
     }
     
@@ -181,7 +185,7 @@ class Content extends \Dsc\Mongo\Collection
         $clone = clone $this;
         $item = $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
     
-        if ($item->id) {
+        if (!empty($item->id)) {
             return $item;
         }
     

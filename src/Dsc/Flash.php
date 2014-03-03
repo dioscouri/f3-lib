@@ -81,7 +81,8 @@ class Flash extends Singleton
     {
         $key = $this->context . "." . $key;
         
-        \Base::instance()->set($key, $value);
+        $system = \Dsc\System::instance();
+        $system->setUserState($key, $value);
         
         return $this;
     }
@@ -95,12 +96,9 @@ class Flash extends Singleton
     public function get( $key, $default=null )
     {
         $key = $this->context . "." . $key;
-        
-        $value = $default;
-        if (\Base::instance()->exists($key)) 
-        {
-            $value = \Base::instance()->get($key);
-        }
+                
+        $system = \Dsc\System::instance();        
+        $value = $system->getUserState($key, $default);
         
         return $value;
     }

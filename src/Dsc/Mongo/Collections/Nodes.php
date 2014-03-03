@@ -27,8 +27,7 @@ class Nodes extends \Dsc\Mongo\Collection
         parent::fetchConditions();
         
         $filter_type = $this->getState('filter.type');
-        if ($filter_type) 
-        {
+        if ($filter_type) {
             if (is_bool($filter_type) && $filter_type) {
                 $this->setCondition('type', $this->__type );
             } elseif (strlen($filter_type)) {
@@ -57,12 +56,17 @@ class Nodes extends \Dsc\Mongo\Collection
     {
         if (!$this->get('metadata.creator')) 
         {
-            if ($identity = $this->getIdentity() && !empty($identity->id)) 
+            $identity = \Dsc\System::instance()->get('auth')->getIdentity();
+            if (!empty($identity->id)) 
             {
             	$this->set('metadata.creator', array(
-	                'id' => $user->id,
-	                'name' => $user->getName()            		
+	                'id' => $identity->id,
+	                'name' => $identity->getName()
             	));
+            }
+            else 
+            {
+            	$this->setError('A creator must be set');
             }
         }
         

@@ -447,7 +447,7 @@ class Collection extends \Dsc\Magic
         }
         
         if (!property_exists($this,$key) || $this->isPublic($key)) {
-        	$this->$key = $val;
+        	\Dsc\ObjectHelper::set( $this, $key, $val );
         }
         
         return \Dsc\ArrayHelper::set( $this->__doc, $key, $val );
@@ -682,7 +682,7 @@ class Collection extends \Dsc\Magic
         
         // otherwise do a selective update with $set = array() and multi=false
         $this->__last_operation = $this->collection()->update(
-                array('_id'=> new \MongoId((string) $this->get('_id') ) ),
+                array('_id'=> new \MongoId((string) $this->get('id') ) ),
                 array('$set' => $document ),
                 array('multiple'=>false)
         );
@@ -698,7 +698,7 @@ class Collection extends \Dsc\Magic
         $this->__options = $options;
         
         $this->bind($document, $options);
-
+        
         // TODO add _pre and _post plugin events - Validate & Update        
         $this->beforeValidate();
         $this->validate();
@@ -706,7 +706,7 @@ class Collection extends \Dsc\Magic
         $this->beforeUpdate();
         
         $this->__last_operation = $this->collection()->update(
-                array('_id'=> new \MongoId((string) $this->get('_id') ) ),
+                array('_id'=> new \MongoId((string) $this->get('id') ) ),
                 $this->cast(),
                 array('upsert'=>false, 'multiple'=>false)
         );
@@ -723,7 +723,7 @@ class Collection extends \Dsc\Magic
         $this->beforeDelete();
         
         $this->__last_operation = $this->collection()->remove(
-                array('_id'=> new \MongoId((string) $this->get('_id') ) )
+                array('_id'=> new \MongoId((string) $this->get('id') ) )
         );
         
         $this->afterDelete();
