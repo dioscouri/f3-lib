@@ -271,6 +271,9 @@ class Collection extends \Dsc\Magic
     
     protected function fetchItems()
     {
+        $this->setParam('limit', $this->getState('list.limit', 10, 'int'));
+        $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
+                
         $this->cursor = $this->collection()->find($this->conditions(), $this->fields());
 
         if ($this->getParam('sort')) {
@@ -331,6 +334,9 @@ class Collection extends \Dsc\Magic
     public function paginate($refresh=false)
     {
         $size = $this->getState('list.limit', 10, 'int');
+        $this->setParam('limit', $size);
+        $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
+        
         $total = $this->collection()->count( $this->conditions() );
         $result = new \Dsc\Pagination( $total, $size );
         $result->items = $this->getItems($refresh);
@@ -481,9 +487,13 @@ class Collection extends \Dsc\Magic
             $key = '_id';
         }
         
-        if ($this->isPublic($key)) {
-        	unset($this->$key);
+        $keys = explode('.', $key);
+        $first_key = $keys[0];
+        if ($this->isPublic($first_key)) 
+        {
+            \Dsc\ObjectHelper::clear( $this, $key );
         }
+        
         \Dsc\ArrayHelper::clear( $this->__doc, $key );
     }
     

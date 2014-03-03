@@ -65,4 +65,45 @@ class ObjectHelper extends \Prefab
 
 	    return $object;	    
 	}
+	
+	/**
+	 * Remove an array item from a given array using dot notation
+	 *
+	 * @param  array   $array
+	 * @param  string  $key
+	 * @return void
+	 */
+	public static function clear(&$object, $key)
+	{
+	    $keys = explode('.', $key);
+	    
+	    while (count($keys) > 1) 
+	    {
+	        $key = array_shift($keys);
+	    
+	        if (is_object($object)) 
+	        {
+	            if (!isset($object->$key)) {
+	                return false;
+	            }
+	            $object =& $object->$key;
+	        } 
+	           else 
+	        {
+	            if (!isset($object[$key])) {
+	                return false;
+	            }
+	            $object =& $object[$key];
+	        }
+	    }
+	    
+	    $key = array_shift($keys);
+	    if (is_object($object)) {
+	        unset($object->$key);
+	    } else {
+	        unset($object[$key]);
+	    }
+
+	    return $object;
+	}
 }

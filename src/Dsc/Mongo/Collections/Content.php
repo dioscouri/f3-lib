@@ -105,10 +105,6 @@ class Content extends \Dsc\Mongo\Collections\Nodes
             }
         }
         
-        if (empty($this->copy)) {
-            $this->setError('Body copy is required');
-        }
-        
         return parent::validate();
     }
     
