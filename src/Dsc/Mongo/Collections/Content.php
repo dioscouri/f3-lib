@@ -1,14 +1,12 @@
 <?php 
 namespace Dsc\Mongo\Collections;
 
-class Content extends \Dsc\Mongo\Collections\Taggable 
+class Content extends \Dsc\Mongo\Collections\Describable 
 {
     /**
      * Default Document Structure
      * @var unknown
      */
-    public $title; // string INDEX
-    public $slug; // string INDEX    
     public $copy; // text
     public $publication = array(
     	'status' => 'published',
@@ -40,22 +38,11 @@ class Content extends \Dsc\Mongo\Collections\Taggable
             $where = array();
             $where[] = array('slug'=>$key);
             $where[] = array('title'=>$key);
-            $where[] = array('copy'=>$key);            
+            $where[] = array('copy'=>$key);
+            $where[] = array('description'=>$key);
             $where[] = array('metadata.creator.name'=>$key);
 
             $this->setCondition('$or', $where);
-        }
-        
-        $filter_slug = $this->getState('filter.slug');
-        if (strlen($filter_slug))
-        {
-            $this->setCondition('slug', $filter_slug);
-        }
-        
-        $filter_title = $this->getState('filter.title');
-        if (strlen($filter_title))
-        {
-            $this->setCondition('title', $filter_title);
         }
         
         $filter_copy_contains = $this->getState('filter.copy-contains');
@@ -68,16 +55,6 @@ class Content extends \Dsc\Mongo\Collections\Taggable
         // TODO Add conditions for publication date range and status
         
         return $this;
-    }
-    
-    protected function beforeValidate()
-    {
-        if (empty($this->slug) && !empty($this->title))
-        {
-            $this->slug = $this->generateSlug();
-        }
-        
-        return parent::beforeValidate();
     }
     
     public function validate()
@@ -116,46 +93,5 @@ class Content extends \Dsc\Mongo\Collections\Taggable
         }        
         
         return parent::beforeSave();
-    }
-    
-    public function generateSlug( $unique=true )
-    {
-        if (empty($this->title)) {
-            $this->setError('A title is required for generating the slug');
-            return $this->checkErrors();
-        }
-        
-        $slug = \Web::instance()->slug( $this->title );
-        
-        if ($unique) 
-        {
-            $base_slug = $slug;
-            $n = 1;
-            while ($this->slugExists($slug))
-            {
-                $slug = $base_slug . '-' . $n;
-                $n++;
-            }
-        }
-    
-        return $slug;
-    }
-    
-    /**
-     *
-     *
-     * @param string $slug
-     * @return unknown|boolean
-     */
-    public function slugExists( $slug )
-    {
-        $clone = clone $this;
-        $item = $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
-    
-        if (!empty($item->id)) {
-            return $item;
-        }
-    
-        return false;
     }
 }

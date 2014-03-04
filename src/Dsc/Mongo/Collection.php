@@ -271,9 +271,6 @@ class Collection extends \Dsc\Magic
     
     protected function fetchItems()
     {
-        $this->setParam('limit', $this->getState('list.limit', 10, 'int'));
-        $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
-                
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
 
         if ($this->getParam('sort')) {
@@ -422,6 +419,36 @@ class Collection extends \Dsc\Magic
     {
         // TODO Throw Exception if null?
         return $this->__collection_name;
+    }
+    
+    public static function find( $conditions, $fields=array() )
+    {
+        if (empty($this)) {
+            $model = new static();
+        } else {
+            $model = $this;
+        }
+
+        $sort = $this->__config['default_sort'];
+        if (isset($conditions['sort'])) {
+        	$sort = $conditions['sort'];
+        	unset($conditions['sort']);
+        }
+        $model->setParam('sort', $sort);
+        
+        if (isset($conditions['limit'])) {
+            $limit = $conditions['limit'];
+            unset($conditions['limit']);
+            $model->setParam('limit', $limit);
+        }
+        
+        if (isset($conditions['skip'])) {
+            $skip = $conditions['skip'];
+            unset($conditions['skip']);
+            $model->setParam('skip', $skip);
+        }
+        
+        return $model->getItems();
     }
     
     /**
