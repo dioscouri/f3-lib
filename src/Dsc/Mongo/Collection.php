@@ -274,20 +274,20 @@ class Collection extends \Dsc\Magic
         $this->setParam('limit', $this->getState('list.limit', 10, 'int'));
         $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
                 
-        $this->cursor = $this->collection()->find($this->conditions(), $this->fields());
+        $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
 
         if ($this->getParam('sort')) {
-            $this->cursor->sort($this->getParam('sort'));
+            $this->__cursor->sort($this->getParam('sort'));
         }
         if ($this->getParam('limit')) {
-            $this->cursor->limit($this->getParam('limit'));
+            $this->__cursor->limit($this->getParam('limit'));
         }
         if ($this->getParam('skip')) {
-            $this->cursor->skip($this->getParam('skip'));
+            $this->__cursor->skip($this->getParam('skip'));
         }
         
         $items = array();
-        foreach ($this->cursor as $doc) {
+        foreach ($this->__cursor as $doc) {
         	$item = new static( $doc );
         	$items[] = $item;
         }           
@@ -309,17 +309,17 @@ class Collection extends \Dsc\Magic
     
     protected function fetchItem()
     {
-        $this->cursor = $this->collection()->find($this->conditions(), $this->fields());
+        $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
         
         if ($this->getParam('sort')) {
-            $this->cursor->sort($this->getParam('sort'));
+            $this->__cursor->sort($this->getParam('sort'));
         }
-        $this->cursor->limit(1);
-        $this->cursor->skip(0);
+        $this->__cursor->limit(1);
+        $this->__cursor->skip(0);
         
         $item = null;
-        if ($this->cursor->hasNext()) {
-            $item = new static( $this->cursor->getNext() );
+        if ($this->__cursor->hasNext()) {
+            $item = new static( $this->__cursor->getNext() );
         }
         
         return $item;
