@@ -421,15 +421,15 @@ class Collection extends \Dsc\Magic
         return $this->__collection_name;
     }
     
-    public static function find( $conditions, $fields=array() )
+    public static function find( $conditions=array(), $fields=array() )
     {
         if (empty($this)) {
             $model = new static();
         } else {
-            $model = $this;
+            $model = clone $this;
         }
 
-        $sort = $this->__config['default_sort'];
+        $sort = $model->__config['default_sort'];
         if (isset($conditions['sort'])) {
         	$sort = $conditions['sort'];
         	unset($conditions['sort']);
@@ -447,6 +447,9 @@ class Collection extends \Dsc\Magic
             unset($conditions['skip']);
             $model->setParam('skip', $skip);
         }
+        
+        $model->setParam('conditions', $conditions);
+        $model->setParam('fields', $fields);
         
         return $model->getItems();
     }
