@@ -1,17 +1,15 @@
 <?php 
 namespace Dsc\Mongo\Collections;
 
-class Categories extends \Dsc\Mongo\Collection 
+class Categories extends \Dsc\Mongo\Collections\Nodes 
 {
     /**
      * Default Document Structure
      * @var unknown
      */
-    public $_id; // MongoId
-    public $type; // string INDEX
     public $title; // string INDEX
-    public $description; // text
     public $slug; // string INDEX
+    public $description; // text
     public $parent; // MongoId(),
     public $path; // '/path/to/the/current/category/using/slugs' INDEX UNIQUE
     public $ancestors = array(); // array( array('MongoId', 'slug', 'title') )
@@ -42,12 +40,6 @@ class Categories extends \Dsc\Mongo\Collection
             $this->setCondition('$or', $where);
         }
     
-        $filter_id = $this->getState('filter.id');
-        if (strlen($filter_id))
-        {
-            $this->setCondition('_id', new \MongoId((string) $filter_id));
-        }
-        
         $filter_slug = $this->getState('filter.slug');
         if (strlen($filter_slug))
         {
@@ -64,25 +56,6 @@ class Categories extends \Dsc\Mongo\Collection
         if (!empty($filter_parent))
         {
             $this->setCondition('parent', new \MongoId((string) $filter_parent));
-        }
-        
-        $filter_ids = $this->getState('filter.ids');
-        if (!empty($filter_ids) && is_array($filter_ids))
-        {
-            $ids = array();
-            foreach ($filter_ids as $filter_id) {
-                $ids[] = new \MongoId((string) $filter_id);
-            }
-            $this->setCondition('_id', array('$in' => $ids));
-        }
-        
-        $filter_type = $this->getState('filter.type');
-        if ($filter_type) {
-            if (is_bool($filter_type) && $filter_type) {
-                $this->setCondition('type', $this->__type);
-            } elseif (strlen($filter_type)) {
-                $this->setCondition('type', $filter_type);
-            }
         }
     
         return $this;

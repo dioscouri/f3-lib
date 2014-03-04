@@ -9,6 +9,8 @@ namespace Dsc\Mongo;
  */
 class Collection extends \Dsc\Magic
 {
+    public $_id; // MongoId
+    
     protected $__doc = array();
 
     protected $__collection_name = null;
@@ -269,20 +271,20 @@ class Collection extends \Dsc\Magic
     
     protected function fetchItems()
     {
-        $this->cursor = $this->collection()->find($this->conditions(), $this->fields());
+        $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
 
         if ($this->getParam('sort')) {
-            $this->cursor->sort($this->getParam('sort'));
+            $this->__cursor->sort($this->getParam('sort'));
         }
         if ($this->getParam('limit')) {
-            $this->cursor->limit($this->getParam('limit'));
+            $this->__cursor->limit($this->getParam('limit'));
         }
         if ($this->getParam('skip')) {
-            $this->cursor->skip($this->getParam('skip'));
+            $this->__cursor->skip($this->getParam('skip'));
         }
         
         $items = array();
-        foreach ($this->cursor as $doc) {
+        foreach ($this->__cursor as $doc) {
         	$item = new static( $doc );
         	$items[] = $item;
         }           
@@ -304,17 +306,17 @@ class Collection extends \Dsc\Magic
     
     protected function fetchItem()
     {
-        $this->cursor = $this->collection()->find($this->conditions(), $this->fields());
+        $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
         
         if ($this->getParam('sort')) {
-            $this->cursor->sort($this->getParam('sort'));
+            $this->__cursor->sort($this->getParam('sort'));
         }
-        $this->cursor->limit(1);
-        $this->cursor->skip(0);
+        $this->__cursor->limit(1);
+        $this->__cursor->skip(0);
         
         $item = null;
-        if ($this->cursor->hasNext()) {
-            $item = new static( $this->cursor->getNext() );
+        if ($this->__cursor->hasNext()) {
+            $item = new static( $this->__cursor->getNext() );
         }
         
         return $item;
@@ -329,6 +331,9 @@ class Collection extends \Dsc\Magic
     public function paginate($refresh=false)
     {
         $size = $this->getState('list.limit', 10, 'int');
+        $this->setParam('limit', $size);
+        $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
+        
         $total = $this->collection()->count( $this->conditions() );
         $result = new \Dsc\Pagination( $total, $size );
         $result->items = $this->getItems($refresh);
@@ -370,7 +375,24 @@ class Collection extends \Dsc\Magic
     protected function fetchConditions()
     {
         $this->__query_params['conditions'] = array();
-    
+        
+        $filter_id = $this->getState('filter.id');
+        if (strlen($filter_id))
+        {
+            $this->setCondition('_id', new \MongoId((string) $filter_id));
+        }
+        
+        $filter_ids = $this->getState('filter.ids');
+        if (!empty($filter_ids) && is_array($filter_ids))
+        {
+            $_ids = array();
+            foreach ($filter_ids as $_filter_id) 
+            {
+            	$_ids = new \MongoId( (string) $_filter_id);
+            }
+            $this->setCondition('_id', array('$in' => $_ids) );
+        }
+        
         return $this;
     }
     
@@ -397,6 +419,39 @@ class Collection extends \Dsc\Magic
     {
         // TODO Throw Exception if null?
         return $this->__collection_name;
+    }
+    
+    public static function find( $conditions=array(), $fields=array() )
+    {
+        if (empty($this)) {
+            $model = new static();
+        } else {
+            $model = clone $this;
+        }
+
+        $sort = $model->__config['default_sort'];
+        if (isset($conditions['sort'])) {
+        	$sort = $conditions['sort'];
+        	unset($conditions['sort']);
+        }
+        $model->setParam('sort', $sort);
+        
+        if (isset($conditions['limit'])) {
+            $limit = $conditions['limit'];
+            unset($conditions['limit']);
+            $model->setParam('limit', $limit);
+        }
+        
+        if (isset($conditions['skip'])) {
+            $skip = $conditions['skip'];
+            unset($conditions['skip']);
+            $model->setParam('skip', $skip);
+        }
+        
+        $model->setParam('conditions', $conditions);
+        $model->setParam('fields', $fields);
+        
+        return $model->getItems();
     }
     
     /**
@@ -428,7 +483,7 @@ class Collection extends \Dsc\Magic
         }
         
         if (!property_exists($this,$key) || $this->isPublic($key)) {
-        	$this->$key = $val;
+        	\Dsc\ObjectHelper::set( $this, $key, $val );
         }
         
         return \Dsc\ArrayHelper::set( $this->__doc, $key, $val );
@@ -462,9 +517,13 @@ class Collection extends \Dsc\Magic
             $key = '_id';
         }
         
-        if ($this->isPublic($key)) {
-        	unset($this->$key);
+        $keys = explode('.', $key);
+        $first_key = $keys[0];
+        if ($this->isPublic($first_key)) 
+        {
+            \Dsc\ObjectHelper::clear( $this, $key );
         }
+        
         \Dsc\ArrayHelper::clear( $this->__doc, $key );
     }
     
@@ -661,7 +720,7 @@ class Collection extends \Dsc\Magic
         
         // otherwise do a selective update with $set = array() and multi=false
         $this->__last_operation = $this->collection()->update(
-                array('_id'=> new \MongoId((string) $this->get('_id') ) ),
+                array('_id'=> new \MongoId((string) $this->get('id') ) ),
                 array('$set' => $document ),
                 array('multiple'=>false)
         );
@@ -677,7 +736,7 @@ class Collection extends \Dsc\Magic
         $this->__options = $options;
         
         $this->bind($document, $options);
-
+        
         // TODO add _pre and _post plugin events - Validate & Update        
         $this->beforeValidate();
         $this->validate();
@@ -685,7 +744,7 @@ class Collection extends \Dsc\Magic
         $this->beforeUpdate();
         
         $this->__last_operation = $this->collection()->update(
-                array('_id'=> new \MongoId((string) $this->get('_id') ) ),
+                array('_id'=> new \MongoId((string) $this->get('id') ) ),
                 $this->cast(),
                 array('upsert'=>false, 'multiple'=>false)
         );
@@ -702,7 +761,7 @@ class Collection extends \Dsc\Magic
         $this->beforeDelete();
         
         $this->__last_operation = $this->collection()->remove(
-                array('_id'=> new \MongoId((string) $this->get('_id') ) )
+                array('_id'=> new \MongoId((string) $this->get('id') ) )
         );
         
         $this->afterDelete();
