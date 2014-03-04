@@ -40,10 +40,15 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
      * @param array $types
      * @return unknown
      */
-    public function getTags($types=array())
+    public static function getTags($query=array())
     {
-        // TODO if $types, only get tags used by items of those types
-        $tags = $this->collection()->distinct("tags");
+        if (empty($this)) {
+            $model = new static();
+        } else {
+            $model = clone $this;
+        }
+        
+        $tags = $model->collection()->distinct("tags", $query);
         $tags = array_values( array_filter( $tags ) );
     
         return $tags;

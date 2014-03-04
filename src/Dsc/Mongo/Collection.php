@@ -264,6 +264,12 @@ class Collection extends \Dsc\Magic
      */
     public function getItems($refresh=false)
     {
+        if (is_null($this->getState('list.sort')))
+        {
+            $this->setState('list.sort', $this->__config['default_sort']);
+        }
+        $this->setParam('sort', $this->getState('list.sort'));
+        
         // TODO Store the state
         // TODO Implement caching
         return $this->fetchItems();

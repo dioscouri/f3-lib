@@ -61,6 +61,16 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         return $this;
     }
     
+    protected function beforeValidate()
+    {
+        if (empty($this->slug) && !empty($this->title))
+        {
+            $this->slug = $this->generateSlug();
+        }
+    
+        return parent::beforeValidate();
+    }
+    
     public function validate()
     {
         if (empty($this->title)) {
@@ -69,14 +79,14 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         
         // is the path unique?
         // this would be a great case for $this->validateWith( $validator ); -- using a Uniqueness Validator
-        if ($existing = $this->pathExists( $this->path )) 
+        if ($existing = $this->pathExists( $this->path ))
         {
-            if ((empty($this->_id) || $this->_id != $existing->_id) && $existing->type == $this->type) 
+            if ((empty($this->_id) || $this->_id != $existing->_id) && $existing->type == $this->type)
             {
                 $this->setError('An item with this title already exists with this parent.');
-            }            
+            }
         }
-
+        
         return parent::validate();
     }
     
@@ -86,11 +96,6 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
             $this->type = $this->__type;
         }
     
-        if (empty($this->slug))
-        {
-            $this->slug = \Joomla\Filter\OutputFilter::stringURLUnicodeSlug($this->title);
-        }
-    
         if (empty($this->parent) || $this->parent == "null")
         {
             $this->parent = null;
@@ -98,10 +103,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
             $this->parent = new \MongoId((string) $this->parent);
         }
         
-        if (empty($this->path))
-        {
-            $this->path = $this->generatePath( $this->slug, $this->parent );
-        }
+        $this->path = $this->generatePath( $this->slug, $this->parent );
         
         if (empty($this->ancestors) && !empty($this->parent))
         {
@@ -139,7 +141,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         return parent::beforeSave();
     }
     
-    public function beforeUpdate()
+    protected function beforeUpdate()
     {
         // if this item's parent is different from it's parent in the database, then we also need to update all the children
         $old = $this->load(array('_id' => $this->_id ));
@@ -151,20 +153,22 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         return parent::beforeUpdate();
     }
     
-    public function afterUpdate()
+    protected function afterUpdate()
     {
         if (!empty($this->__options['update_children']))
         {
-            if ($children = $this->emptyState()->setState('filter.parent', $updated->id)->getItems())
+            if ($children = (new static())->setState('filter.parent', $this->_id)->getItems())
             {
                 foreach ($children as $child)
                 {
-                    unset($child->ancestors);
-                    unset($child->path);
+                    $child->ancestors = array();
+                    $child->path = null;
                     $child->update(array(), array('update_children' => true));
                 }
             }
         }
+        
+        parent::afterUpdate();
     }
     
     public function generatePath( $slug, $parent_id=null )
@@ -176,8 +180,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         }
         
         // get the parent's path, append the slug
-        $parent = $this->emptyState()->setState('filter.id', $parent_id)->getItem();
-        $this->emptyState();
+        $parent = (new static())->setState('filter.id', $parent_id)->getItem();
         
         if (!empty($parent->path)) {
             $path = $parent->path;
@@ -198,5 +201,45 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         
         return false;
     }
-
+    
+    public function generateSlug( $unique=true )
+    {
+        if (empty($this->title)) {
+            $this->setError('A title is required for generating the slug');
+            return $this->checkErrors();
+        }
+    
+        $slug = \Web::instance()->slug( $this->title );
+    
+        if ($unique)
+        {
+            $base_slug = $slug;
+            $n = 1;
+            while ($this->slugExists($slug))
+            {
+                $slug = $base_slug . '-' . $n;
+                $n++;
+            }
+        }
+    
+        return $slug;
+    }
+    
+    /**
+     *
+     *
+     * @param string $slug
+     * @return unknown|boolean
+     */
+    public function slugExists( $slug )
+    {
+        $clone = clone $this;
+        $item = $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
+    
+        if (!empty($item->id)) {
+            return $item;
+        }
+    
+        return false;
+    }
 }
