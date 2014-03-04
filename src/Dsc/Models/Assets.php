@@ -153,6 +153,18 @@ class Assets extends Nodes
         if ($filter_slug) {
             $this->filters['metadata.slug'] = $filter_slug;
         }
+
+        $filter_ids = $this->getState('filter.ids');
+        if (!empty($filter_ids) && is_array($filter_ids))
+        {
+        	$ids = array();
+        	foreach ($filter_ids as $filter_id) {
+        		$ids[] = new \MongoId((string) $filter_id);
+        	}
+        	$this->filters['_id'] = array(
+        			'$in' => $ids
+        	);
+        }
         
         $filter_content_type = $this->getState('filter.content_type');
         if (strlen($filter_content_type))
