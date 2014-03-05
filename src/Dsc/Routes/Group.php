@@ -68,8 +68,8 @@ abstract class Group
 	 * @param $singual_params	Custom parameters for item routes
 	 */
 	public function addCrudGroup($plural, $singual, $plural_params = array(), $singual_params = array() ) {
-			$this->addCrudItem($singual, $plural_params);
-			$this->addCrudList($plural, $singual_params);
+		$this->addCrudItem($singual, $singual_params);
+		$this->addCrudList($plural, $plural_params);
 	}
 	/**
 	 * Adds CRUD item routes for selected controller
@@ -84,7 +84,7 @@ abstract class Group
 				'rest_actions' => false,
 				'exclude' => array()
 		);
-		$params = array_merge($orig_params, $params);
+		$params = $params + $orig_params;
 		if( strlen( $params['prefix_url'] ) == 0 ){ // use controller name as fallback option
 			$params['prefix_url'] = '/'.strtolower( $controller );
 		}
@@ -183,10 +183,12 @@ abstract class Group
 		$orig_params = array(
 				'prefix_url' => '',
 				'exclude' => array(),
-				'databable_links' => false,				
+
+				'datatable_links' => false,
+				'get_parent_link' => false,		
 				'pagination_list' => true
 		);
-		$params = array_merge($orig_params, $params);
+		$params = $params + $orig_params;
 		if( strlen( $params['prefix_url'] ) == 0 ){ // use controller name as fallback option
 			$params['prefix_url'] = '/'.strtolower( $controller );
 		}
@@ -221,19 +223,23 @@ abstract class Group
 		foreach( $operations as $op ){
 			$routes []= $operation_list[$op];
 		}
-		if( (bool)($params['databable_links']) ){
+		
+		if( (bool)($params['datatable_links']) ){
 			$routes []= array( 
 						'action' => 'getDatatable',
 						'ajax'	=>  true,
 						'request' => 'GET',
 						'route' => ''
 							);
+		}
+		
+		if( (bool)$params['get_parent_link']){
 			$routes []= array(
-						'action' => 'getAll',
-						'ajax'	=>  true,
-						'request' => 'GET',
-						'route' => '/all'
-							);
+					'action' => 'getAll',
+					'ajax'	=>  true,
+					'request' => 'GET',
+					'route' => '/all'
+			);
 		}
 		
 		// add all routes you can
