@@ -59,9 +59,17 @@ abstract class Group
 								 'params' =>$params);
 	}
 
-	public function addCrudGroup($plural, $singual ) {
-			$this->addCrudItem($singual);
-			$this->addCrudList($plural);
+	/**
+	 * Adds CRUD routes for both, list and item operations in the controller
+	 * 
+	 * @param $plural	Controller for list
+	 * @param $singual	Controller for item
+	 * @param $plural_params	Custom parameters for list routes
+	 * @param $singual_params	Custom parameters for item routes
+	 */
+	public function addCrudGroup($plural, $singual, $plural_params = array(), $singual_params = array() ) {
+			$this->addCrudItem($singual, $plural_params);
+			$this->addCrudList($plural, $singual_params);
 	}
 	/**
 	 * Adds CRUD item routes for selected controller
