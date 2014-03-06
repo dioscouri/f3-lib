@@ -55,7 +55,7 @@ class Pagination
      * @param $limit int max items per page
      * @param $routeKey string the key for pagination in your routing
      */
-    public function __construct( $items, $limit = 10, $routeKey = 'page' ) {
+    public function __construct( $items, $limit = 30, $routeKey = 'page' ) {
         $this->fw = \Base::instance();
         $this->total_items = is_array($items)?count($items):$items;
         $this->routeKey = $routeKey;
@@ -312,7 +312,7 @@ class Pagination
     {
         $limits = !empty($options['limits']) ? $options['limits'] : array(
                 json_decode(json_encode(array('value'=>10, 'title'=>10))),
-                json_decode(json_encode(array('value'=>25, 'title'=>25))),
+                json_decode(json_encode(array('value'=>30, 'title'=>30))),
                 json_decode(json_encode(array('value'=>50, 'title'=>50))),
                 json_decode(json_encode(array('value'=>100, 'title'=>100)))
             );

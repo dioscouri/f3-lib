@@ -224,7 +224,7 @@ class Model extends Singleton
         $filters = $this->getFilters();
         $options = $this->getOptions();
         $pos = $this->getState('list.offset', 0, 'int');
-        $size = $this->getState('list.limit', 10, 'int');
+        $size = $this->getState('list.limit', 30, 'int');
     
         $pagination = $this->getMapper()->paginate($pos, $size, $filters, $options);
     

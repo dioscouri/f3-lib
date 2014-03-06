@@ -336,7 +336,7 @@ class Collection extends \Dsc\Magic
      */
     public function paginate($refresh=false)
     {
-        $size = $this->getState('list.limit', 10, 'int');
+        $size = $this->getState('list.limit', 30, 'int');
         $this->setParam('limit', $size);
         $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
         
