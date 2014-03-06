@@ -174,7 +174,7 @@ trait CrudItemCollection
         }
                 
         // redirect to the editing form for the new item
-        \Dsc\System::instance()->addMessage('Item saved');
+        \Dsc\System::instance()->addMessage('Item saved', 'success');
         
         if (method_exists($this->item, 'cast')) {
             $this->item_data = $this->item->cast();
@@ -241,12 +241,12 @@ trait CrudItemCollection
             if ($data['submitType'] == 'save_as') 
             {
                 $this->item = $this->item->saveAs($values);
-                \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.');
+                \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.', 'success');
             } 
             else 
             {
                 $this->item = $this->item->update($values);
-                \Dsc\System::instance()->addMessage('Item updated');
+                \Dsc\System::instance()->addMessage('Item updated', 'success');
             }
             
         }
@@ -333,7 +333,7 @@ trait CrudItemCollection
         
         try {
             $this->item->remove();
-            \Dsc\System::instance()->addMessage('Item deleted');
+            \Dsc\System::instance()->addMessage('Item deleted', 'success');
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Delete failed with the following errors:', 'error');
