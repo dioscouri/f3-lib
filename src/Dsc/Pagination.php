@@ -25,7 +25,7 @@ class Pagination
     public $prev_page;
     public $items;
     
-    private $range = 3;    
+    private $range = 2;    
     private $template = 'common/pagination.php';
     private $routeKey;
     private $routeKeyPrefix = "page/";
