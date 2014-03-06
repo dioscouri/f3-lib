@@ -15,6 +15,9 @@ class Apps extends Singleton
             $path = $f3->get('PATH_ROOT') . 'apps/';
             if (file_exists( $path . $app . '/bootstrap.php' )) {
                 require_once $path . $app . '/bootstrap.php';
+                if( isset( $app ) ){
+                 	$apps []= $app;                    	
+                }
             }            
             return $this;
         }
@@ -27,6 +30,8 @@ class Apps extends Singleton
             define('JPATH_ROOT', $f3->get('PATH_ROOT'));
         }
         
+        $apps = array(); // array of all apps
+        
 		// do the original apps first        
         $path = $f3->get('PATH_ROOT') . 'vendor/dioscouri/';
         if ($folders = \Joomla\Filesystem\Folder::folders( $path ))
@@ -35,6 +40,9 @@ class Apps extends Singleton
             {
                 if (file_exists( $path . $folder . '/bootstrap.php' )) {
                     require_once $path . $folder . '/bootstrap.php';
+                    if( isset( $app ) ){
+                    	$apps []= $app;                    	
+                    }
                 }
             }
         }
@@ -47,6 +55,9 @@ class Apps extends Singleton
         	{
         		if (file_exists( $path . $folder . '/bootstrap.php' )) {
         			require_once $path . $folder . '/bootstrap.php';
+        		    if( isset( $app ) ){
+                    	$apps []= $app;                    	
+                    }
         		}
         	}
         }
@@ -60,9 +71,28 @@ class Apps extends Singleton
         		{
         			if (file_exists( $additional_path . $folder . '/bootstrap.php' )) {
         				require_once $additional_path . $folder . '/bootstrap.php';
+        			    if( isset( $app ) ){
+                    		$apps []= $app;                    	
+                    	}
         			}
         		}
         	}        	
+        }
+        
+        // now let's run all the apps
+        if( count( $apps ) > 0 ){
+			$global_app_name = $f3->get('APP_NAME');
+        	foreach( $apps as $app ){
+        		$app->command( 'pre', $global_app_name );
+        	}
+
+            foreach( $apps as $app ){
+        		$app->command( 'run', $global_app_name );
+        	}
+
+            foreach( $apps as $app ){
+        		$app->command( 'post', $global_app_name );
+        	}
         }
         
         return $this;
