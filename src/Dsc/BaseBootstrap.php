@@ -104,8 +104,6 @@ abstract class BaseBootstrap{
 				$ui .= ";" .$this->dir . "/src/".$this->namespace."/Views/";
 				$f3->set('UI', $ui);
 					
-			} else {
-				throw \Exception( "Could not find views files in any standard directory - ".$this->get_class() );
 			}
 		}
 		
