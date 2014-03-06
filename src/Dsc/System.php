@@ -46,21 +46,29 @@ class System extends Singleton
      * @param unknown_type $message
      * @param unknown_type $type
      */
-    public static function addMessage($message, $type='message') 
+    public static function addMessage($message, $type='info') 
     {
         $messages = \Base::instance()->get('SESSION.messages') ? \Base::instance()->get('SESSION.messages') : array();
         
         switch (strtolower($type)) {
-            case "error":
-                $type = "error";
+            case "good":
+            case "success":
+                $type = "success";
                 break;
+            case "high":
+            case "bad":
+            case "danger":
+            case "error":
+                $type = "danger";
+                break;
+            case "low":
             case "warn":
             case "warning":
             case "notice":
-                $type = "notice";
+                $type = "warning";
                 break;
             default:
-                $type = "message";
+                $type = "info";
                 break;            
         }
         
@@ -81,7 +89,7 @@ class System extends Singleton
     {
         // Initialise variables.
         $buffer = null;
-        $lists = null;
+        $lists = array();
         
         // Get the message queue
         $messages = $this->getMessages();
@@ -98,32 +106,29 @@ class System extends Singleton
             }
         }
         
-        // Build the return string
-        $buffer .= "\n<div id=\"system-message-container\">";
-        
         // If messages exist render them
-        if (is_array($lists))
+        if (!empty($lists))
         {
-            $buffer .= "\n<dl id=\"system-message\">";
+            // Build the return string            
+            $buffer .= "<div id='system-message-container'>";
             foreach ($lists as $type => $msgs)
             {
-                if (count($msgs))
+                $buffer .= "<div id='system-message-" . strtolower($type) . "' class='alert alert-" . strtolower($type) . "'>";
+                if (!empty($msgs))
                 {
-                    $buffer .= "\n<dt class=\"" . strtolower($type) . "\">" . $type . "</dt>";
-                    $buffer .= "\n<dd class=\"" . strtolower($type) . " message\">";
-                    $buffer .= "\n\t<ul>";
+                    $buffer .= "<ul class='list-unstyled'>";
                     foreach ($msgs as $msg)
                     {
-                        $buffer .= "\n\t\t<li>" . $msg . "</li>";
+                        $buffer .= "<li>" . $msg . "</li>";
                     }
-                    $buffer .= "\n\t</ul>";
-                    $buffer .= "\n</dd>";
+                    $buffer .= "</ul>";
                 }
+                $buffer .= "</div>";
             }
-            $buffer .= "\n</dl>";
+            $buffer .= "</div>";
         }
         
-        $buffer .= "\n</div>";
+        
         
         return $buffer;        
     }

@@ -394,7 +394,7 @@ class Collection extends \Dsc\Magic
             $_ids = array();
             foreach ($filter_ids as $_filter_id) 
             {
-            	$_ids = new \MongoId( (string) $_filter_id);
+            	$_ids[] = new \MongoId( (string) $_filter_id);
             }
             $this->setCondition('_id', array('$in' => $_ids) );
         }
