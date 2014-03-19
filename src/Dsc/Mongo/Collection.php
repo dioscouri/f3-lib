@@ -338,7 +338,7 @@ class Collection extends \Dsc\Magic
     {
         $size = $this->getState('list.limit', 30, 'int');
         $this->setParam('limit', $size);
-        $this->setParam('skip', $this->getState('list.offset', 0, 'int'));
+        $this->setParam('skip', $this->getState('list.offset', 0, 'int') * $size);
         
         $total = $this->collection()->count( $this->conditions() );
         $result = new \Dsc\Pagination( $total, $size );
