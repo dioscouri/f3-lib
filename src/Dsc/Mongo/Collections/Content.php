@@ -36,6 +36,12 @@ class Content extends \Dsc\Mongo\Collections\Describable
             $key =  new \MongoRegex('/'. $filter_keyword .'/i');
     
             $where = array();
+            
+            $regex = '/^[0-9a-z]{24}$/';
+            if (preg_match($regex, (string) $filter_keyword))
+            {
+                $where[] = array('_id'=>new \MongoId((string) $filter_keyword));
+            }
             $where[] = array('slug'=>$key);
             $where[] = array('title'=>$key);
             $where[] = array('copy'=>$key);
