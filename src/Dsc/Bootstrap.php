@@ -6,7 +6,7 @@ namespace Dsc;
  * the real bootstrapping occurs
  * 
  */
-abstract class BaseBootstrap{
+abstract class Bootstrap{
 
 	protected $namespace = '';
 	
@@ -110,24 +110,24 @@ abstract class BaseBootstrap{
 	}
 	
 	
-	protected function preRun($app){
+	protected function pre($app){
 		// handle other types of application, if no specific function defined
 	}
 	
-	protected function preRunAdmin(){
+	protected function preAdmin(){
 	}
 
-	protected function preRunSite(){
+	protected function preSite(){
 	}
 	
-	protected function postRun($app){
+	protected function post($app){
 		// handle other types of application, if no specific function defined
 	}
 	
-	protected function postRunAdmin(){
+	protected function postAdmin(){
 	}
 	
-	protected function postRunSite(){
+	protected function postSite(){
 	}
 }
 ?>
