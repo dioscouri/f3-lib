@@ -262,4 +262,49 @@ class ArrayHelper extends \Prefab
 	
 	    return $array;
 	}
+	
+	public static function sortArrays(array $a, $k, $direction = 1)
+	{
+	    $sortDirection = (array) $direction;
+	    $key           = (array) $k;
+	    
+	    usort(
+    	    $a, function($a, $b) use($sortDirection, $key)
+    	    {
+    	        for ($i = 0, $count = count($key); $i < $count; $i++)
+    	        {
+    	            if (isset($sortDirection[$i]))
+    	            {
+    	                $direction = $sortDirection[$i];
+    	            }
+    	    
+    	            $va = $a[$key[$i]];
+    	            $vb = $b[$key[$i]];
+    	    
+    	            if ((is_bool($va) || is_numeric($va)) && (is_bool($vb) || is_numeric($vb)))
+    	            {
+    	                $cmp = $va - $vb;
+    	            }
+    	            else
+    	            {
+    	                $cmp = \Joomla\String\String::strcasecmp($va, $vb);
+    	            }
+    	    
+    	            if ($cmp > 0)
+    	            {
+    	                return $direction;
+    	            }
+    	    
+    	            if ($cmp < 0)
+    	            {
+    	                return -$direction;
+    	            }
+    	        }
+    	    
+    	        return 0;
+    	    }
+	    );
+	    
+	    return $a;
+	}
 }
