@@ -644,7 +644,12 @@ class Collection extends \Dsc\Magic
     
     public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
     {
-        return $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem();
+        if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
+        {
+        	$this->bind( $item );
+        }
+        
+        return $this;
     }
     
     public function save($document=array(), $options=array())

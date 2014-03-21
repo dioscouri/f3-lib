@@ -8,6 +8,11 @@ class Session
         $this->store = $store;
     }
     
+    public function id()
+    {
+        return session_id();
+    }
+    
     public function get( $key )
     {
         return \Base::instance()->get('SESSION.' . $key );
