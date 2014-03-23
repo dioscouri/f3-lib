@@ -27,6 +27,8 @@ class Theme extends \View
         if (strtolower($key)=='app') {
             return \Base::instance();
         }
+        
+        return \Dsc\System::instance()->get($key);
     }
 
     /**
