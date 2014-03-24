@@ -41,10 +41,25 @@ abstract class Bootstrap{
 			// register event listener
 			\Dsc\System::instance()->getDispatcher()->addListener($listener::instance());
 		}
+		$listener = "\\".$this->namespace."\\Admin\Listener";
+		if( class_exists( $listener ) ){
+		    // register event listener
+		    \Dsc\System::instance()->getDispatcher()->addListener($listener::instance());
+		}		
 		$this->_runBase('Admin');
 	}
 
-	protected function runSite(){	
+	protected function runSite(){
+	    $listener = "\\".$this->namespace."\\Listener";
+	    if( class_exists( $listener ) ){
+	        // register event listener
+	        \Dsc\System::instance()->getDispatcher()->addListener($listener::instance());
+	    }
+	    $listener = "\\".$this->namespace."\\Site\Listener";
+	    if( class_exists( $listener ) ){
+	        // register event listener
+	        \Dsc\System::instance()->getDispatcher()->addListener($listener::instance());
+	    }
 		$this->_runBase('Site');
 	}
 	
@@ -130,4 +145,3 @@ abstract class Bootstrap{
 	protected function postSite(){
 	}
 }
-?>
