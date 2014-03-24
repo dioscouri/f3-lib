@@ -27,5 +27,18 @@ class Session
     {
         $this->set( $key, null );
     }
+    
+    public function destroy()
+    {
+        \Base::instance()->clear('SESSION');
+        session_unset();
+        setcookie(session_name(),'',strtotime('-1 year'));
+        unset($_COOKIE[session_name()]);
+        header_remove('Set-Cookie');
+        session_regenerate_id(true);        
+        
+        session_start();
+        return session_destroy();
+    }
 }
 ?>
