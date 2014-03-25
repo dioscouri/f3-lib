@@ -11,7 +11,7 @@ class Settings extends \Dsc\Mongo\Collections\Nodes
      */
     public static function fetch()
     {
-        $item = new self;
+        $item = new static;
         $item->load(array('type' => $item->type()));
         return $item;
     }
