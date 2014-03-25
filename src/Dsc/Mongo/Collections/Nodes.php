@@ -84,4 +84,9 @@ class Nodes extends \Dsc\Mongo\Collection
         
         return parent::beforeValidate();
     }
+    
+    public function type()
+    {
+        return $this->__type;
+    }
 }

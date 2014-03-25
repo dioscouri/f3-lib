@@ -12,6 +12,11 @@ trait Settings
      */
     
     abstract protected function getModel();
+    
+    protected function getItem()
+    {
+        return $this->getModel()->fetch();
+    }
 
     public function index()
     {
@@ -28,12 +33,7 @@ trait Settings
     	$f3->set('model', $model );
     	$f3->set('item', $item );
     
-    	$item_data = $model->prefab()->cast();
-    	if (method_exists($item, 'cast')) {
-    		$item_data = $item->cast();
-    	} elseif (is_object($item)) {
-    		$item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
-    	}
+    	$item_data = $item->cast();
     	$flash->store($item_data);
     
     	$view = \Dsc\System::instance()->get('theme');
@@ -55,10 +55,10 @@ trait Settings
     		unset($values['submitType']);
     
     		if (empty($this->item->id)) {
-    			$this->item = $model->create($values);
+    			$this->item = $model->insert($values);
     			\Dsc\System::instance()->addMessage('Settings saved');
     		} else {
-    			$this->item = $model->update($this->item, $values);
+    			$this->item->update($values);
     			\Dsc\System::instance()->addMessage('Settings updated');
     		}
     	}
@@ -88,11 +88,7 @@ trait Settings
     
     	if ($f3->get('AJAX'))
     	{
-    		if (method_exists($this->item, 'cast')) {
-    			$this->item_data = $this->item->cast();
-    		} else {
-    			$this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
-    		}
+    		$this->item_data = $this->item->cast();
     
     		return $this->outputJson( $this->getJsonResponse( array(
     				'message' => \Dsc\System::instance()->renderMessages(),
@@ -103,23 +99,6 @@ trait Settings
     	$f3->reroute( $this->settings_route );
     
     	return;
-    }
-    
-    protected function getItem()
-    {
-    	$f3 = \Base::instance();
-    	$model = $this->getModel()
-    	->setState('filter.type', true);
-    
-    	try {
-    		$item = $model->getItem();
-    	} catch ( \Exception $e ) {
-    		\Dsc\System::instance()->addMessage( "Invalid Item: " . $e->getMessage(), 'error');
-    		$f3->reroute( $this->settings_route );
-    		return;
-    	}
-    
-    	return $item;
     }
 }
 ?>
