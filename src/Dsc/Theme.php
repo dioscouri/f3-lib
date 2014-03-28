@@ -122,7 +122,7 @@ class Theme extends \View
                 {
                     // get the requested module position content
                     $content = \Modules\Factory::render( $args['name'], \Base::instance()->get( 'PARAMS.0' ) );
-                    $this->setContents( $content, $args['type'], $args['name'] );
+                    $this->setBuffer( $content, $args['type'], $args['name'] );
                 }
             }
         }        
@@ -271,7 +271,11 @@ class Theme extends \View
      */
     public function getCurrentTheme()
     {
-        return \Dsc\ArrayHelper::get( $this->dsc_theme, 'themes.current' );
+        if ($theme = \Dsc\ArrayHelper::get( $this->dsc_theme, 'themes.current' )) {
+        	return $theme;
+        }
+        
+        throw new \Exception( 'You must set a theme.' );
     }
 
     /**
