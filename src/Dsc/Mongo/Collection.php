@@ -602,6 +602,11 @@ class Collection extends \Dsc\Magic
             $source = get_object_vars($source);
         }
         
+        if (empty($source)) 
+        {
+        	return $this;
+        }
+        
         $this->__doc = $source;
     
         if ($this->__config['append']) 
