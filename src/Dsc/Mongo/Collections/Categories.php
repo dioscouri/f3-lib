@@ -142,8 +142,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     protected function beforeUpdate()
     {
         // if this item's parent is different from it's parent in the database, then we also need to update all the children
-        $old = clone $this;
-        $old->load(array('_id' => $this->_id ));
+        $old = (new static)->load(array('_id' => $this->_id ));
         if ($old->parent != $this->parent || $old->title != $this->title) {
             // update children after save
             $this->__options['update_children'] = true;
@@ -191,8 +190,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     
     public function pathExists( $path )
     {
-        $item = clone $this;
-    	$item->load(array('path'=>$path, 'type'=>$this->__type));
+        $item = (new static)->load(array('path'=>$path, 'type'=>$this->__type));
         
         if (!empty($item->_id)) {
             return $item;
@@ -232,8 +230,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
      */
     public function slugExists( $slug )
     {
-        $clone = clone $this;
-        $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
+        $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
     
         if (!empty($clone->id)) {
             return $clone;
