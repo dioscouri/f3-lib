@@ -700,9 +700,6 @@ class Collection extends \Dsc\Magic
         $this->__options = $options;
         
         $this->bind($document, $options);
-        if (!empty($this->_id)) {
-        	return $this->overwrite($document, $options);
-        }
         
         // TODO add _pre and _post plugin events - Validate & Create
         $this->beforeValidate();
@@ -710,7 +707,10 @@ class Collection extends \Dsc\Magic
         $this->beforeSave();
         $this->beforeCreate();
         
-        $this->set('_id', new \MongoId );
+        if (!$this->get('id')) {
+            $this->set('_id', new \MongoId );
+        }
+                
         if ($this->__last_operation = $this->collection()->insert( $this->cast() )) 
         {
         	$this->set('_id', $this->__doc['_id']);
@@ -761,7 +761,7 @@ class Collection extends \Dsc\Magic
         $this->__last_operation = $this->collection()->update(
                 array('_id'=> new \MongoId((string) $this->get('id') ) ),
                 $this->cast(),
-                array('upsert'=>false, 'multiple'=>false)
+                array('upsert'=>true, 'multiple'=>false)
         );
 
         $this->afterUpdate();
