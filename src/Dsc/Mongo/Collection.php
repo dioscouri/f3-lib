@@ -631,7 +631,7 @@ class Collection extends \Dsc\Magic
                 }
             }            
         }
-    
+        
         return $this;
     }
     
@@ -750,7 +750,6 @@ class Collection extends \Dsc\Magic
     public function overwrite($document=array(), $options=array())
     {
         $this->__options = $options;
-        
         $this->bind($document, $options);
         
         // TODO add _pre and _post plugin events - Validate & Update        
