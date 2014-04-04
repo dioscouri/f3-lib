@@ -89,8 +89,7 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
      */
     public function slugExists( $slug )
     {
-        $clone = clone $this;
-        $item = $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
+        $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
     
         if (!empty($item->id)) {
             return $item;

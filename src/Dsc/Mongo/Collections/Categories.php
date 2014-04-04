@@ -73,7 +73,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     
     public function validate()
     {
-        if (empty($this->title)) {
+    	if (empty($this->title)) {
             $this->setError('Title is required');
         }
         
@@ -86,7 +86,6 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
                 $this->setError('An item with this title already exists with this parent.');
             }
         }
-        
         return parent::validate();
     }
     
@@ -137,19 +136,17 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
                 'title' => $parent_title
             );
         }        
-        
         return parent::beforeSave();
     }
     
     protected function beforeUpdate()
     {
         // if this item's parent is different from it's parent in the database, then we also need to update all the children
-        $old = $this->load(array('_id' => $this->_id ));
+        $old = (new static)->load(array('_id' => $this->_id ));
         if ($old->parent != $this->parent || $old->title != $this->title) {
             // update children after save
             $this->__options['update_children'] = true;
         }
-        
         return parent::beforeUpdate();
     }
     
@@ -193,7 +190,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     
     public function pathExists( $path )
     {
-        $item = $this->load(array('path'=>$path, 'type'=>$this->__type));
+        $item = (new static)->load(array('path'=>$path, 'type'=>$this->__type));
         
         if (!empty($item->_id)) {
             return $item;
@@ -233,11 +230,10 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
      */
     public function slugExists( $slug )
     {
-        $clone = clone $this;
-        $item = $clone->load(array('slug'=>$slug, 'type'=>$this->__type));
+        $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
     
-        if (!empty($item->id)) {
-            return $item;
+        if (!empty($clone->id)) {
+            return $clone;
         }
     
         return false;
