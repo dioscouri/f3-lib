@@ -27,7 +27,13 @@ class Controller extends Singleton
         }
     }
     
-    protected function getJsonResponse( $data ) 
+    /**
+     * Create a standard object for responding to ajax requests
+     * 
+     * @param array $data
+     * @return \stdClass
+     */
+    protected function getJsonResponse( array $data=null ) 
     {
         $response = new \stdClass();
         
