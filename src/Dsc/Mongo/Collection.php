@@ -98,6 +98,20 @@ class Collection extends \Dsc\Magic
     }
     
     /**
+     * Get a set condition in the query
+     *
+     */
+    public function getCondition( $key )
+    {
+        if (isset($this->__query_params['conditions'][$key])) 
+        {
+            return $this->__query_params['conditions'][$key];
+        }
+    
+        return null;
+    }
+    
+    /**
      * Get a parameter from the query
      * or return the entire query_params array
      *

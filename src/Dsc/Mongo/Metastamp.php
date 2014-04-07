@@ -13,6 +13,8 @@ class Metastamp
      */
     public static function getDate( $time ) 
     {
+        $time = trim($time);
+        
         /**
          * getdate() returns:
          Array

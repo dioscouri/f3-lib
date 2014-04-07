@@ -58,7 +58,32 @@ class Content extends \Dsc\Mongo\Collections\Describable
             $this->setCondition('copy', $key);
         }
         
-        // TODO Add conditions for publication date range and status
+        $filter_published_today = $this->getState('filter.published_today');
+        if (strlen($filter_published_today))
+        {
+            // add $and conditions to the query stack
+            if (!$and = $this->getCondition('$and')) {
+                $and = array();
+            }
+            
+            $and[] = array('$or' => array(
+                            array('publication.start.time' => null),
+                            array('publication.start.time' => array( '$lte' => time() )  )
+            ));
+ 
+            $and[] = array('$or' => array(
+                            array('publication.end.time' => null),
+                            array('publication.end.time' => array( '$gt' => time() )  )
+            ));
+            
+            $this->setCondition('$and', $and);
+        }
+        
+        $filter_status = $this->getState('filter.publication_status');
+        if (strlen($filter_status))
+        {
+            $this->setCondition('publication.status', $filter_status);
+        }
         
         return $this;
     }
@@ -86,11 +111,20 @@ class Content extends \Dsc\Mongo\Collections\Describable
     
     protected function beforeSave()
     {
-        if (empty($this->{'publication.start'})) {
-            $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate( $this->{'publication.start_date'} . ' ' . $this->{'publication.start_time'} );
+        if (!empty($this->{'publication.start_date'})) {
+            $string = $this->{'publication.start_date'};
+            if (!empty($this->{'publication.start_time'})) {
+                $string .= ' ' . $this->{'publication.start_time'};
+            }
+            $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate( trim( $string ) );
+        } else {
+            $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate('now');
         }
         
-        if (empty($this->{'publication.end'}) && !empty($this->{'publication.end_date'})) {
+        if (empty($this->{'publication.end_date'})) {
+            unset($this->{'publication.end'});
+        }
+        elseif (!empty($this->{'publication.end_date'})) {
             $string = $this->{'publication.end_date'};
             if (!empty($this->{'publication.end_time'})) {
                 $string .= ' ' . $this->{'publication.end_time'};
