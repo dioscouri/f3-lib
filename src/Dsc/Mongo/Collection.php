@@ -704,8 +704,8 @@ class Collection extends \Dsc\Magic
         // TODO add _pre and _post plugin events - Validate & Create
         $this->beforeValidate();
         $this->validate();
-        $this->beforeSave();
         $this->beforeCreate();
+        $this->beforeSave();
         
         if (!$this->get('id')) {
             $this->set('_id', new \MongoId );
@@ -731,8 +731,8 @@ class Collection extends \Dsc\Magic
         }
         
         // TODO add _pre and _post plugin events - Update
-        $this->beforeSave();
         $this->beforeUpdate();
+        $this->beforeSave();
         
         // otherwise do a selective update with $set = array() and multi=false
         $this->__last_operation = $this->collection()->update(
@@ -755,8 +755,8 @@ class Collection extends \Dsc\Magic
         // TODO add _pre and _post plugin events - Validate & Update        
         $this->beforeValidate();
         $this->validate();
-        $this->beforeSave();
         $this->beforeUpdate();
+        $this->beforeSave();
         
         $this->__last_operation = $this->collection()->update(
                 array('_id'=> new \MongoId((string) $this->get('id') ) ),
