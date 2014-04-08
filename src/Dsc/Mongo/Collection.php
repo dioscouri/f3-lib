@@ -171,7 +171,23 @@ class Collection extends \Dsc\Magic
     
         $offset = \Dsc\Pagination::findCurrentPage();
         $this->setState('list.offset', ($offset-1 >= 0) ? $offset-1 : 0);
-    
+        
+        if (!is_null($this->getState('list.order')) && !is_null($this->getState('list.direction')))
+        {
+            switch(strtolower($this->getState('list.direction'))) {
+                case "desc":
+                    $dir = -1;
+                    break;                
+            	case "asc":
+            	default:
+                    $dir = 1;	    
+            	    break;
+            }
+            
+            // TODO ensure that $this->getState('list.order') is a valid sorting field
+            $this->setState('list.sort', array( $this->getState('list.order') => $dir ) );
+        }
+        
         if (is_null($this->getState('list.sort')))
         {
             $this->setState('list.sort', $this->__config['default_sort']);
