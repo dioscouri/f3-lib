@@ -72,7 +72,7 @@ class Nodes extends \Dsc\Mongo\Collection
         
         if (!$this->get('metadata.created'))
         {
-            $this->set('metadata.created', \Dsc\Mongo\Metastamp::getDate('now') );
+        	$this->set('metadata.created', \Dsc\Mongo\Metastamp::getDate('now') );
         }
         
         $this->set('metadata.last_modified', \Dsc\Mongo\Metastamp::getDate('now') );
