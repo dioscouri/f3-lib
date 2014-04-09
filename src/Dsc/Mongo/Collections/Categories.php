@@ -135,7 +135,12 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
                 'slug' => $parent_slug,
                 'title' => $parent_title
             );
-        }        
+        }     
+
+		if (empty($this->parent) || $this->parent == "null")
+        {
+            $this->ancestors = array();
+        }
         return parent::beforeSave();
     }
     
