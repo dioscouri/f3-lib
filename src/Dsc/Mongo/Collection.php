@@ -535,11 +535,11 @@ class Collection extends \Dsc\Magic
         if ($key == 'id') {
             $key = '_id';
         }
-        
+
         if ($this->isPublic($key)) {
         	return $this->$key;
         } else {
-            return \Dsc\ArrayHelper::get( $this->__doc, $key, $default );
+            return \Dsc\ArrayHelper::get( $this->cast(), $key, $default );
         }
     }
     
