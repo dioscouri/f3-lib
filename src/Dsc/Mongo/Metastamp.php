@@ -33,7 +33,11 @@ class Metastamp
          )
          */
                 
-        $strtotime = strtotime( $time );
+        if( is_numeric( $time ) ){
+        	$strtotime = $time;
+        } else {
+        	$strtotime = strtotime( $time );
+        }
         
         $array = array(
                 'time' => $strtotime, 
