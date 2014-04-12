@@ -232,12 +232,12 @@ trait CrudItem
             if ($data['submitType'] == 'save_as') 
             {
                 $this->item = $model->saveAs($this->item, $values);
-                \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.');
+                \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.', 'success');
             } 
             else 
             {
                 $this->item = $model->update($this->item, $values);
-                \Dsc\System::instance()->addMessage('Item updated');
+                \Dsc\System::instance()->addMessage('Item updated', 'success');
             }
             
         }
