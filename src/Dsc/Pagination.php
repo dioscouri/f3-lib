@@ -74,9 +74,12 @@ class Pagination
      * @param $limit int
      */
     public function setLimit($limit) {
-        if(is_numeric($limit))
+        if(is_numeric($limit)) {
             $this->items_per_page = $limit;
-        $this->setCurrent( self::findCurrentPage($this->routeKey));
+        }
+        // WTF is this doing here?  Why not put this in the __constructor?
+        // TODO Move this to the constructor and test that it doesn't break anything
+        $this->setCurrent( self::findCurrentPage($this->routeKey) );
     }
 
     /**
@@ -115,12 +118,27 @@ class Pagination
      * set the current page number
      * @param $current int
      */
-    public function setCurrent($current) {
-        if(!$this->routeKeyPrefix)
+    public function setCurrent($current) 
+    {
+        if ($this->routeKeyPrefix) 
+        {
             $current = str_replace($this->routeKeyPrefix,'',$current);
-        if(!is_numeric($current)) return;
-        if($current <= $this->getMax()) $this->current_page = $current;
-        else $this->current_page = $this->getMax();
+        }
+        
+        if(!is_numeric($current)) {
+            return;
+        }
+        
+        if ($current <= $this->getMax()) {
+            $this->current_page = $current;
+        }
+        else {
+            $this->current_page = $this->getMax();
+        }
+        
+        // current has changed, so update the prev/next
+        $this->next_page = $this->getNext();
+        $this->prev_page = $this->getPrev();
     }
 
     /**
