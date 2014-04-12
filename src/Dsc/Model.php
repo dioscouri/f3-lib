@@ -446,6 +446,7 @@ class Model extends Singleton
     {
         $item_data = $mapper->cast();
         $new_values = array_merge( $values, array_diff_key( $item_data, $values ) );
+        unset($new_values[$this->getItemKey()]);
         
         return $this->save( $new_values, $options );
     }
