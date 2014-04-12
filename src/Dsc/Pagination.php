@@ -55,15 +55,19 @@ class Pagination
      * @param $limit int max items per page
      * @param $routeKey string the key for pagination in your routing
      */
-    public function __construct( $items, $limit = 30, $routeKey = 'page' ) {
+    public function __construct( $items, $limit = 30, $routeKey = 'page' ) 
+    {
         $this->fw = \Base::instance();
         $this->total_items = is_array($items)?count($items):$items;
-        $this->routeKey = $routeKey;
         $this->setLimit($limit);
-
+        
+        $this->routeKey = $routeKey;        
         if($key = $this->fw->get('PAGINATION_KEY')) {
             $this->setRouteKeyPrefix($key);
         }
+
+        $this->setCurrent( self::findCurrentPage($this->routeKey) );
+        
         $this->total_pages = $this->getMax();
         $this->next_page = $this->getNext();
         $this->prev_page = $this->getPrev();
@@ -77,9 +81,6 @@ class Pagination
         if(is_numeric($limit)) {
             $this->items_per_page = $limit;
         }
-        // WTF is this doing here?  Why not put this in the __constructor?
-        // TODO Move this to the constructor and test that it doesn't break anything
-        $this->setCurrent( self::findCurrentPage($this->routeKey) );
     }
 
     /**
@@ -157,8 +158,7 @@ class Pagination
      */
     static public function findCurrentPage($key='page') {
         $f3 = \Base::instance();
-        return $f3->exists('PARAMS.'.$key) ?
-        preg_replace("/[^0-9]/", "", $f3->get('PARAMS.'.$key)) : 1;
+        return $f3->exists('PARAMS.'.$key) ? preg_replace("/[^0-9]/", "", $f3->get('PARAMS.'.$key)) : 1;
     }
 
     /**
