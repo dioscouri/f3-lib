@@ -33,7 +33,40 @@ class Settings extends \Dsc\Mongo\Collection
         {
             $this->type = $this->__type;
         }
+        
+        if (!$this->get('metadata.created'))
+        {
+            $this->set('metadata.created', \Dsc\Mongo\Metastamp::getDate('now') );
+        }
+        
+        $this->set('metadata.last_modified', \Dsc\Mongo\Metastamp::getDate('now') );
     
         return parent::beforeValidate();
+    }
+    
+    /**
+     * Gets the metadata.created field, creating it if it doesn't exist
+     */
+    public function created()
+    {
+        if (!$this->get('metadata.created'))
+        {
+            $this->set('metadata.created', \Dsc\Mongo\Metastamp::getDate('now') );
+        }
+    
+        return $this->get('metadata.created');
+    }
+    
+    /**
+     * Gets the metadata.last_modified field, creating it if it doesn't exist
+     */
+    public function lastModified()
+    {
+        if (!$this->get('metadata.last_modified'))
+        {
+            $this->set('metadata.last_modified', \Dsc\Mongo\Metastamp::getDate('now') );
+        }
+    
+        return $this->get('metadata.last_modified');
     }
 }
