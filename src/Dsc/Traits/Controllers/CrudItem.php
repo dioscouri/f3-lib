@@ -165,7 +165,7 @@ trait CrudItem
         }
                 
         // redirect to the editing form for the new item
-        \Dsc\System::instance()->addMessage('Item saved');
+        \Dsc\System::instance()->addMessage('Item saved', 'success');
         
         if (method_exists($this->item, 'cast')) {
             $this->item_data = $this->item->cast();
@@ -315,7 +315,7 @@ trait CrudItem
         
         try {
             $model->delete( $this->item );
-            \Dsc\System::instance()->addMessage('Item deleted');
+            \Dsc\System::instance()->addMessage('Item deleted', 'success');
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Delete failed with the following errors:', 'error');
