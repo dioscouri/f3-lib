@@ -57,6 +57,12 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         {
             $this->setCondition('parent', new \MongoId((string) $filter_parent));
         }
+        
+        $filter_path = $this->getState('filter.path');
+        if (strlen($filter_path))
+        {
+            $this->setCondition('path', $filter_path);
+        }
     
         return $this;
     }
