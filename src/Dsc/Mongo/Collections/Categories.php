@@ -61,6 +61,11 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         $filter_path = $this->getState('filter.path');
         if (strlen($filter_path))
         {
+            // if the path doesn't begin with /, prefix it with a /
+            if (substr($filter_path, 0, 1) !== '/') 
+            {
+                $filter_path = '/' . $filter_path;
+            }
             $this->setCondition('path', $filter_path);
         }
     
