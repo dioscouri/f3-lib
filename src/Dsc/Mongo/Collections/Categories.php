@@ -228,7 +228,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         {
             $base_slug = $slug;
             $n = 1;
-            while ($this->slugExists($slug))
+            while ($this->slugExists($slug, $this->parent))
             {
                 $slug = $base_slug . '-' . $n;
                 $n++;
@@ -244,10 +244,17 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
      * @param string $slug
      * @return unknown|boolean
      */
-    public function slugExists( $slug )
+    public function slugExists( $slug, $parent=null )
     {
-        $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
-    
+        if (!empty($parent)) 
+        {
+            $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type, 'parent'=>new \MongoId($parent) ));
+        } 
+        else 
+        {
+            $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
+        }
+        
         if (!empty($clone->id)) {
             return $clone;
         }
