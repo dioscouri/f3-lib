@@ -35,7 +35,19 @@ class Models extends \Dsc\Magic
             $this->bind( $source, $this->__config );
         }
     }
-
+    
+    /**
+     * Make a Log entry in the logger
+     * 
+     * @param unknown $message
+     * @param string $priority
+     * @param string $category
+     */
+    public function log( $message, $priority='INFO', $category='General' )
+    {
+        \Dsc\Models\Logs::instance()->add( $message, $priority, $category );
+    }
+    
     /**
      * Set the model's config options
      *
@@ -204,6 +216,8 @@ class Models extends \Dsc\Magic
         }
         
         \Dsc\ArrayHelper::clear( $this->__doc, $key );
+        
+        return $this;
     }
 
     /**

@@ -7,11 +7,9 @@ namespace Dsc\Mongo;
  * @author Rafael Diaz-Tushman
  *
  */
-class Collection extends \Dsc\Magic
+class Collection extends \Dsc\Models
 {
     public $_id; // MongoId
-    
-    protected $__doc = array();
 
     protected $__collection_name = null;
         
@@ -51,8 +49,6 @@ class Collection extends \Dsc\Magic
      * @var unknown
      */
     protected $__options = array();
-    
-    protected $__errors = array();
     
     protected $__last_operation = null;
     
@@ -133,6 +129,9 @@ class Collection extends \Dsc\Magic
         return null;
     }
     
+    /**
+     * 
+     */
     public function context()
     {
         if (empty($this->__config['context'])) {
@@ -142,6 +141,9 @@ class Collection extends \Dsc\Magic
         return $this->__config['context'];
     }
     
+    /**
+     * Gets the input filter object
+     */
     public function inputFilter()
     {
         return \Dsc\System::instance()->get('inputfilter');
@@ -500,10 +502,7 @@ class Collection extends \Dsc\Magic
             $key = '_id';
         }
         
-        if (\Dsc\ArrayHelper::exists( $this->__doc, $key ) || $this->isPublic($key)) {
-        	return true;
-        }
-        return false;
+        return parent::exists($key);
     }
     
     /**
@@ -518,11 +517,7 @@ class Collection extends \Dsc\Magic
             $key = '_id';
         }
         
-        if (!property_exists($this,$key) || $this->isPublic($key)) {
-        	\Dsc\ObjectHelper::set( $this, $key, $val );
-        }
-        
-        return \Dsc\ArrayHelper::set( $this->__doc, $key, $val );
+        return parent::set($key, $val);
     }
     
     /**
@@ -536,11 +531,7 @@ class Collection extends \Dsc\Magic
             $key = '_id';
         }
 
-        if ($this->isPublic($key)) {
-        	return $this->$key;
-        } else {
-            return \Dsc\ArrayHelper::get( $this->cast(), $key, $default );
-        }
+        return parent::get($key, $default);
     }
     
     /**
@@ -553,130 +544,17 @@ class Collection extends \Dsc\Magic
             $key = '_id';
         }
         
-        $keys = explode('.', $key);
-        $first_key = $keys[0];
-        if ($this->isPublic($first_key)) 
-        {
-            \Dsc\ObjectHelper::clear( $this, $key );
-        }
-        
-        \Dsc\ArrayHelper::clear( $this->__doc, $key );
+        return parent::clear($key);
     }
-    
+
     /**
-     * Returns an associative array of object's public properties
-     * removing any that begin with a double-underscore (__) 
-     *
-     * @param   boolean  $public  If true, returns only the public properties.
-     *
-     * @return  array
+     * Load a single Item from the collection and bind it to $this
+     *  
+     * @param array $conditions
+     * @param array $fields
+     * @param array $sort
+     * @return \Dsc\Mongo\Collection
      */
-    public function cast($public = true)
-    {
-        $vars = get_object_vars($this);
-        if ($public)
-        {
-            foreach ($vars as $key => $value)
-            {
-                if (substr($key, 0, 2) == '__' || !$this->isPublic($key))
-                {
-                    unset($vars[$key]);
-                }
-            }
-        }
-        return $vars;
-    }
-    
-    protected function visible($key) 
-    {
-    	return $this->isPublic($key);
-    }
-    
-    /**
-     *	Return TRUE if property has public visibility
-     *	@return bool
-     *	@param $key string
-     **/
-    protected function isPublic($key) 
-    {
-        if (property_exists($this,$key)) {
-            try {
-                $ref=new \ReflectionProperty(get_class($this),$key);
-                $out=$ref->ispublic();
-                unset($ref);
-            } catch (\Exception $e) {
-            	// property is set but is not defined in the class: makes it a dynamic prop, so it's public
-            	$out=true;
-            }
-            return $out;
-        }
-        return false;
-    }
-    
-    public function log( $message, $priority='INFO', $category='General' )
-    {
-        \Dsc\Models\Logs::instance()->add( $message, $priority, $category );
-    }
-    
-    public function bind( $source, $options=array() )
-    {
-        $this->setConfig($options);
-        
-        if (!is_object($source) && !is_array($source))
-        {
-            throw new \Exception('Invalid source');
-        }
-    
-        if (is_object($source))
-        {
-            $source = get_object_vars($source);
-        }
-        
-        if (empty($source)) 
-        {
-        	return $this;
-        }
-        
-        $this->__doc = $source;
-    
-        if ($this->__config['append']) 
-        {
-            // add unknown keys to the object
-            foreach ($source as $key=>$value)
-            {
-                if (!in_array($key, $this->__config['ignored']))
-                {
-                    $this->set($key, $value);
-                }
-            }
-        } 
-            else 
-        {
-            // ignore unknown keys
-            foreach ($source as $key=>$value)
-            {
-                if (!in_array($key, $this->__config['ignored']) && $this->isPublic($key))
-                {
-                    $this->set($key, $value);
-                }
-            }            
-        }
-        
-        return $this;
-    }
-    
-    public function setConfig( $config=array() )
-    {
-        $this->__config = $config + $this->__config + $this->__default_config;
-        
-        if (!is_array($this->__config['ignored']))
-        {
-            $this->__config['ignored'] = \Base::instance()->split($this->__config['ignored']);
-        }
-        
-        return $this;
-    }
-    
     public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
     {
         if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
@@ -687,6 +565,12 @@ class Collection extends \Dsc\Magic
         return $this;
     }
     
+    /**
+     * Save an item
+     * 
+     * @param unknown $document
+     * @param unknown $options
+     */
     public function save($document=array(), $options=array())
     {
         $this->__options = $options;
@@ -725,6 +609,12 @@ class Collection extends \Dsc\Magic
         return $this->insert( $document, $options );
     }
     
+    /**
+     * 
+     * @param unknown $document
+     * @param unknown $options
+     * @return \Dsc\Mongo\Collection
+     */
     public function insert($document=array(), $options=array())
     {
         $this->__options = $options;
@@ -752,6 +642,11 @@ class Collection extends \Dsc\Magic
         return $this;
     }
     
+    /**
+     * 
+     * @param unknown $document
+     * @param unknown $options
+     */
     public function update($document=array(), $options=array())
     {
         $this->__options = $options;
@@ -777,6 +672,12 @@ class Collection extends \Dsc\Magic
         return $this->lastOperation();
     }
     
+    /**
+     * 
+     * @param unknown $document
+     * @param unknown $options
+     * @return \Dsc\Mongo\Collection
+     */
     public function overwrite($document=array(), $options=array())
     {
         $this->__options = $options;
@@ -800,6 +701,9 @@ class Collection extends \Dsc\Magic
         return $this;
     }
     
+    /**
+     * 
+     */
     public function remove()
     {
         // TODO add _pre and _post plugin events - Delete
@@ -814,6 +718,10 @@ class Collection extends \Dsc\Magic
         return $this->lastOperation();
     }
     
+    /**
+     * 
+     * @param string $model
+     */
     public function delete( $model=null )
     {
         if (!empty($model)) {
@@ -823,6 +731,10 @@ class Collection extends \Dsc\Magic
         return $this->remove();
     }
     
+    /**
+     * 
+     * @return boolean|\Dsc\Mongo\Collection
+     */
     public function validate()
     {
         $errors = $this->getErrors();
@@ -834,6 +746,11 @@ class Collection extends \Dsc\Magic
         return $this;
     }
     
+    /**
+     * 
+     * @param unknown $validator
+     * @return \Dsc\Mongo\Collection
+     */
     public function validateWith( $validator )
     {
         if (!$validator->validate($this)) 
@@ -843,68 +760,11 @@ class Collection extends \Dsc\Magic
         
         return $this;
     }
-    
+
     /**
-     * Add an error message.
-     *
-     * @param string $error
-     * @return \Dsc\Singleton
+     * Gets the last operation result
+     * 
      */
-    public function setError($error)
-    {
-        if (is_string($error)) {
-        	$error = new \Exception( $error );
-        }
-        
-        if (is_a($error, 'Exception'))
-        {
-            array_push($this->__errors, $error);
-        }
-    
-        return $this;
-    }
-    
-    /**
-     * Return all errors, if any.
-     *
-     * @return  array  Array of error messages.
-     */
-    public function getErrors()
-    {
-        return $this->__errors;
-    }
-    
-    /**
-     * Resets all error messages
-     */
-    public function clearErrors()
-    {
-        $this->__errors = array();
-        return $this;
-    }
-    
-    /**
-     * Any errors set?  If so, check fails
-     *
-     */
-    public function checkErrors()
-    {
-        $errors = $this->getErrors();
-        if (empty($errors))
-        {
-            return $this;
-        }
-        
-        $messages = array();
-        foreach ($errors as $exception) 
-        {
-            $messages[] = $exception->getMessage();        	
-        }
-        $messages = implode(". ", $messages);
-    
-        throw new \Exception( $messages );
-    }
-    
     public function lastOperation()
     {
         return $this->__last_operation;
