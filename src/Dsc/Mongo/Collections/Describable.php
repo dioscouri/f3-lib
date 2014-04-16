@@ -91,8 +91,8 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     {
         $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
     
-        if (!empty($item->id)) {
-            return $item;
+        if (!empty($clone->id)) {
+            return $clone;
         }
     
         return false;

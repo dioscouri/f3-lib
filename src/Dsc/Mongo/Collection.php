@@ -470,6 +470,7 @@ class Collection extends \Dsc\Models
     public function saveAs( $document=array(), $options=array() )
     {
         $item_data = $this->cast();
+        // preserve any key=>values from the original item that are not in the new document array 
         $new_values = array_merge( $document, array_diff_key( $item_data, $document ) );
         unset($new_values[$this->getItemKey()]);
         $item = new static( $new_values );
