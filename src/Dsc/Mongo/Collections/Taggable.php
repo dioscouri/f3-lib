@@ -28,7 +28,9 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
         {
             $this->tags = trim($this->tags);
             if (!empty($this->tags)) {
-                $this->tags = \Base::instance()->split( (string) $this->tags );
+                $this->tags = array_map(function($el){
+                	return strtolower($el);
+                }, \Base::instance()->split( (string) $this->tags ));
             }
         }
         elseif(empty($this->tags) && !is_array($this->tags)) 
