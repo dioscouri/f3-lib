@@ -51,13 +51,13 @@ class Collection extends \Dsc\Models
     protected $__options = array();
     
     protected $__last_operation = null;
-    
+
     /**
-     *	Instantiate class
-     *	@return void
-     *	@param $db object
-     *	@param $collection string
-     **/
+     * Instantiate class, optionally binding it with an array/object
+     * 
+     * @param string $data
+     * @param unknown $options
+     */
     public function __construct($data=null, $options=array()) 
     {
         $this->emptyState();
@@ -239,6 +239,13 @@ class Collection extends \Dsc\Models
         return $new_state;
     }
     
+    /**
+     * Gets a set state, cleaning it
+     * 
+     * @param string $property
+     * @param string $default
+     * @param string $return_type
+     */
     public function getState( $property=null, $default=null, $return_type='default' )
     {
         $return = ($property === null) ? $this->__model_state : $this->__model_state->get($property, $default);
@@ -268,6 +275,11 @@ class Collection extends \Dsc\Models
         return $this;
     }
     
+    /**
+     * Empties the model's set state
+     * 
+     * @return \Dsc\Mongo\Collection
+     */
     public function emptyState()
     {
         $blank = new \Joomla\Registry\Registry;
@@ -284,13 +296,18 @@ class Collection extends \Dsc\Models
         return $this->__config['crud_item_key'];
     }
     
+    /**
+     * An alias for getItems()
+     * 
+     * @param string $refresh
+     */
     public function getList($refresh=false) 
     {
     	return $this->getItems($refresh);
     }
     
     /**
-     * An alias for find()
+     * Gets items from a collection with a query
      * that uses the model's state
      * and implements caching (if enabled)
      */
@@ -307,6 +324,11 @@ class Collection extends \Dsc\Models
         return $this->fetchItems();
     }
     
+    /**
+     * Fetches multiple items from a collection using set conditions
+     * 
+     * @return multitype:\Dsc\Mongo\Collection
+     */
     protected function fetchItems()
     {
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
@@ -342,6 +364,11 @@ class Collection extends \Dsc\Models
         return $this->fetchItem();
     }
     
+    /**
+     * Fetches an item from the collection using set conditions
+     * 
+     * @return Ambigous <NULL, \Dsc\Mongo\Collection>
+     */
     protected function fetchItem()
     {
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
@@ -379,17 +406,26 @@ class Collection extends \Dsc\Models
         return $result;
     }
     
+    /**
+     * Gets the array of fields set to be returned by the next query,
+     * fetching them if necessary
+     *  
+     * @return array
+     */
     public function fields()
     {
-        $this->fetchFields();
-    
-        if (!empty($this->__query_params['fields'])) {
-            return $this->__query_params['fields'];
+        if (empty($this->__query_params['fields'])) {
+            $this->fetchFields();
         }
     
-        return array();
+        return $this->__query_params['fields'];
     }
     
+    /**
+     * Fetches the array of fields to be returned by the next query
+     * 
+     * @return \Dsc\Mongo\Collection
+     */
     protected function fetchFields()
     {
         $select_fields = $this->getState('select.fields');
@@ -401,6 +437,12 @@ class Collection extends \Dsc\Models
         return $this;
     }
     
+    /**
+     * Gets the array of conditions set for the next query,
+     * fetching them if necessary
+     * 
+     * @return array
+     */
     public function conditions()
     {
         if (empty($this->__query_params['conditions'])) {
@@ -410,6 +452,11 @@ class Collection extends \Dsc\Models
         return $this->__query_params['conditions'];
     }
     
+    /**
+     * Fetches the conditions for the next query
+     * 
+     * @return \Dsc\Mongo\Collection
+     */
     protected function fetchConditions()
     {
         $this->__query_params['conditions'] = array();
@@ -434,6 +481,9 @@ class Collection extends \Dsc\Models
         return $this;
     }
     
+    /**
+     * Gets the global Mongo connection 
+     */
     public function getDb()
     {
         return \Dsc\System::instance()->get('mongo');
@@ -453,12 +503,26 @@ class Collection extends \Dsc\Models
         return $this->getDb()->selectCollection( $this->collectionName() );
     }
     
+    /**
+     * Gets the collection name for this model
+     */
     public function collectionName()
     {
-        // TODO Throw Exception if null?
+        // Throw Exception if null
+        if (empty($this->__collection_name)) 
+        {
+        	throw new \Exception('Must specify a collection name');
+        }
+        
         return $this->__collection_name;
     }
     
+    /**
+     * Finds items in the collection based on set conditions
+     * 
+     * @param unknown $conditions
+     * @param unknown $fields
+     */
     public static function find( $conditions=array(), $fields=array() )
     {
         if (empty($this)) {
@@ -621,7 +685,6 @@ class Collection extends \Dsc\Models
         
         $this->bind($document, $options);
         
-        // TODO add _pre and _post plugin events - Validate & Create
         $this->beforeValidate();
         $this->validate();
         $this->beforeCreate();
@@ -655,7 +718,6 @@ class Collection extends \Dsc\Models
         	return $this->overwrite($document, $options);
         }
         
-        // TODO add _pre and _post plugin events - Update
         $this->beforeUpdate();
         $this->beforeSave();
         
@@ -682,8 +744,7 @@ class Collection extends \Dsc\Models
     {
         $this->__options = $options;
         $this->bind($document, $options);
-        
-        // TODO add _pre and _post plugin events - Validate & Update        
+     
         $this->beforeValidate();
         $this->validate();
         $this->beforeUpdate();
@@ -706,7 +767,6 @@ class Collection extends \Dsc\Models
      */
     public function remove()
     {
-        // TODO add _pre and _post plugin events - Delete
         $this->beforeDelete();
         
         $this->__last_operation = $this->collection()->remove(
