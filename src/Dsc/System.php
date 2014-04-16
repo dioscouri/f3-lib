@@ -139,10 +139,11 @@ class System extends Singleton
      */
     public function getSessionRegistry()
     {
-        $registry = \Base::instance()->get('SESSION.system.registry');
+        $global_app_name = \Base::instance()->get('APP_NAME');
+        $registry = \Base::instance()->get('SESSION.system.registry.'.$global_app_name);
         if (empty($registry) || !$registry instanceof \Joomla\Registry\Registry) {
             $registry = new \Joomla\Registry\Registry;
-            \Base::instance()->set('SESSION.system.registry', $registry);
+            \Base::instance()->set('SESSION.system.registry.'.$global_app_name, $registry);
         }
         
         return $registry;
