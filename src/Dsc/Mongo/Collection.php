@@ -41,8 +41,6 @@ class Collection extends \Dsc\Models
         'skip' => 0 
     );
     
-    protected $__model_state = null;
-    
     /**
      * Desired options during CRUD actions
      * 
@@ -51,22 +49,6 @@ class Collection extends \Dsc\Models
     protected $__options = array();
     
     protected $__last_operation = null;
-
-    /**
-     * Instantiate class, optionally binding it with an array/object
-     * 
-     * @param string $data
-     * @param unknown $options
-     */
-    public function __construct($data=null, $options=array()) 
-    {
-        $this->emptyState();
-        $this->setConfig($options);
-        
-        if (!empty($data)) {
-        	$this->bind($data, $options);
-        }
-    }
     
     /**
      * Manually set a query param without using setState()
@@ -127,173 +109,6 @@ class Collection extends \Dsc\Models
         }
     
         return null;
-    }
-    
-    /**
-     * 
-     */
-    public function context()
-    {
-        if (empty($this->__config['context'])) {
-            $this->__config['context'] = strtolower(get_class($this));
-        }
-    
-        return $this->__config['context'];
-    }
-    
-    /**
-     * Gets the input filter object
-     */
-    public function inputFilter()
-    {
-        return \Dsc\System::instance()->get('inputfilter');
-    }
-    
-    /**
-     * Method to auto-populate the model state.
-     *
-     */
-    public function populateState()
-    {
-        if ($filters = $this->getUserStateFromRequest($this->context() . '.filter', 'filter', array(), 'array'))
-        {
-            foreach ($filters as $name => $value)
-            {
-                $this->setState('filter.' . $name, $value);
-            }
-        }
-    
-        if ($list = $this->getUserStateFromRequest($this->context() . '.list', 'list', array(), 'array'))
-        {
-            foreach ($list as $name => $value)
-            {
-                $this->setState('list.' . $name, $value);
-            }
-        }
-    
-        $offset = \Dsc\Pagination::findCurrentPage();
-        $this->setState('list.offset', ($offset-1 >= 0) ? $offset-1 : 0);
-        
-        if (!is_null($this->getState('list.order')) && !is_null($this->getState('list.direction')))
-        {
-            switch(strtolower($this->getState('list.direction'))) {
-                case "desc":
-                    $dir = -1;
-                    break;                
-            	case "asc":
-            	default:
-                    $dir = 1;	    
-            	    break;
-            }
-            
-            // TODO ensure that $this->getState('list.order') is a valid sorting field
-            $this->setState('list.sort', array( $this->getState('list.order') => $dir ) );
-        }
-        
-        if (is_null($this->getState('list.sort')))
-        {
-            $this->setState('list.sort', $this->__config['default_sort']);
-        }
-    
-        return $this;
-    }
-    
-    /**
-     * Gets the value of a user state variable and sets it in the session
-     *
-     * This is the same as the method in \Dsc\System except that this also can optionally
-     * force you back to the first page when a filter has changed
-     *
-     * @param   string   $key        The key of the user state variable.
-     * @param   string   $request    The name of the variable passed in a request.
-     * @param   string   $default    The default value for the variable if not found. Optional.
-     * @param   string   $type       Filter for the variable, for valid values see {@link \Joomla\Input\Input::clean()}. Optional.
-     * @param   boolean  $resetPage  If true, the offset in request is set to zero
-     *
-     * @return  The request user state.
-     */
-    public function getUserStateFromRequest($key, $request, $default = null, $type = 'none', $resetPage = true)
-    {
-        $system = \Dsc\System::instance();
-        $input = $system->get('input');
-    
-        $old_state = $system->getUserState($key);
-        $cur_state = (!is_null($old_state)) ? $old_state : $default;
-        $new_state = $input->get($request, null, $type);
-    
-        if (($cur_state != $new_state) && ($resetPage))
-        {
-            $input->set('list.offset', 0);
-        }
-    
-        // Save the new value only if it is set in this request.
-        if ($new_state !== null)
-        {
-            $system->setUserState($key, $new_state);
-        }
-        else
-        {
-            $new_state = $cur_state;
-        }
-    
-        return $new_state;
-    }
-    
-    /**
-     * Gets a set state, cleaning it
-     * 
-     * @param string $property
-     * @param string $default
-     * @param string $return_type
-     */
-    public function getState( $property=null, $default=null, $return_type='default' )
-    {
-        $return = ($property === null) ? $this->__model_state : $this->__model_state->get($property, $default);
-    
-        return $this->inputFilter()->clean( $return, $return_type );
-    }
-    
-    /**
-     * Method to set model state variables
-     *
-     * @param   string  $property  The name of the property.
-     * @param   mixed   $value     The value of the property to set or null.
-     *
-     * @return  mixed  The previous value of the property or null if not set.
-     */
-    public function setState($property, $value = null)
-    {
-        if ($property instanceof \Joomla\Registry\Registry) {
-            $this->__model_state = $property;
-        } elseif (! $this->__model_state instanceof \Joomla\Registry\Registry) {
-            $this->__model_state = new \Joomla\Registry\Registry;
-            $this->__model_state->set($property, $value);
-        } else {
-            $this->__model_state->set($property, $value);
-        }
-    
-        return $this;
-    }
-    
-    /**
-     * Empties the model's set state
-     * 
-     * @return \Dsc\Mongo\Collection
-     */
-    public function emptyState()
-    {
-        $blank = new \Joomla\Registry\Registry;
-        $this->setState( $blank );
-    
-        return $this;
-    }
-    
-    /**
-     * Returns the key name for the model
-     */
-    public function getItemKey()
-    {
-        return $this->__config['crud_item_key'];
     }
     
     /**
