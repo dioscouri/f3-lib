@@ -102,7 +102,8 @@ class Content extends \Dsc\Mongo\Collections\Describable
         {
             if (empty($this->id) || $existing->id != $this->id)
             {
-                $this->setError('An item with this slug already exists.  Slugs must be unique.');
+                //An item with this slug already exists.  Slugs must be unique.
+                $this->slug = $this->generateSlug();
             }
         }
         
