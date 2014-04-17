@@ -299,4 +299,18 @@ class Assets extends Nodes
     
         return $result;
     }
+    
+    /**
+     *
+     * @param array $types
+     * @return unknown
+     */
+    public static function distinctTypes($query=array())
+    {
+        $model = new static();
+        $distinct = $model->getCollection()->distinct("metadata.type", $query);
+        $distinct = array_values( array_filter( $distinct ) );
+    
+        return $distinct;
+    }
 }
