@@ -299,6 +299,8 @@ class Models extends \Dsc\Magic
     {
         if ($filters = $this->getUserStateFromRequest($this->context() . '.filter', 'filter', array(), 'array'))
         {
+            $filters = \Dsc\ArrayHelper::dot( $filters );
+            
             foreach ($filters as $name => $value)
             {
                 $this->setState('filter.' . $name, $value);
@@ -307,6 +309,8 @@ class Models extends \Dsc\Magic
     
         if ($list = $this->getUserStateFromRequest($this->context() . '.list', 'list', array(), 'array'))
         {
+            $list = \Dsc\ArrayHelper::dot( $list );
+            
             foreach ($list as $name => $value)
             {
                 $this->setState('list.' . $name, $value);
