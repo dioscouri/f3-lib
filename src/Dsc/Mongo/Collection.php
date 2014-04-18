@@ -210,9 +210,14 @@ class Collection extends \Dsc\Models
      */
     public function paginate($refresh=false)
     {
+        $offset = $this->getState('list.offset', 0, 'int');
+        $this->setState('list.offset', $offset );
+        
         $size = $this->getState('list.limit', 30, 'int');
+        $this->setState('list.limit', $size );
+        
         $this->setParam('limit', $size);
-        $this->setParam('skip', $this->getState('list.offset', 0, 'int') * $size);
+        $this->setParam('skip', $offset * $size);
         
         $total = $this->collection()->count( $this->conditions() );
         $result = new \Dsc\Pagination( $total, $size );
