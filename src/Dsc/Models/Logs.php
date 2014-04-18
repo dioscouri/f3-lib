@@ -22,7 +22,7 @@ class Logs extends \Dsc\Models\Db\Mongo
         $mapper = $this->getMapper();
         $mapper->reset();
         $mapper->created = \Dsc\Mongo\Metastamp::getDate( 'now' );
-        $mapper->created['microtime'] = microtime( true );
+        $mapper->set('created.microtime', microtime( true ) );
         $mapper->priority = $priority;
         $mapper->category = $category;
         $mapper->message = $message;
