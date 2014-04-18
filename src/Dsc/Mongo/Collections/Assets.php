@@ -3,17 +3,18 @@ namespace Dsc\Mongo\Collections;
 
 class Assets extends Taggable 
 {
-    protected $collection = 'common.assets.files';
-    protected $collection_gridfs = 'common.assets';
-    protected $type = 'common.assets';
-    protected $default_ordering_direction = '-1';
-    protected $default_ordering_field = 'metadata.created.time';    
-
-    use \Dsc\Traits\Models\HasSlug;
+    protected $__collection_name = 'common.assets.files';
+    protected $__collection_gridfs = 'common.assets';
+    protected $__type = 'common.assets';
+    protected $__config = array(
+    		'default_sort' => array(
+    				'metadata.created.time' => -1
+    		),
+    );
     
     public function getGridFSCollectionName() 
     {
-        return $this->collection_gridfs;
+        return $this->__collection_gridfs;
     }
     
     public function getMimeType( $buffer ) 
@@ -114,8 +115,9 @@ class Assets extends Taggable
         {
             $key =  new \MongoRegex('/'. $filter_content_type .'/i');
             $this->setCondition('contentType', $key);
-        }        
+        }
     
+        
         return $this;
     }
 
@@ -129,17 +131,14 @@ class Assets extends Taggable
     	
     	if (empty( $this->md5 ) )
     	{
-    		if (!empty($mapper->{'md5'})) {
-    			$values['md5'] = $mapper->{'md5'};
+    		if  (!empty($this->{'details.ETag'})) {
+    			$this->md5 = str_replace('"', '', $this->{'details.ETag'} );
     		}
-    		elseif (!empty($mapper->{'details.ETag'})) {
-    			$values['md5'] = str_replace('"', '', $mapper->{'details.ETag'} );
-    		}
-    		elseif (!empty($mapper->{'filename'})) {
-    			$values['md5'] = md5_file( $mapper->{'filename'} );
+    		elseif (!empty($this->{'filename'})) {
+    			$this->md5 = md5_file( $this->{'filename'} );
     		}
     		else {
-    			$values['md5'] = md5( $values['metadata']['slug'] );
+    			$this->md5 = md5( $this->{'metadata.slug'} );
     		}
     	}
     	 
@@ -173,7 +172,7 @@ class Assets extends Taggable
 
             $url_path = parse_url( $url , PHP_URL_PATH );
             $pathinfo = pathinfo( $url_path );
-            $filename = $this->inputfilter->clean( $url_path );
+            $filename = $this->inputfilter()->clean( $url_path );
             $buffer = $request['body'];
             $originalname = str_replace( "/", "-", $filename );
 
@@ -188,12 +187,12 @@ class Assets extends Taggable
                 'md5' => md5( $filename ),
                 'thumb' => $thumb,
                 'url' => null,
-                'metadata' => array(
-                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter->clean( $originalname ) )
+            	'metadata' => array(
+            			"title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter()->clean( $originalname ) ),
                 ),
                 'details' => array(
                     "filename" => $filename,
-                    "source_url" => $url
+                    "source_url" => $url,
                 )
             );
 
@@ -207,14 +206,13 @@ class Assets extends Taggable
             // save the file
             if ($storedfile = $grid->storeBytes( $buffer, $values ))
             {
-                $mapper = $model->getMapper();
-                $mapper->load(array('_id'=>$storedfile));
-                $mapper = $model->update( $mapper, $values );
+            	$model->load( array( "_id" => new \MongoId( $storedfile ) ) );
+                $model->override( $values );
             }
 
             // $storedfile has newly stored file's Document ID
             $result["asset_id"] = (string) $storedfile;
-            $result["slug"] = $mapper->{'metadata.slug'};
+            $result["slug"] = $model->{'metadata.slug'};
             $result['error'] = false;
         } 
             else 
@@ -234,9 +232,76 @@ class Assets extends Taggable
     public static function distinctTypes($query=array())
     {
         $model = new static();
-        $distinct = $model->getCollection()->distinct("metadata.type", $query);
+        $distinct = $model->getCollection()->distinct("type", $query);
         $distinct = array_values( array_filter( $distinct ) );
     
         return $distinct;
+    }
+    
+    public function isImage( $contentType=null )
+    {
+    	if (empty($contentType)) {
+    		$contentType = $this->contentType;
+    	}
+    
+    	if (empty($contentType))
+    	{
+    		return false;
+    	}
+    
+    	if (substr(strtolower($contentType), 0, 5) == "image") {
+    		return true;
+    	}
+    
+    	return false;
+    }
+    
+    public function generateSlug( $values, $unique=true )
+    {
+    	if (empty($values['metadata']['title'])) {
+    		$this->setError('Title is required');
+    	}
+    	$this->checkErrors();
+    	 
+    	$created = date('Y-m-d');
+    	if (!empty($values['created']['time'])) {
+    		$created = date('Y-m-d', $values['created']['time']);
+    	} elseif (!empty($this->get('created')) && !empty( $this->get('created.time') )) {
+    		$created = date('Y-m-d', $this->get('created.time'));
+    	}
+    
+    	$slug = \Web::instance()->slug( $created . '-' . $values['metadata']['title'] );
+    
+    	if ($unique)
+    	{
+    		$base_slug = $slug;
+    		$n = 1;
+    		while ($this->slugExists($slug))
+    		{
+    			$now = microtime(true);
+    			$suffix = md5( $now . "." . $n );
+    			$slug = $base_slug . '-' . $suffix;
+    			$n++;
+    		}
+    	}
+    
+    	return $slug;
+    }
+    
+    /**
+     *
+     *
+     * @param string $slug
+     * @return unknown|boolean
+     */
+    public function slugExists( $slug )
+    {
+   		$clone = (new static)->load(array('metadata.slug'=>$slug, 'type'=>$this->__type));
+    
+    	if (!empty($clone->id)) {
+    		return $clone;
+    	}
+    
+    	return false;
     }
 }
