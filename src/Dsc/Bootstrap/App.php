@@ -72,6 +72,51 @@ abstract class App extends \Dsc\Bootstrap
     		}
     	}
     }
+    
+    /**
+     * This method takes care of registration all view files
+     *
+     * @param $app Name of the part of application
+     */
+    protected function registerViewFiles($app){
+    	$f3 = \Base::instance();
+    
+    	// append this app's UI folder to the path
+    	 
+    	if (file_exists( $this->dir . '/' . $app . '/Views/' ))
+    	{
+    	// new way
+    		\Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/' . $app . '/Views/', $this->namespace . '/' . $app . '/Views' );
+    		// old way
+    		$ui = $f3->get( 'UI' );
+    		$ui .= ";" . $this->dir .  '/' . $app . "/Views/";
+    		$f3->set( 'UI', $ui );
+    	}
+    }
+    
+    /**
+     * This method takesccase of registration all modules
+     *
+     * @param $app Name of the part of application
+     */
+    protected function registerModules($app){
+    	// register the modules path, if you can
+    	$modules_path = $this->dir . "/Modules/";
+    	if (! file_exists( $modules_path ))
+    	{
+    		// let's try more specific route
+    		$modules_path = $this->dir .  '/' . $app . "/Modules/";
+    		if (! file_exists( $modules_path ))
+    		{ // not even here? maybe more luck next time
+    			$modules_path = '';
+    		}
+    	}
+    	 
+    	if (strlen( $modules_path ))
+    	{
+    		\Modules\Factory::registerPath( $modules_path );
+    	}
+    }
 
     /**
      * This method returns list of javascript files to be added to header
