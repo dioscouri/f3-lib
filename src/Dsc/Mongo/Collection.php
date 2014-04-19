@@ -315,12 +315,8 @@ class Collection extends \Dsc\Models
      */
     public static function collection()
     {
-        if (empty($this)) {
-            $item = new static();
-            return $item->getDb()->selectCollection( $item->collectionName() );
-        }
-
-        return $this->getDb()->selectCollection( $this->collectionName() );
+        $item = new static();
+        return $item->getDb()->selectCollection( $item->collectionName() );
     }
     
     /**
