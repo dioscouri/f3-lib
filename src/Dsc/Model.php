@@ -56,7 +56,7 @@ class Model extends Singleton
     
     public function log( $message, $priority='INFO', $category='General' )
     {
-        \Dsc\Models\Logs::instance()->add( $message, $priority, $category );
+        \Dsc\Mongo\Collections\Logs::add( $message, $priority, $category );
     }
 
     /**

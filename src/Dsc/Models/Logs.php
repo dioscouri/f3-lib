@@ -5,12 +5,12 @@ class Logs extends \Dsc\Models\Db\Mongo
 {
     protected $collection = 'common.logs';
     protected $default_ordering_direction = '-1';
-    protected $default_ordering_field = 'datetime';
+    protected $default_ordering_field = 'created.microtime';
     
     public function __construct($config=array())
     {
         $config['filter_fields'] = array(
-            'datetime', 'priority', 'category'
+            'datetime', 'priority', 'category', 'created.time', 'created.microtime'
         );
         $config['order_directions'] = array('1', '-1');
         
@@ -21,7 +21,8 @@ class Logs extends \Dsc\Models\Db\Mongo
     {
         $mapper = $this->getMapper();
         $mapper->reset();
-        $mapper->datetime = date('Y-m-d H:i:s');
+        $mapper->created = \Dsc\Mongo\Metastamp::getDate( 'now' );
+        $mapper->set('created.microtime', microtime( true ) );
         $mapper->priority = $priority;
         $mapper->category = $category;
         $mapper->message = $message;

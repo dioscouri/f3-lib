@@ -43,45 +43,20 @@ abstract class Bootstrap
 
     protected function runAdmin()
     {
-        $listener = "\\" . $this->namespace . "\\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
-        $listener = "\\" . $this->namespace . "\\Admin\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
         $this->_runBase( 'Admin' );
     }
 
     protected function runSite()
     {
-        $listener = "\\" . $this->namespace . "\\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
-        $listener = "\\" . $this->namespace . "\\Site\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
         $this->_runBase( 'Site' );
     }
 
     /**
      * This part is common for all running all parts of application (both Admin and Site)
      *
-     * @param $app Name
-     *            of the part of application
+     * @param $app Name of the part of application
      */
-    private function _runBase( $app )
+    protected function _runBase( $app )
     {
         $f3 = \Base::instance();
         $router = "\\" . $this->namespace . "\\Routes";
@@ -93,51 +68,85 @@ abstract class Bootstrap
                 $router = '';
             }
         }
+
         if (strlen( $router ))
         {
             // register all the routes
             \Dsc\System::instance()->get( 'router' )->mount( new $router(), $this->namespace );
         }
         
-        // register the modules path, if you can
-        $modules_path = $this->dir . "/src/" . $this->namespace . "/Modules/";
-        if (! file_exists( $modules_path ))
+        $listener = "\\" . $this->namespace . "\\Listener";
+        if (class_exists( $listener ))
         {
-            // let's try more specific route
-            $modules_path = $this->dir . "/src/" . $this->namespace . '/' . $app . "/Modules/";
-            if (! file_exists( $modules_path ))
-            { // not even here? maybe more luck next time
-                $modules_path = '';
-            }
+        	// register event listener
+        	\Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
+        }
+
+        $listener = "\\" . $this->namespace . "\\".$app."\\Listener";
+        if (class_exists( $listener ))
+        {
+        	// register event listener
+        	\Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
         }
         
-        if (strlen( $modules_path ))
-        {
-            \Modules\Factory::registerPath( $modules_path );
-        }
-        
-        // append this app's UI folder to the path
-        // new way
-        
-        if (file_exists( $this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/' ))
-        {
-            \Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/', $this->namespace . '/' . $app . '/Views' );
-            // old way
-            $ui = $f3->get( 'UI' );
-            $ui .= ";" . $this->dir . "/src/" . $this->namespace . '/' . $app . "/Views/";
-            $f3->set( 'UI', $ui );
-        }
-        else
-        {
-            if (file_exists( $this->dir . '/src/' . $this->namespace . '/Views/' ))
-            {
-                \Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views' );
-                // old way
-                $ui = $f3->get( 'UI' );
-                $ui .= ";" . $this->dir . "/src/" . $this->namespace . "/Views/";
-                $f3->set( 'UI', $ui );
-            }
-        }
+        $this->registerModules( $app );
+        $this->registerViewFiles( $app );
+    }
+    
+    /**
+     * This method takes care of registration all view files
+     * 
+     * @param $app Name of the part of application
+     */
+    protected function registerViewFiles($app){
+    	$f3 = \Base::instance();
+    	 
+    	// append this app's UI folder to the path
+    	// new way
+    	
+    	if (file_exists( $this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/' ))
+    	{
+    		\Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/', $this->namespace . '/' . $app . '/Views' );
+    		// old way
+    		$ui = $f3->get( 'UI' );
+    		$ui .= ";" . $this->dir . "/src/" . $this->namespace . '/' . $app . "/Views/";
+    		$f3->set( 'UI', $ui );
+    	}
+    	else
+    	{
+    		if (file_exists( $this->dir . '/src/' . $this->namespace . '/Views/' ))
+    		{
+    			\Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views' );
+    			// old way
+    			$ui = $f3->get( 'UI' );
+    			$ui .= ";" . $this->dir . "/src/" . $this->namespace . "/Views/";
+    			$f3->set( 'UI', $ui );
+    		}
+    	}
+    }
+    
+    /**
+     * This method takesccase of registration all modules
+     * 
+     * @param $app Name of the part of application
+     */
+    protected function registerModules($app){
+    	// register the modules path, if you can
+    	$modules_path = $this->dir . "/src/" . $this->namespace . "/Modules/";
+    	if (! file_exists( $modules_path ))
+    	{
+    		// let's try more specific route
+    		$modules_path = $this->dir . "/src/" . $this->namespace . '/' . $app . "/Modules/";
+    		if (! file_exists( $modules_path ))
+    		{ // not even here? maybe more luck next time
+    			$modules_path = '';
+    		}
+    	}
+    	
+    	if (strlen( $modules_path ))
+    	{
+    		\Modules\Factory::registerPath( $modules_path );
+    	}
     }
 
     protected function pre( $app )

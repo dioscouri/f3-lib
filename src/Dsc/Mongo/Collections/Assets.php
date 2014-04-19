@@ -1,22 +1,81 @@
 <?php 
 namespace Dsc\Mongo\Collections;
 
-class Assets extends Taggable 
+class Assets extends \Dsc\Mongo\Collections\Describable 
 {
     protected $__collection_name = 'common.assets.files';
-    protected $__collection_gridfs = 'common.assets';
+    protected $__collection_name_gridfs = 'common.assets';
     protected $__type = 'common.assets';
     protected $__config = array(
-    		'default_sort' => array(
-    				'metadata.created.time' => -1
-    		),
+        'default_sort' => array(
+            'metadata.created.time' => 1
+        ),
     );
-    
-    public function getGridFSCollectionName() 
+
+    /**
+     * This is static so you can do
+     * YourModel::collection()->find() or anything else with the MongoCollection object
+     */
+    public static function collectionGridFS()
     {
-        return $this->__collection_gridfs;
+        $item = new static();
+        return $item->getDb()->selectCollection( $item->collectionNameGridFS() );
     }
     
+    /**
+     * Gets the collection name for this model
+     */
+    public function collectionNameGridFS()
+    {
+        if (empty($this->__collection_name_gridfs))
+        {
+            throw new \Exception('Must specify a collection name for GridFS');
+        }
+    
+        return $this->__collection_name_gridfs;
+    }    
+    
+    /**
+     * 
+     * @param string $unique
+     * @return string
+     */
+    public function generateSlug( $unique=true )
+    {
+        if (empty($this->title)) {
+            $this->setError('A title is required for generating the slug');
+            return $this->checkErrors();
+        }
+    
+        
+        if (!empty($this->{'metadata.created.time'})) {
+            $created = date('Y-m-d', $this->{'metadata.created.time'});
+        } else {
+            $created = date('Y-m-d');
+        }
+        
+        $slug = \Web::instance()->slug( $created . '-' . $this->title );
+    
+        if ($unique)
+        {
+            $base_slug = $slug;
+            $n = 1;
+            while ($this->slugExists($slug))
+            {
+                $now = microtime(true);
+                $suffix = md5( $now . "." . $n );
+                $slug = $base_slug . '-' . $suffix;
+                $n++;
+            }
+        }
+    
+        return $slug;
+    }
+    
+    /**
+     * 
+     * @param unknown $buffer
+     */
     public function getMimeType( $buffer ) 
     {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -57,6 +116,11 @@ class Assets extends Taggable
         return $thumb->toBuffer();
     }
     
+    /**
+     * 
+     * @param unknown $imagick
+     * @param unknown $options
+     */
     public function getThumbFromImagick( $imagick, $options=array() )
     {
         $width = !empty($options['width']) ? (int) $options['width'] : 460;
@@ -67,6 +131,11 @@ class Assets extends Taggable
         return $imagick->getImageBlob();
     }
     
+    /**
+     * 
+     * @param unknown $buffer
+     * @return boolean
+     */
     public function isBlobImage( $buffer )
     {
         try {
@@ -77,6 +146,13 @@ class Assets extends Taggable
         } 
     }
     
+    /**
+     * 
+     * @param unknown $buffer
+     * @param string $ext
+     * @param unknown $options
+     * @return NULL
+     */
     public function getThumb( $buffer, $ext=null, $options=array() )
     {
         if ($this->isBlobImage( $buffer )) {
@@ -88,9 +164,12 @@ class Assets extends Taggable
         return null;
     }
     
-    protected function fetchConditions()
+    /**
+     * 
+     */
+    protected function old_fetchFilters()
     {
-    	parent::fetchConditions();
+        $this->filters = array();
     
         $filter_keyword = $this->getState('filter.keyword');
         if ($filter_keyword && is_string($filter_keyword))
@@ -102,58 +181,95 @@ class Assets extends Taggable
             $where[] = array('metadata.creator.name'=>$key);
             $where[] = array('metadata.slug'=>$key);
             
-            $this->setCondition('$or', $where);
-        }    
+            $this->filters['$or'] = $where;
+        }
+    
+        $filter_id = $this->getState('filter.id');
+        if (strlen($filter_id))
+        {
+            $this->filters['_id'] = new \MongoId((string) $filter_id);
+        }
     
         $filter_slug = $this->getState('filter.slug');
         if ($filter_slug) {
-            $this->setCondition('metadata.slug', $filter_slug );
+            $this->filters['metadata.slug'] = $filter_slug;
         }
 
+        $filter_ids = $this->getState('filter.ids');
+        if (!empty($filter_ids) && is_array($filter_ids))
+        {
+        	$ids = array();
+        	foreach ($filter_ids as $filter_id) {
+        		$ids[] = new \MongoId((string) $filter_id);
+        	}
+        	$this->filters['_id'] = array(
+        			'$in' => $ids
+        	);
+        }
+        
         $filter_content_type = $this->getState('filter.content_type');
         if (strlen($filter_content_type))
         {
             $key =  new \MongoRegex('/'. $filter_content_type .'/i');
-            $this->setCondition('contentType', $key);
+            $this->filters['contentType'] = $key;
+        }
+        
+        $filter_type = $this->getState('filter.type');
+        if ($filter_type) {
+            if (is_bool($filter_type) && $filter_type) {
+                $this->filters['metadata.type'] = $this->type;
+            } elseif (strlen($filter_type)) {
+                $this->filters['metadata.type'] = $filter_type;
+            }
         }
     
+        return $this->filters;
+    }
+    
+    public function old_save( $values, $options=array(), $mapper=null )
+    {
+        if (empty($values['metadata']['slug']))
+        {
+            if (!empty($mapper->{'metadata.slug'})) {
+                $values['metadata']['slug'] = $mapper->{'metadata.slug'};
+            }
+            else {
+                $values['metadata']['slug'] = $this->generateSlug( $values, $mapper );
+            }            
+        }
         
-        return $this;
-    }
-
-
-    protected function beforeValidate()
-    {
-    	if (empty($this->slug) && !empty($this->title))
-    	{
-    		$this->slug = $this->generateSlug();
-    	}
-    	
-    	if (empty( $this->md5 ) )
-    	{
-    		if  (!empty($this->{'details.ETag'})) {
-    			$this->md5 = str_replace('"', '', $this->{'details.ETag'} );
-    		}
-    		elseif (!empty($this->{'filename'})) {
-    			$this->md5 = md5_file( $this->{'filename'} );
-    		}
-    		else {
-    			$this->md5 = md5( $this->{'metadata.slug'} );
-    		}
-    	}
-    	 
-    	return parent::beforeValidate();
+        if (empty($values['md5']))
+        {
+            if (!empty($mapper->{'md5'})) {
+                $values['md5'] = $mapper->{'md5'};
+            }
+            elseif (!empty($mapper->{'details.ETag'})) {
+                $values['md5'] = str_replace('"', '', $mapper->{'details.ETag'} );
+            }
+            elseif (!empty($mapper->{'filename'})) {
+                $values['md5'] = md5_file( $mapper->{'filename'} );
+            }            
+            else {
+                $values['md5'] = md5( $values['metadata']['slug'] );
+            }
+        }
+    
+        if (!empty($values['metadata']['tags']) && !is_array($values['metadata']['tags']))
+        {
+            $values['metadata']['tags'] = trim($values['metadata']['tags']);
+            if (!empty($values['metadata']['tags'])) {
+                $values['metadata']['tags'] = \Base::instance()->split( (string) $values['metadata']['tags'] );
+            }
+        }
+    
+        if (empty($values['metadata']['tags'])) {
+            unset($values['metadata']['tags']);
+        }
+    
+        return parent::save( $values, $options, $mapper );
     }
     
-    protected function beforeSave()
-    {
-    	if (empty($this->type)) {
-    		$this->type = $this->__type;
-    	}
-    	return parent::beforeSave();
-    }
-    
-    public function createFromUrl( $url, $options=array() )
+    public static function createFromUrl( $url, $options=array() )
     {
         $options = $options + array('width'=>460, 'height'=>308);
         
@@ -166,13 +282,13 @@ class Assets extends Taggable
         $request = $web->request( $url );
         if (!empty($request['body']))
         {
-            $model = $this;
+            $model = new static;
             $db = $model->getDb();
-            $grid = $db->getGridFS( $model->getGridFSCollectionName() );
+            $grid = $db->getGridFS( $model->collectionNameGridFS() );
 
             $url_path = parse_url( $url , PHP_URL_PATH );
             $pathinfo = pathinfo( $url_path );
-            $filename = $this->inputfilter()->clean( $url_path );
+            $filename = $this->inputfilter->clean( $url_path );
             $buffer = $request['body'];
             $originalname = str_replace( "/", "-", $filename );
 
@@ -187,12 +303,12 @@ class Assets extends Taggable
                 'md5' => md5( $filename ),
                 'thumb' => $thumb,
                 'url' => null,
-            	'metadata' => array(
-            			"title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter()->clean( $originalname ) ),
+                'metadata' => array(
+                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter->clean( $originalname ) )
                 ),
                 'details' => array(
                     "filename" => $filename,
-                    "source_url" => $url,
+                    "source_url" => $url
                 )
             );
 
@@ -206,8 +322,9 @@ class Assets extends Taggable
             // save the file
             if ($storedfile = $grid->storeBytes( $buffer, $values ))
             {
-            	$model->load( array( "_id" => new \MongoId( $storedfile ) ) );
-                $model->override( $values );
+                $model->load(array('_id'=>$storedfile));
+                $model->bind($values);
+                $model->save();
             }
 
             // $storedfile has newly stored file's Document ID
@@ -232,76 +349,27 @@ class Assets extends Taggable
     public static function distinctTypes($query=array())
     {
         $model = new static();
-        $distinct = $model->getCollection()->distinct("type", $query);
+        $distinct = $model->getCollection()->distinct("metadata.type", $query);
         $distinct = array_values( array_filter( $distinct ) );
     
         return $distinct;
     }
-    
-    public function isImage( $contentType=null )
+
+	public function isImage( $contentType=null ) 
     {
-    	if (empty($contentType)) {
-    		$contentType = $this->contentType;
-    	}
-    
-    	if (empty($contentType))
-    	{
-    		return false;
-    	}
-    
-    	if (substr(strtolower($contentType), 0, 5) == "image") {
-    		return true;
-    	}
-    
-    	return false;
-    }
-    
-    public function generateSlug( $values, $unique=true )
-    {
-    	if (empty($values['metadata']['title'])) {
-    		$this->setError('Title is required');
-    	}
-    	$this->checkErrors();
-    	 
-    	$created = date('Y-m-d');
-    	if (!empty($values['created']['time'])) {
-    		$created = date('Y-m-d', $values['created']['time']);
-    	} elseif (!empty($this->get('created')) && !empty( $this->get('created.time') )) {
-    		$created = date('Y-m-d', $this->get('created.time'));
-    	}
-    
-    	$slug = \Web::instance()->slug( $created . '-' . $values['metadata']['title'] );
-    
-    	if ($unique)
-    	{
-    		$base_slug = $slug;
-    		$n = 1;
-    		while ($this->slugExists($slug))
-    		{
-    			$now = microtime(true);
-    			$suffix = md5( $now . "." . $n );
-    			$slug = $base_slug . '-' . $suffix;
-    			$n++;
-    		}
-    	}
-    
-    	return $slug;
-    }
-    
-    /**
-     *
-     *
-     * @param string $slug
-     * @return unknown|boolean
-     */
-    public function slugExists( $slug )
-    {
-   		$clone = (new static)->load(array('metadata.slug'=>$slug, 'type'=>$this->__type));
-    
-    	if (!empty($clone->id)) {
-    		return $clone;
-    	}
-    
-    	return false;
+        if (empty($contentType)) {
+            $contentType = $this->contentType;
+        }
+        
+        if (empty($contentType)) 
+        {
+            return false;
+        }
+        
+        if (substr(strtolower($contentType), 0, 5) == "image") {
+            return true;
+        }
+        
+        return false;
     }
 }
