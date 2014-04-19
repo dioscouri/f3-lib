@@ -43,35 +43,11 @@ abstract class Bootstrap
 
     protected function runAdmin()
     {
-        $listener = "\\" . $this->namespace . "\\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
-        $listener = "\\" . $this->namespace . "\\Admin\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
         $this->_runBase( 'Admin' );
     }
 
     protected function runSite()
     {
-        $listener = "\\" . $this->namespace . "\\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
-        $listener = "\\" . $this->namespace . "\\Site\Listener";
-        if (class_exists( $listener ))
-        {
-            // register event listener
-            \Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
-        }
         $this->_runBase( 'Site' );
     }
 
@@ -81,7 +57,7 @@ abstract class Bootstrap
      * @param $app Name
      *            of the part of application
      */
-    private function _runBase( $app )
+    protected function _runBase( $app )
     {
         $f3 = \Base::instance();
         $router = "\\" . $this->namespace . "\\Routes";
@@ -93,12 +69,27 @@ abstract class Bootstrap
                 $router = '';
             }
         }
+
         if (strlen( $router ))
         {
             // register all the routes
             \Dsc\System::instance()->get( 'router' )->mount( new $router(), $this->namespace );
         }
         
+        $listener = "\\" . $this->namespace . "\\Listener";
+        if (class_exists( $listener ))
+        {
+        	// register event listener
+        	\Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
+        }
+
+        $listener = "\\" . $this->namespace . "\\".$app."\\Listener";
+        if (class_exists( $listener ))
+        {
+        	// register event listener
+        	\Dsc\System::instance()->getDispatcher()->addListener( $listener::instance() );
+        }
+
         // register the modules path, if you can
         $modules_path = $this->dir . "/src/" . $this->namespace . "/Modules/";
         if (! file_exists( $modules_path ))
