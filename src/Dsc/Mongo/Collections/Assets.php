@@ -238,7 +238,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
 
             $url_path = parse_url( $url , PHP_URL_PATH );
             $pathinfo = pathinfo( $url_path );
-            $filename = $this->inputfilter->clean( $url_path );
+            $filename = $model->inputfilter()->clean( $url_path );
             $buffer = $request['body'];
             $originalname = str_replace( "/", "-", $filename );
 
@@ -254,7 +254,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 'thumb' => $thumb,
                 'url' => null,
                 'metadata' => array(
-                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputFilter()->clean( $originalname ) )
+                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) )
                 ),
                 'details' => array(
                     "filename" => $filename,
