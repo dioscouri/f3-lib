@@ -202,6 +202,16 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
      */
     protected function beforeSave()
     {
+        $this->tree = new \MongoId( (string) $this->tree );
+        
+        if (!empty($this->parent)) {
+            $this->parent = new \MongoId( (string) $this->tree );
+        }
+
+        if (isset($this->published)) {
+            $this->published = (bool) $this->published;
+        }
+        
         // this is an insert
         if (!empty($this->__isCreate)) 
         {
