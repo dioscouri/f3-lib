@@ -8,7 +8,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     protected $__type = 'common.assets';
     protected $__config = array(
         'default_sort' => array(
-            'metadata.created.time' => 1
+            'metadata.created.time' => -1
         ),
     );
 
@@ -18,8 +18,12 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public static function collectionGridFS()
     {
-        $item = new static();
-        return $item->getDb()->selectCollection( $item->collectionNameGridFS() );
+        if (empty($this)) {
+            $item = new static();
+        } else {
+            $item = clone $this;
+        }
+        return $item->getDb()->getGridFS( $item->collectionNameGridFS() );
     }
     
     /**
@@ -42,11 +46,10 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public function generateSlug( $unique=true )
     {
-        if (empty($this->title)) {
+        if (empty($this->get('title'))) {
             $this->setError('A title is required for generating the slug');
             return $this->checkErrors();
         }
-    
         
         if (!empty($this->{'metadata.created.time'})) {
             $created = date('Y-m-d', $this->{'metadata.created.time'});
@@ -54,7 +57,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             $created = date('Y-m-d');
         }
         
-        $slug = \Web::instance()->slug( $created . '-' . $this->title );
+        $slug = \Web::instance()->slug( $created . '-' . $this->{'title'} );
     
         if ($unique)
         {
@@ -163,10 +166,59 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         
         return null;
     }
+
+    protected function fetchConditions()
+    {
+    	parent::fetchConditions();
+    
+    	$filter_keyword = $this->getState('filter.keyword');
+    	if ($filter_keyword && is_string($filter_keyword))
+    	{
+    		$key =  new \MongoRegex('/'. $filter_keyword .'/i');
+    
+    		$where = array();
+    		$where[] = array('title'=>$key);
+    		$where[] = array('slug'=>$key);
+    		$where[] = array('metadata.creator.name'=>$key);
+    
+    		$this->setCondition('$or', $where);
+    	}
+    	
+    	$filter_content_type = $this->getState('filter.content_type');
+    	if (strlen($filter_content_type))
+    	{
+    		$key =  new \MongoRegex('/'. $filter_content_type .'/i');
+    		$this->setCondition( 'contentType', $key );
+    	}
+    	 
+    	return $this;
+    }
+    
+    protected function beforeSave()
+    {
+    	if (empty($this->type)) {
+    		$this->type = $this->__type;
+    	}
+        
+        if (empty($this->md5 ) )
+        {
+			if (!empty($this->{'details.ETag'})) {
+                $this->md5 = str_replace('"', '', $this->{'details.ETag'} );
+            }
+            elseif (!empty($this->filename)) {
+                $this->md5 = md5_file( $this->filename );
+            }            
+            else {
+                $this->md5 = md5( $this->slug );
+            }
+        }
+    	
+        return parent::beforeSave();
+    }
     
     /**
      * Creates an asset directly from a URL
-     * 
+     *
      * @param unknown $url
      * @param unknown $options
      * @return multitype:string NULL boolean
@@ -206,7 +258,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 'thumb' => $thumb,
                 'url' => null,
                 'metadata' => array(
-                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter->clean( $originalname ) )
+                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputFilter()->clean( $originalname ) )
                 ),
                 'details' => array(
                     "filename" => $filename,
@@ -257,6 +309,12 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         return $distinct;
     }
 
+    /**
+     * Checks id this asset is an image
+     * 
+     * @param string $contentType
+     * @return boolean
+     */
 	public function isImage( $contentType=null ) 
     {
         if (empty($contentType)) {
