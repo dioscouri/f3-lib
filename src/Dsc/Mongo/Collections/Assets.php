@@ -165,110 +165,12 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     }
     
     /**
+     * Creates an asset directly from a URL
      * 
+     * @param unknown $url
+     * @param unknown $options
+     * @return multitype:string NULL boolean
      */
-    protected function old_fetchFilters()
-    {
-        $this->filters = array();
-    
-        $filter_keyword = $this->getState('filter.keyword');
-        if ($filter_keyword && is_string($filter_keyword))
-        {
-            $key =  new \MongoRegex('/'. $filter_keyword .'/i');
-    
-            $where = array();
-            $where[] = array('metadata.title'=>$key);
-            $where[] = array('metadata.creator.name'=>$key);
-            $where[] = array('metadata.slug'=>$key);
-            
-            $this->filters['$or'] = $where;
-        }
-    
-        $filter_id = $this->getState('filter.id');
-        if (strlen($filter_id))
-        {
-            $this->filters['_id'] = new \MongoId((string) $filter_id);
-        }
-    
-        $filter_slug = $this->getState('filter.slug');
-        if ($filter_slug) {
-            $this->filters['metadata.slug'] = $filter_slug;
-        }
-
-        $filter_ids = $this->getState('filter.ids');
-        if (!empty($filter_ids) && is_array($filter_ids))
-        {
-        	$ids = array();
-        	foreach ($filter_ids as $filter_id) {
-        		$ids[] = new \MongoId((string) $filter_id);
-        	}
-        	$this->filters['_id'] = array(
-        			'$in' => $ids
-        	);
-        }
-        
-        $filter_content_type = $this->getState('filter.content_type');
-        if (strlen($filter_content_type))
-        {
-            $key =  new \MongoRegex('/'. $filter_content_type .'/i');
-            $this->filters['contentType'] = $key;
-        }
-        
-        $filter_type = $this->getState('filter.type');
-        if ($filter_type) {
-            if (is_bool($filter_type) && $filter_type) {
-                $this->filters['metadata.type'] = $this->type;
-            } elseif (strlen($filter_type)) {
-                $this->filters['metadata.type'] = $filter_type;
-            }
-        }
-    
-        return $this->filters;
-    }
-    
-    public function old_save( $values, $options=array(), $mapper=null )
-    {
-        if (empty($values['metadata']['slug']))
-        {
-            if (!empty($mapper->{'metadata.slug'})) {
-                $values['metadata']['slug'] = $mapper->{'metadata.slug'};
-            }
-            else {
-                $values['metadata']['slug'] = $this->generateSlug( $values, $mapper );
-            }            
-        }
-        
-        if (empty($values['md5']))
-        {
-            if (!empty($mapper->{'md5'})) {
-                $values['md5'] = $mapper->{'md5'};
-            }
-            elseif (!empty($mapper->{'details.ETag'})) {
-                $values['md5'] = str_replace('"', '', $mapper->{'details.ETag'} );
-            }
-            elseif (!empty($mapper->{'filename'})) {
-                $values['md5'] = md5_file( $mapper->{'filename'} );
-            }            
-            else {
-                $values['md5'] = md5( $values['metadata']['slug'] );
-            }
-        }
-    
-        if (!empty($values['metadata']['tags']) && !is_array($values['metadata']['tags']))
-        {
-            $values['metadata']['tags'] = trim($values['metadata']['tags']);
-            if (!empty($values['metadata']['tags'])) {
-                $values['metadata']['tags'] = \Base::instance()->split( (string) $values['metadata']['tags'] );
-            }
-        }
-    
-        if (empty($values['metadata']['tags'])) {
-            unset($values['metadata']['tags']);
-        }
-    
-        return parent::save( $values, $options, $mapper );
-    }
-    
     public static function createFromUrl( $url, $options=array() )
     {
         $options = $options + array('width'=>460, 'height'=>308);
