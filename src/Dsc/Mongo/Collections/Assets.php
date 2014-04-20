@@ -18,11 +18,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public static function collectionGridFS()
     {
-        if (empty($this)) {
-            $item = new static();
-        } else {
-            $item = clone $this;
-        }
+        $item = new static;
         return $item->getDb()->getGridFS( $item->collectionNameGridFS() );
     }
     
@@ -310,7 +306,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     }
 
     /**
-     * Checks id this asset is an image
+     * Checks if this asset is an image
      * 
      * @param string $contentType
      * @return boolean
