@@ -263,6 +263,14 @@ class ArrayHelper extends \Prefab
 	    return $array;
 	}
 	
+	/**
+	 * Sort an array of arrays
+	 * 
+	 * @param array $a
+	 * @param unknown $k
+	 * @param number $direction
+	 * @return Ambigous <number, array>|number|unknown
+	 */
 	public static function sortArrays(array $a, $k, $direction = 1)
 	{
 	    $sortDirection = (array) $direction;

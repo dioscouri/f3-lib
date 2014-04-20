@@ -284,19 +284,34 @@ class Pagination
     }
 
     /**
-     * checks the route
+     * Removes the pagination string (e.g. /page/4) from the route
+     * so that the new routes don't have "page" duplicates, e.g. /page/4/page/5
      * 
      * @return string
      */
     protected function checkRoute( $route )
     {
-        $len = strlen( $this->routeKeyPrefix );
-        // checks if the prefix is already appended to the very last of the route.
-        // if so remove it
-        if (substr_compare( $route, $this->routeKeyPrefix, - $len, $len ) == 0)
+        $txt = $route;
+        
+        $re1='.*?';	# Non-greedy match on filler
+        $re2='\\/';	# Uninteresting: c
+        $re3='.*?';	# Non-greedy match on filler
+        $re4='(\\/)';	# Any Single Character 1
+        $re5='(page)';	# Word 1
+        $re6='(\\/)';	# Any Single Character 2
+        $re7='(\\d+)';	# Integer Number 1
+        
+        if ($c=preg_match_all ("/".$re1.$re2.$re3.$re4.$re5.$re6.$re7."/is", $txt, $matches))
         {
-            $route = str_replace( $this->routeKeyPrefix, '', $route );
-        }
+            $c1=$matches[1][0];
+            $word1=$matches[2][0];
+            $c2=$matches[3][0];
+            $int1=$matches[4][0];
+            //echo \Dsc\Debug::dump( "($c1) ($word1) ($c2) ($int1) \n" );
+            
+            $route = str_replace($c1.$word1.$c2.$int1, '', $route);
+        }        
+        
         return $route;
     }
 
@@ -310,25 +325,44 @@ class Pagination
         if (is_null( $this->linkPath ))
         {
             $route = $this->fw->get( 'PARAMS.0' );
-            if ($this->fw->exists( 'PARAMS.' . $this->routeKey ))
+            if ($this->fw->exists( 'PARAMS.' . $this->routeKey )) {
                 $route = preg_replace( "/" . $this->fw->get( 'PARAMS.' . $this->routeKey ) . "$/", '', $route );
-            elseif (substr( $route, - 1 ) != '/')
+            } elseif (substr( $route, - 1 ) != '/') {
                 $route .= '/';
+            }
         }
-        else
+        else {
             $route = $this->linkPath;
+        }
         
+        $routeSuffix = null;
+        $pieces = explode('?', $route, 2);
+        
+        $route = $pieces[0];
+        if (substr( $route, -1 ) != '/') {
+            $route .= '/';
+        }
+
         $route = $this->checkRoute( $route );
-        // TODO this is problably not the solution, but we are getting two page suffixes in the links
+        
+        if (!empty($pieces[1])) {
+            $routeSuffix = '?' . $pieces[1];
+            if (substr( $routeSuffix, -1 ) == '/') {
+                $routeSuffix = substr($routeSuffix, 0, -1);
+            }
+        }
         
         $this->fw->set( 'pg.route', $route );
         $this->fw->set( 'pg.prefix', $this->routeKeyPrefix );
+        $this->fw->set( 'pg.routeSuffix', $routeSuffix );
         $this->fw->set( 'pg.currentPage', $this->current_page );
         $this->fw->set( 'pg.nextPage', $this->getNext() );
         $this->fw->set( 'pg.prevPage', $this->getPrev() );
         $this->fw->set( 'pg.firstPage', $this->getFirst() );
         $this->fw->set( 'pg.lastPage', $this->getLast() );
         $this->fw->set( 'pg.rangePages', $this->getInRange() );
+        
+        //echo \Dsc\Debug::dump( $this->fw->get( 'pg' ) );
         $output = \Template::instance()->render( $this->template );
         $this->fw->clear( 'pg' );
         return $output;
