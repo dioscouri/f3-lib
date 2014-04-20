@@ -8,7 +8,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     protected $__type = 'common.assets';
     protected $__config = array(
         'default_sort' => array(
-            'metadata.created.time' => 1
+            'metadata.created.time' => -1
         ),
     );
 
@@ -18,8 +18,12 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public static function collectionGridFS()
     {
-        $item = new static();
-        return $item->getDb()->selectCollection( $item->collectionNameGridFS() );
+        if (empty($this)) {
+            $item = new static();
+        } else {
+            $item = clone $this;
+        }
+        return $item->getDb()->getGridFS( $item->collectionNameGridFS() );
     }
     
     /**
@@ -42,11 +46,10 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public function generateSlug( $unique=true )
     {
-        if (empty($this->title)) {
+        if (empty($this->get('title'))) {
             $this->setError('A title is required for generating the slug');
             return $this->checkErrors();
         }
-    
         
         if (!empty($this->{'metadata.created.time'})) {
             $created = date('Y-m-d', $this->{'metadata.created.time'});
@@ -54,7 +57,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             $created = date('Y-m-d');
         }
         
-        $slug = \Web::instance()->slug( $created . '-' . $this->title );
+        $slug = \Web::instance()->slug( $created . '-' . $this->{'title'} );
     
         if ($unique)
         {
@@ -163,110 +166,53 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         
         return null;
     }
-    
-    /**
-     * 
-     */
-    protected function old_fetchFilters()
-    {
-        $this->filters = array();
-    
-        $filter_keyword = $this->getState('filter.keyword');
-        if ($filter_keyword && is_string($filter_keyword))
-        {
-            $key =  new \MongoRegex('/'. $filter_keyword .'/i');
-    
-            $where = array();
-            $where[] = array('metadata.title'=>$key);
-            $where[] = array('metadata.creator.name'=>$key);
-            $where[] = array('metadata.slug'=>$key);
-            
-            $this->filters['$or'] = $where;
-        }
-    
-        $filter_id = $this->getState('filter.id');
-        if (strlen($filter_id))
-        {
-            $this->filters['_id'] = new \MongoId((string) $filter_id);
-        }
-    
-        $filter_slug = $this->getState('filter.slug');
-        if ($filter_slug) {
-            $this->filters['metadata.slug'] = $filter_slug;
-        }
 
-        $filter_ids = $this->getState('filter.ids');
-        if (!empty($filter_ids) && is_array($filter_ids))
-        {
-        	$ids = array();
-        	foreach ($filter_ids as $filter_id) {
-        		$ids[] = new \MongoId((string) $filter_id);
-        	}
-        	$this->filters['_id'] = array(
-        			'$in' => $ids
-        	);
-        }
-        
-        $filter_content_type = $this->getState('filter.content_type');
-        if (strlen($filter_content_type))
-        {
-            $key =  new \MongoRegex('/'. $filter_content_type .'/i');
-            $this->filters['contentType'] = $key;
-        }
-        
-        $filter_type = $this->getState('filter.type');
-        if ($filter_type) {
-            if (is_bool($filter_type) && $filter_type) {
-                $this->filters['metadata.type'] = $this->type;
-            } elseif (strlen($filter_type)) {
-                $this->filters['metadata.type'] = $filter_type;
-            }
-        }
+    protected function fetchConditions()
+    {
+    	parent::fetchConditions();
     
-        return $this->filters;
+    	$filter_keyword = $this->getState('filter.keyword');
+    	if ($filter_keyword && is_string($filter_keyword))
+    	{
+    		$key =  new \MongoRegex('/'. $filter_keyword .'/i');
+    
+    		$where = array();
+    		$where[] = array('title'=>$key);
+    		$where[] = array('slug'=>$key);
+    		$where[] = array('metadata.creator.name'=>$key);
+    
+    		$this->setCondition('$or', $where);
+    	}
+    	$filter_content_type = $this->getState('filter.content_type');
+    	if (strlen($filter_content_type))
+    	{
+    		$key =  new \MongoRegex('/'. $filter_content_type .'/i');
+    		$this->setCondition( 'contentType', $key );
+    	}
+    	 
+    	return $this;
     }
     
-    public function old_save( $values, $options=array(), $mapper=null )
+    protected function beforeSave()
     {
-        if (empty($values['metadata']['slug']))
-        {
-            if (!empty($mapper->{'metadata.slug'})) {
-                $values['metadata']['slug'] = $mapper->{'metadata.slug'};
-            }
-            else {
-                $values['metadata']['slug'] = $this->generateSlug( $values, $mapper );
-            }            
-        }
+    	if (empty($this->type)) {
+    		$this->type = $this->__type;
+    	}
         
-        if (empty($values['md5']))
+        if (empty($this->md5 ) )
         {
-            if (!empty($mapper->{'md5'})) {
-                $values['md5'] = $mapper->{'md5'};
+			if (!empty($this->{'details.ETag'})) {
+                $this->md5 = str_replace('"', '', $this->{'details.ETag'} );
             }
-            elseif (!empty($mapper->{'details.ETag'})) {
-                $values['md5'] = str_replace('"', '', $mapper->{'details.ETag'} );
-            }
-            elseif (!empty($mapper->{'filename'})) {
-                $values['md5'] = md5_file( $mapper->{'filename'} );
+            elseif (!empty($this->filename)) {
+                $this->md5 = md5_file( $this->filename );
             }            
             else {
-                $values['md5'] = md5( $values['metadata']['slug'] );
+                $this->md5 = md5( $this->slug );
             }
         }
-    
-        if (!empty($values['metadata']['tags']) && !is_array($values['metadata']['tags']))
-        {
-            $values['metadata']['tags'] = trim($values['metadata']['tags']);
-            if (!empty($values['metadata']['tags'])) {
-                $values['metadata']['tags'] = \Base::instance()->split( (string) $values['metadata']['tags'] );
-            }
-        }
-    
-        if (empty($values['metadata']['tags'])) {
-            unset($values['metadata']['tags']);
-        }
-    
-        return parent::save( $values, $options, $mapper );
+    	
+        return parent::beforeSave();
     }
     
     public static function createFromUrl( $url, $options=array() )
@@ -304,7 +250,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 'thumb' => $thumb,
                 'url' => null,
                 'metadata' => array(
-                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputfilter->clean( $originalname ) )
+                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $this->inputFilter()->clean( $originalname ) )
                 ),
                 'details' => array(
                     "filename" => $filename,
