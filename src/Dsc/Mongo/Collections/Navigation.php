@@ -83,6 +83,13 @@ class Navigation extends \Dsc\Mongo\Collections\Nested
         return $this;
     }
     
+    protected function beforeSave()
+    {
+        $this->tree = new \MongoId( (string) $this->tree );
+        
+        return parent::beforeSave();
+    }
+    
     /**
      * Gets all the root level menu items.
      * TODO Move this upstream and make it use __type

@@ -59,6 +59,8 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
             $this->slug = $this->generateSlug();
         }
         
+        $this->path = $this->generatePath();
+        
         return parent::beforeValidate();
     }
     
@@ -190,6 +192,8 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     protected function beforeCreate()
     {
         $this->__isCreate = true;
+        
+        $this->slug = $this->generateSlug();
     }
 
     /**
@@ -309,20 +313,64 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
 
     protected function beforeUpdate()
     {
+        // get the old version so we can do some comparisons        
+        $this->__oldNode = (new static)->load( array( '_id' => $this->id ) );
+        
         // are we moving the node? or just updating its details?
-        $this->__isMoving = false;
-        $this->__oldNode = clone $this;
-        $this->__oldNode->load( array( '_id' => $this->id ) );
+        $this->__isMoving = false;        
         if ($this->__oldNode->parent != $this->parent)
         {
             $this->__isMoving = true;
+        }
+
+        // do we need to update the children after save?
+        $this->__update_children = isset($this->__update_children) ? $this->__update_children : false;
+        if (   $this->__oldNode->tree != $this->tree 
+            || $this->__oldNode->parent != $this->parent 
+            || $this->__oldNode->title != $this->title 
+            || $this->__oldNode->path != $this->path
+        ) 
+        {
+            // update children after save
+            $this->__update_children = true;
         }
         
         return parent::beforeUpdate();
     }
     
     protected function afterUpdate()
-    {        
+    {
+        if ($this->__oldNode->tree != $this->tree)
+        {
+            // update the tree value for this node and all descendants
+            $result = $this->collection()->update(
+                array(
+                    'lft' => array('$gte' => $this->__oldNode->lft, '$lte' => $this->__oldNode->rgt ),
+                    'tree' => $this->__oldNode->tree
+                ),
+                array(
+                    '$set' => array( 'tree' => $this->tree )
+                ),
+                array(
+                    'multiple'=> true
+                )
+            );
+        }
+        
+        if ($this->__update_children)
+        {
+            if ($children = (new static)->setState('filter.parent', $this->id)->getList())
+            {
+                foreach ($children as $child)
+                {
+                    $child->tree = $this->tree;
+                    $child->path = null;
+                    $child->__update_children = true;
+                    $child->save();
+                }
+            }
+        }        
+        
         if (!empty($this->__isMoving))
         {
             $this->rebuildTree( $this->tree );
@@ -499,7 +547,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         {
             $node = $this->getRoot( $tree );
         }
-        
+        echo \Dsc\Debug::dump($node);
         // the right value of this node is the left value + 1
         $right = $left + 1;
         
