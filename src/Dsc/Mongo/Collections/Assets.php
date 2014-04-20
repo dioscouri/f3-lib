@@ -42,7 +42,8 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public function generateSlug( $unique=true )
     {
-        if (empty($this->get('title'))) {
+        $title = !empty($this->get('title')) ? $this->get('title') : $this->{'metadata.title'};
+        if (empty($title)) {
             $this->setError('A title is required for generating the slug');
             return $this->checkErrors();
         }
@@ -53,7 +54,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             $created = date('Y-m-d');
         }
         
-        $slug = \Web::instance()->slug( $created . '-' . $this->{'title'} );
+        $slug = \Web::instance()->slug( $created . '-' . $title );
     
         if ($unique)
         {
@@ -247,6 +248,8 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 $thumb = new \MongoBinData( $thumb_binary_data, 2 );
             }
 
+            $title = \Joomla\String\Normalise::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) );
+            
             $values = array(
                 'storage' => 'gridfs',
                 'contentType' => $model->getMimeType( $buffer ),
@@ -254,8 +257,9 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 'thumb' => $thumb,
                 'url' => null,
                 'metadata' => array(
-                    "title" => \Joomla\String\Normalise::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) )
+                    "title" => $title
                 ),
+                'title' => $title,
                 'details' => array(
                     "filename" => $filename,
                     "source_url" => $url
