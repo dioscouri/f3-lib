@@ -362,9 +362,11 @@ class Pagination
         $this->fw->set( 'pg.lastPage', $this->getLast() );
         $this->fw->set( 'pg.rangePages', $this->getInRange() );
         
-        //echo \Dsc\Debug::dump( $this->fw->get( 'pg' ) );
-        $output = \Template::instance()->render( $this->template );
+        $theme = \Dsc\System::instance()->get('theme');
+        //echo \Dsc\Debug::dump( $this->template );        
+        $output = $theme->renderView( $this->template );
         $this->fw->clear( 'pg' );
+        
         return $output;
     }
 

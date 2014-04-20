@@ -3,6 +3,8 @@ namespace Dsc\Traits\Models;
 
 trait OrderableCollection 
 {
+    public $ordering;
+    
     /**
      * Move the model up, meaning decrease ordering value and increase all others where ordering = $this->ordering-1 and _id != $this->id 
      * 

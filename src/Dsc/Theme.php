@@ -218,13 +218,29 @@ class Theme extends \View
             
             $view_dir = $this->getViewPath( $view_string );
             $path_pattern = $view_dir . $requested_file;
-            if ($path_pattern) {
+            if (file_exists($path_pattern)) {
                 $string = $this->loadFile($path_pattern);
             }
+        }
+        else 
+        {
+            $requested_file = $pieces[0];            
+        	// it's a view in the format 'common/pagination.php'
+        	// try to find it in the registered paths
+        	foreach (\Dsc\ArrayHelper::get( $this->dsc_theme, 'views.paths' ) as $view_path) 
+        	{
+        	    $path_pattern = $view_path . $requested_file;
+        	    if (file_exists($path_pattern)) {
+        	        $string = $this->loadFile($path_pattern);
+        	        break;
+        	    }
+        	}
         }
         
         if (is_null( $string ))
         {
+            // throw an error?
+            // try to find it?
         }
         
         return $string;
