@@ -58,6 +58,12 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     
         return parent::validate();
     }
+    
+    /**
+     * 
+     * @param string $unique
+     * @return string
+     */
     public function generateSlug( $unique=true )
     {
     	if (empty($this->title)) {

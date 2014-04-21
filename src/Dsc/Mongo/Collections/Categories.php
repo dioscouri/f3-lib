@@ -97,6 +97,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
                 $this->setError('An item with this title already exists with this parent.');
             }
         }
+        
         return parent::validate();
     }
     
