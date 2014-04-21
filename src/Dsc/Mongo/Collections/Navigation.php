@@ -15,26 +15,6 @@ class Navigation extends \Dsc\Mongo\Collections\Nested
     {
         parent::fetchConditions();
     
-        $filter_root = $this->getState('filter.root');
-        if (is_bool($filter_root) && $filter_root)
-        {
-            $this->setCondition('is_root', true);
-        } 
-        elseif (is_bool($filter_root) && !$filter_root) 
-        {
-            $this->setCondition('is_root', array( '$ne' => true ) );
-        }
-    
-        $filter_tree = $this->getState('filter.tree');
-        if (!empty($filter_tree)) {
-            $this->setCondition('tree', new \MongoId((string) $filter_tree ));
-        }
-    
-        $filter_parent = $this->getState('filter.parent');
-        if (!empty($filter_parent)) {
-            $this->setCondition('parent', new \MongoId((string) $filter_parent ));
-        }
-    
         $filter_published = $this->getState('filter.published');
         if ($filter_published || (int) $filter_published == 1) {
             // only published items, using both publication dates and published field
@@ -81,20 +61,5 @@ class Navigation extends \Dsc\Mongo\Collections\Nested
         }        
     
         return $this;
-    }
-    
-    /**
-     * Gets all the root level menu items.
-     * TODO Move this upstream and make it use __type
-     * 
-     * @return array
-     */
-    public static function roots()
-    {
-        $return = array();
-        
-        $return = (new static)->emptyState()->setState('filter.root', true)->getItems();
-    
-        return $return;
     }
 }

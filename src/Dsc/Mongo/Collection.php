@@ -130,7 +130,11 @@ class Collection extends \Dsc\Models
     {
         if (is_null($this->getState('list.sort')))
         {
-            $this->setState('list.sort', $this->__config['default_sort']);
+            if (!empty($this->getParam('sort'))) {
+                $this->setState('list.sort', $this->getParam('sort'));
+            } else {
+                $this->setState('list.sort', $this->__config['default_sort']);
+            }
         }
         $this->setParam('sort', $this->getState('list.sort'));
         
@@ -341,11 +345,7 @@ class Collection extends \Dsc\Models
      */
     public static function find( $conditions=array(), $fields=array() )
     {
-        if (empty($this)) {
-            $model = new static();
-        } else {
-            $model = clone $this;
-        }
+        $model = new static();
 
         $sort = $model->__config['default_sort'];
         if (isset($conditions['sort'])) {
@@ -353,7 +353,7 @@ class Collection extends \Dsc\Models
         	unset($conditions['sort']);
         }
         $model->setParam('sort', $sort);
-        
+
         if (isset($conditions['limit'])) {
             $limit = $conditions['limit'];
             unset($conditions['limit']);

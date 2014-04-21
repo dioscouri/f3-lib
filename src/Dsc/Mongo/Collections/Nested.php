@@ -17,7 +17,8 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     protected $__type = 'common.nested_sets';
     protected $__config = array(
         'default_sort' => array(
-            'title' => 1
+            'tree'=> 1, 
+            'lft' => 1
         ),
     );
     
@@ -48,6 +49,26 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         {
             $this->setCondition('title', $filter_title);
         }
+        
+        $filter_root = $this->getState('filter.root');
+        if (is_bool($filter_root) && $filter_root)
+        {
+            $this->setCondition('is_root', true);
+        }
+        elseif (is_bool($filter_root) && !$filter_root)
+        {
+            $this->setCondition('is_root', array( '$ne' => true ) );
+        }
+        
+        $filter_tree = $this->getState('filter.tree');
+        if (!empty($filter_tree)) {
+            $this->setCondition('tree', new \MongoId((string) $filter_tree ));
+        }
+        
+        $filter_parent = $this->getState('filter.parent');
+        if (!empty($filter_parent)) {
+            $this->setCondition('parent', new \MongoId((string) $filter_parent ));
+        }
     
         return $this;
     }
@@ -64,6 +85,9 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         return parent::beforeValidate();
     }
     
+    /**
+     * 
+     */
     public function validate()
     {
         if (empty($this->title)) {
@@ -79,15 +103,20 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         // this would be a great case for $this->validateWith( $validator ); -- using a Uniqueness Validator
         if ($existing = $this->pathExists( $this->path ))
         {
-            if ((empty($this->_id) || $this->_id != $existing->_id) && $existing->type == $this->type)
+            if ((empty($this->id) || $this->id != $existing->id) && $existing->type() == $this->type())
             {
-                $this->setError('An item with this title already exists with this parent.');
+                $this->setError( 'An item with this path already exists: ' . $this->path);
             }
         }
     
         return parent::validate();
     }
     
+    /**
+     * 
+     * @param string $unique
+     * @return string
+     */
     public function generateSlug( $unique=true )
     {
         if (empty($this->title)) {
@@ -204,8 +233,20 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     {
         $this->tree = new \MongoId( (string) $this->tree );
         
-        if (!empty($this->parent)) {
+        if (empty($this->parent)) {
             $this->parent = new \MongoId( (string) $this->tree );
+        } elseif (!empty($this->parent)) {
+            // is it a MongoId?
+            $regex = '/^[0-9a-z]{24}$/';
+            if (preg_match($regex, (string) $this->parent))
+            {
+                $this->parent = new \MongoId( (string) $this->parent );
+            }
+            else {
+                $this->parent = null;
+            }
+        } else {
+            $this->parent = null;
         }
 
         if (isset($this->published)) {
@@ -328,7 +369,9 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         
         // are we moving the node? or just updating its details?
         $this->__isMoving = false;        
-        if ($this->__oldNode->parent != $this->parent)
+        if (   $this->__oldNode->parent != $this->parent
+            || $this->__oldNode->tree != $this->tree
+        )
         {
             $this->__isMoving = true;
         }
@@ -384,7 +427,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         if (!empty($this->__isMoving))
         {
             $this->rebuildTree( $this->tree );
-            
+
             // if we just removed a leaf/branch to a new tree, rebuild the old tree too 
             if (!empty($this->__oldNode) && $this->tree != $this->__oldNode->tree) 
             {
@@ -411,7 +454,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         // THE FOLLOWING IS AN ALTERNATVE TO THE ABOVE -- any advantages?
             /*
             // Delete the children        
-            $this->deleteDescendants( $this );
+            $this->deleteDescendants();
             // Then erase this one too
             $eraseThis = parent::erase($filter);
             */
@@ -453,7 +496,8 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     }
         
     /**
-     * Determines whether item has descendants
+     * Determines whether $this has descendants
+     * 
      * @return int|boolean
      */
     public function hasDescendants()
@@ -467,7 +511,12 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         return false;
     }
     
-    public function parent()
+    /**
+     * Gets this model's parent, if possible
+     * 
+     * @return unknown|boolean
+     */
+    public function getParent()
     {
         $parent = (new static)->load( array('_id' => new \MongoId( (string) $this->parent ) ) );
         if (!empty($parent->id)) {
@@ -477,65 +526,85 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         return false;
     }
     
-    public function getChildren( $mapper )
+    /**
+     * Get the immediate children of a model, $this one if no $parent is provided
+     * 
+     * @param unknown $parent
+     * @return multitype:\Dsc\Mongo\Collections\Nested
+     */
+    public function getChildren( $parent=null )
     {
-        $filter = array(
-        	'parent' => $mapper->id
-        );
+        if (empty($parent)) 
+        {
+            $parent_id = new \MongoId( (string) $this->id );
+        }
+        else 
+        {
+            $parent_id = new \MongoId( (string) $parent->id );
+        }
         
-        $this->cursor = $this->collection()->find( $filter, array() );
-        $this->cursor = $this->cursor->sort(array('lft' => 1));
+        $this->cursor = $this->collection()->find( array(
+        	'parent' => $parent_id,
+            '_id' => array('$ne' => $parent_id)
+        ) )->sort(array('lft' => 1));
         
         $result = array();
-        while ($this->cursor->hasnext()) {
-            $result[] = $this->cursor->getnext();
+        foreach ($this->cursor as $doc) {
+            $result[] = new static($doc);
         }
-        
-        $out = array();
-        foreach ($result as $doc) {
-            $out[] = $this->factory($doc);
-        }
-            
-        return $out;
-    }
-    
-    public function getDescendants( $mapper )
-    {
-        $filter = array(
-            'lft' => array('$gte' => $mapper->lft ),
-            'rgt' => array('$lte' => $mapper->rgt ),
-            'tree' => $mapper->tree
-        );
-    
-        $this->cursor = $this->collection()->find( $filter, array() );
-        $this->cursor = $this->cursor->sort(array('lft' => 1));
-    
-        $result = array();
-        while ($this->cursor->hasnext()) {
-            $result[] = $this->cursor->getnext();
-        }
-    
-        $out = array();
-        foreach ($result as $doc) {
-            $out[] = $this->factory($doc);
-        }
-    
-        return $out;
-    }
-    
-    public function deleteDescendants( $mapper )
-    {
-        $result = $this->collection()->remove(
-        	array( 
-                'lft' => array('$gt' => $mapper->lft ),
-                'rgt' => array('$lt' => $mapper->rgt ),
-                'tree' => $mapper->tree
-            )
-        );
-            
+
         return $result;
     }
     
+    /**
+     * Returns an array of descendants of this model, starting with $this.
+     * The array will include $this;
+     * 
+     * @return multitype:\Dsc\Mongo\Collections\Nested
+     */
+    public function getDescendants()
+    {
+        $filter = array(
+            'lft' => array('$gte' => $this->lft ),
+            'rgt' => array('$lte' => $this->rgt ),
+            'tree' => $this->tree
+        );
+    
+        $this->cursor = $this->collection()->find( $filter )->sort(array('lft' => 1));
+    
+        $result = array();
+        foreach ($this->cursor as $doc) {
+            $result[] = new static($doc);
+        }
+    
+        return $result;
+    }
+    
+    /**
+     * Delete this item's descendents
+     * 
+     * @param unknown $mapper
+     * @return unknown
+     */
+    public function deleteDescendants()
+    {
+        $this->__last_operation = $this->collection()->remove(
+        	array( 
+                'lft' => array('$gt' => $this->lft ),
+                'rgt' => array('$lt' => $this->rgt ),
+                'tree' => $this->tree
+            )
+        );
+            
+        return $this;
+    }
+    
+    /**
+     * Gets the root of the specified tree, if possible
+     * 
+     * @param unknown $tree
+     * @return \Dsc\Mongo\Collections\Nested|boolean
+     */
     public static function getRoot( $tree ) 
     {
         $root = new static;
@@ -551,13 +620,22 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         return false;        
     }
     
+    /**
+     * Rebuilds the specified tree
+     * starting with either the specified $node, or the root if none specified
+     * 
+     * @param unknown $tree
+     * @param string $node
+     * @param number $left
+     * @return number
+     */
     public function rebuildTree( $tree, $node=null, $left=1 ) 
     {
         if ($node === null)
         {
             $node = $this->getRoot( $tree );
         }
-        echo \Dsc\Debug::dump($node);
+
         // the right value of this node is the left value + 1
         $right = $left + 1;
         
@@ -578,7 +656,12 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         // the children of this node we also know the right value
         $node->lft = $left;
         $node->rgt = $right;
-        $node->save();
+        // not using $node->save() so we avoid recursion.  Just update the doc directly        
+        $this->collection()->update(
+            array('_id'=> new \MongoId((string) $node->id ) ),
+            array('$set' => $node->cast() ),
+            array('multiple'=>false)
+        );
         
         // return the right value of this node + 1
         $return = $right + 1;
@@ -587,29 +670,31 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     }
     
     /**
-     * Move a node one position to the left in the same level of the tree
+     * Move this model one position to the left in the same level of the tree
+     * 
+     * @return \Dsc\Mongo\Collections\Nested
      */
     public function moveUp() 
     {
+        $this->rebuildTree( $this->tree );
+        
         // Get the sibling immediately to the left of this node
-        $sibling = clone $this;
-        $sibling->reset();
-        $sibling->load(array('tree' => $this->tree, 'rgt' => $this->lft - 1 ));
+        $sibling = (new static)->load(array('tree' => $this->tree, 'rgt' => $this->lft - 1 ));
 
         // fail of no sibling found
         if (empty($sibling->id)) {
-            return false;
+            return $this;
         }
         
         $ids = array();
         // Get the primary keys of descendant nodes, including this node's
-        if ($descendants = $this->getDescendants( $this )) {
+        if ($descendants = $this->getDescendants()) {
             $ids = \Joomla\Utilities\ArrayHelper::getColumn( $descendants, '_id' );
         }
 
         $width = (int) ($this->rgt - $this->lft + 1);
         $sibling_width = (int) ($sibling->rgt - $sibling->lft + 1);
-        
+
         // Shift left and right values for the node and its children.
         $result = $this->collection()->update(
                 array(
@@ -640,27 +725,29 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
                 )
         );        
 
-        return $result;
+        return $this;
     }
     
     /**
-     * Move a node one position to the right in the same level of the tree
+     * Move this model one position to the right in the same level of the tree
+     * 
+     * @return \Dsc\Mongo\Collections\Nested
      */
     public function moveDown()
     {
+        $this->rebuildTree( $this->tree );
+        
         // Get the sibling immediately to the left of this node
-        $sibling = clone $this;
-        $sibling->reset();
-        $sibling->load(array('tree' => $this->tree, 'lft' => $this->rgt + 1 ));
+        $sibling = (new static)->load(array('tree' => $this->tree, 'lft' => $this->rgt + 1 ));
     
         // fail of no sibling found
         if (empty($sibling->id)) {
-            return false;
+            return $this;
         }
     
         $ids = array();
         // Get the primary keys of descendant nodes, including this node's
-        if ($descendants = $this->getDescendants( $this )) {
+        if ($descendants = $this->getDescendants()) {
             $ids = \Joomla\Utilities\ArrayHelper::getColumn( $descendants, '_id' );
         }
     
@@ -697,35 +784,52 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
                 )
         );
     
-        return $result;
+        return $this;
     }
     
-    public function getDepth( &$mapper=null ) 
+    /**
+     * Determines the depth of this model in the tree
+     * 
+     * @return number
+     */
+    public function getDepth() 
     {
-        if (empty($mapper)) 
+        if (!isset($this->depth)) 
         {
-            $mapper = &$this;
+            $this->depth = substr_count( $this->path, "/" );
         }
         
-        if (!isset($mapper->depth)) 
-        {
-            $mapper->depth = substr_count( $mapper->path, "/" );
-        }
-        
-        return $mapper->depth;
+        return (int) $this->depth;
     }
     
-    public static function rebuildTrees($options=array())
+    /**
+     * Rebuilds an array of trees
+     * 
+     * @param unknown $options
+     * @return boolean
+     */
+    public static function rebuildTrees(array $trees=array())
     {
-        if (!empty($options['trees']) && is_array($options['trees'])) {
-            foreach ($options['trees'] as $tree)
-            {
-                $model = new static;
-                $model = $model->rebuildTree( $tree );
-            }
+        foreach ($trees as $tree)
+        {
+            $model = new static;
+            $model = $model->rebuildTree( $tree );
         }
         
         return true;
+    }
+    
+    /**
+     * Gets all the root level menu items for this type.
+     *
+     * @return array
+     */
+    public static function roots()
+    {
+        $model = new static;
+        $return = $model->setState('filter.root', true)->setState('filter.type', $model->type() )->getItems();
+    
+        return $return;
     }
 }
 ?>
