@@ -286,7 +286,7 @@ class Collection extends \Dsc\Models
         $this->__query_params['conditions'] = array();
         
         $filter_id = $this->getState('filter.id');
-        if (strlen($filter_id))
+        if (!empty($filter_id))
         {
             $this->setCondition('_id', new \MongoId((string) $filter_id));
         }
