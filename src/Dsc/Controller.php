@@ -91,17 +91,16 @@ class Controller extends Singleton
             return false;
         }
         
-        \Dsc\System::addMessage( \Dsc\Debug::dump( '\Dsc\Controller\isAllowed will check if the following identity has accessing to the resource & method below' ) );
-        \Dsc\System::addMessage( \Dsc\Debug::dump( $identity ) );
-        \Dsc\System::addMessage( \Dsc\Debug::dump('$resource: ' . $resource) );
-        \Dsc\System::addMessage( \Dsc\Debug::dump('$method: ' . $method) );
-        
         if ($hasAccess = \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $resource, $method))
         {
             return true;
         }
+
+        if (\Base::instance()->get('DEBUG')) {
+            \Dsc\System::addMessage( \Dsc\Debug::dump( 'Debugging is enabled := $role: ' . $identity->role . ", " . '$resource: ' . $resource . ", " . '$method: ' . $method) );
+        }
         
-        \Dsc\System::addMessage( 'You do not have access to perform that action.' );
+        \Dsc\System::addMessage( 'You do not have access to perform that action.', 'error' );
         \Base::instance()->reroute('/admin');
         
         return false;        

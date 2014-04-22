@@ -61,7 +61,7 @@ class Nodes extends \Dsc\Mongo\Collection
             {
             	$this->set('metadata.creator', array(
 	                'id' => $identity->id,
-	                'name' => $identity->getName()
+	                'name' => $identity->fullName()
             	));
             }
             else 
