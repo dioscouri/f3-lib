@@ -66,7 +66,10 @@ class Nodes extends \Dsc\Mongo\Collection
             }
             else 
             {
-            	$this->setError('A creator must be set');
+            	$this->set('metadata.creator', array(
+	                'id' => new \MongoId(),
+	                'name' => 'Unicorn Egg Eater'
+            	));
             }
         }
         
