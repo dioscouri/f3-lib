@@ -52,6 +52,10 @@ class Container extends \Joomla\DI\Container
         $this->share( 'session', function() use($store) {
             return new \Dsc\Session($store);
         });
+        
+        $this->share( 'mailer', function() {
+            return new \Mailer\Factory;
+        });
     }
 }
 ?>
