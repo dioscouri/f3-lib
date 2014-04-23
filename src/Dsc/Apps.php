@@ -61,21 +61,27 @@ class Apps extends Singleton
         		}
         	}
         }
+
         
         // then do any additional paths
         foreach ($additional_paths as $additional_path) 
         {
         	if ($folders = \Joomla\Filesystem\Folder::folders( $additional_path ))
         	{
+              
         		foreach ($folders as $folder)
         		{
+                
         			if (file_exists( $additional_path . $folder . '/bootstrap.php' )) {
+
         				require_once $additional_path . $folder . '/bootstrap.php';
         			    if( isset( $app ) ){
                     		$apps []= $app;                    	
                     	}
         			}
+
         		}
+               
         	}        	
         }
         
