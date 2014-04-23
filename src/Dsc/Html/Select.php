@@ -35,7 +35,7 @@ class Select extends \Dsc\Singleton
     			if($value == $selected) {
     			$html .= ' selected="selected" ';	
     			}
-    			$html .= '>'.$value.'</option>';
+    			$html .= '>'.ucwords($value).'</option>';
     		}
     	}
     	return $html;
