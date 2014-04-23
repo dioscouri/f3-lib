@@ -19,7 +19,7 @@ class Select extends \Dsc\Singleton
     			if($option['value'] == $selected) {
     			$html .= ' selected="selected" ';	
     			}
-    			if(is_array($option['data'])) {
+    			if(!empty( $option['data'] ) &&  is_array($option['data'])) {
     				foreach ($option['data'] as $key => $value) {
     				$html .= ' data-'.$key.'="'.$value.'" ';	
     				}
