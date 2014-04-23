@@ -80,20 +80,67 @@ class Controller extends Singleton
         return null;
     }
     
-    public function checkAccess( $resource, $method, $require_identity=true )
+    /**
+     * Requires an identity for the current user,
+     * and either redirects to login screen (if global_app can be determined)
+     * or throws an exception 
+     *  
+     * @throws \Exception
+     * @return \Dsc\Controller
+     */
+    public function requireIdentity()
     {
+        $f3 = \Base::instance();
         $identity = $this->getIdentity();
-        
-        if ($require_identity && empty($identity->id)) 
+        if (empty($identity->id))
         {
-            \Dsc\System::addMessage( 'Please sign in.' );
-            \Base::instance()->reroute('/admin/login');
+            $path = $this->inputfilter->clean( $f3->hive()['PATH'], 'string' );
+            $global_app_name = strtolower( $f3->get('APP_NAME') );
+            switch ($global_app_name) 
+            {
+            	case "admin":
+            	    \Dsc\System::addMessage( 'Please login' );
+            	    \Dsc\System::instance()->get('session')->set('admin.login.redirect', $path);
+            	    $f3->reroute('/admin/login');            	    
+            	    break;
+            	case "site":
+            	    \Dsc\System::addMessage( 'Please login' );
+            	    \Dsc\System::instance()->get('session')->set('site.login.redirect', $path);
+            	    $f3->reroute('/login');            	    
+            	    break;
+            	default:
+                    throw new \Exception( 'Missing identity and unkown application' );
+            	    break;
+            }
+            
             return false;
         }
         
+        return $this;
+    }
+    
+    /**
+     * Checks if the user has access to the requested resource and method pair
+     * 
+     * @param unknown $resource
+     * @param unknown $method
+     * @param string $require_identity
+     * @return boolean
+     */
+    public function checkAccess( $resource, $method, $require_identity=true )
+    {
+        $f3 = \Base::instance();
+        $identity = $this->getIdentity();
+        
+        if ($require_identity) 
+        {
+            $this->requireIdentity();
+        }
+        
+        // TODO If the user has multiple roles (is that possible) then loop through them
         if ($hasAccess = \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $resource, $method))
         {
-            return true;
+            return $this;
         }
 
         if (\Base::instance()->get('DEBUG')) {
@@ -101,7 +148,19 @@ class Controller extends Singleton
         }
         
         \Dsc\System::addMessage( 'You do not have access to perform that action.', 'error' );
-        \Base::instance()->reroute('/admin');
+        $global_app_name = strtolower( $f3->get('APP_NAME') );
+        switch ($global_app_name)
+        {
+        	case "admin":
+        	    \Base::instance()->reroute('/admin');
+        	    break;
+        	case "site":
+        	    \Base::instance()->reroute('/');
+        	    break;
+        	default:
+        	    throw new \Exception( 'No access and unkown application' );
+        	    break;
+        }
         
         return false;        
     }

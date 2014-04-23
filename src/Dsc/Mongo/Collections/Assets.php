@@ -303,7 +303,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     public static function distinctTypes($query=array())
     {
         $model = new static();
-        $distinct = $model->getCollection()->distinct("metadata.type", $query);
+        $distinct = $model->collection()->distinct("metadata.type", $query);
         $distinct = array_values( array_filter( $distinct ) );
     
         return $distinct;
