@@ -105,26 +105,17 @@ abstract class Bootstrap
     {
         $f3 = \Base::instance();
         
-        // append this app's UI folder to the path
-        // new way
-        
+        // register this app's view files with the theme
         if (file_exists($this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/'))
         {
             \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/', $this->namespace . '/' . $app . '/Views');
-            // old way
-            $ui = $f3->get('UI');
-            $ui .= ";" . $this->dir . "/src/" . $this->namespace . '/' . $app . "/Views/";
-            $f3->set('UI', $ui);
+
         }
         else
         {
             if (file_exists($this->dir . '/src/' . $this->namespace . '/Views/'))
             {
                 \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
-                // old way
-                $ui = $f3->get('UI');
-                $ui .= ";" . $this->dir . "/src/" . $this->namespace . "/Views/";
-                $f3->set('UI', $ui);
             }
         }
     }
