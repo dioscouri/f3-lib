@@ -48,15 +48,20 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
      */
     public static function getTags($query=array())
     {
-        if (empty($this)) {
-            $model = new static();
-        } else {
-            $model = clone $this;
-        }
-        
-        $tags = $model->collection()->distinct("tags", $query);
-        $tags = array_values( array_filter( $tags ) );
+        return static::distinctTags($query);
+    }
     
-        return $tags;
+    /**
+     *
+     * @param array $types
+     * @return unknown
+     */
+    public static function distinctTags($query=array())
+    {
+        $model = new static();    
+        $distinct = $model->collection()->distinct("tags", $query);
+        $distinct = array_values( array_filter( $distinct ) );
+    
+        return $distinct;
     }
 }

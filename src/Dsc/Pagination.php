@@ -325,7 +325,10 @@ class Pagination
         if (is_null( $this->linkPath ))
         {
             $route = $this->fw->get( 'PARAMS.0' );
-            if ($this->fw->exists( 'PARAMS.' . $this->routeKey )) {
+            $route = $this->checkRoute( $route );
+            
+            if ($this->fw->exists( 'PARAMS.' . $this->routeKey )) 
+            {
                 $route = preg_replace( "/" . $this->fw->get( 'PARAMS.' . $this->routeKey ) . "$/", '', $route );
             } elseif (substr( $route, - 1 ) != '/') {
                 $route .= '/';
@@ -363,7 +366,6 @@ class Pagination
         $this->fw->set( 'pg.rangePages', $this->getInRange() );
         
         $theme = \Dsc\System::instance()->get('theme');
-        //echo \Dsc\Debug::dump( $this->template );        
         $output = $theme->renderView( $this->template );
         $this->fw->clear( 'pg' );
         
