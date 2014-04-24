@@ -97,10 +97,10 @@ class Theme extends \View
         // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error
         // Render the theme
         $theme = $this->loadFile( $this->getThemePath( $this->getCurrentTheme() ) . $this->getCurrentVariant() );
-                
+              
         // Render the view
         $view_string = $this->renderView( $view, $params );
-        
+
         // render the system messages
         $messages = \Dsc\System::instance()->renderMessages();
         $this->setBuffer( $messages, 'system.messages' );
@@ -193,6 +193,7 @@ class Theme extends \View
             }
             
             $path = \Dsc\Filesystem\Path::clean( $dir . "/" . $view_string . "/" . $requested_folder . "/" );
+
             if ($path = \Dsc\Filesystem\Path::real( $path ))
             {
                 $path_pattern = $path . $requested_filename;
@@ -211,13 +212,16 @@ class Theme extends \View
         
         if (count( $pieces ) > 1)
         {
+
             // we're looking for a specific view (e.g. Blog/Site/View::posts/category.php)
             // $view is a specific app's view/template.php, so try to find & render it
             $view_string = $pieces[0];
             $requested_file = $pieces[1];
             
             $view_dir = $this->getViewPath( $view_string );
+
             $path_pattern = $view_dir . $requested_file;
+
             if (file_exists($path_pattern)) {
                 $string = $this->loadFile($path_pattern);
             }
@@ -322,7 +326,7 @@ class Theme extends \View
      * Gets a view's path by name
      */
     public function getViewPath( $name )
-    {
+    {   
         return \Dsc\ArrayHelper::get( $this->dsc_theme, 'views.paths.' . $name );
     }
 
