@@ -154,6 +154,13 @@ class Theme extends \View
         ) );
     }
 
+    /**
+     * Renders a view file, with support for overrides
+     *
+     * @param unknown $view
+     * @param array $params
+     * @return unknown|NULL
+     */
     public function renderView( $view, array $params = array() )
     {
         $params = $params + array(
@@ -164,87 +171,9 @@ class Theme extends \View
         
         $string = null;
         
-        $view = str_replace( "\\", "/", $view );
-        $pieces = \Dsc\String::split( str_replace( array(
-            "::",
-            ":" 
-        ), "|", $view ) );
-        
-        // Overrides!
-        // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
-        $dir = \Dsc\Filesystem\Path::clean( $this->getThemePath( $this->getCurrentTheme() ) . "Overrides/" );
-        if ($dir = \Dsc\Filesystem\Path::real( $dir ))
+        if ($view_file = $this->findViewFile( $view )) 
         {
-        	if (count( $pieces ) > 1)
-            {
-                // we're looking for a specific view (e.g. Blog/Site/View::posts/category.php)
-                $view_string = $pieces[0];
-                $requested_file = $pieces[1];
-                $requested_folder = (dirname( $pieces[1] ) == ".") ? null : dirname( $pieces[1] );
-                $requested_filename = basename( $pieces[1] );
-            }
-            else
-            {
-                // (e.g. posts/category.php) that has been requested, so look for it in the overrides dir
-                $view_string = null;
-                $requested_file = $pieces[0];
-                $requested_folder = (dirname( $pieces[0] ) == ".") ? null : dirname( $pieces[0] );
-                $requested_filename = basename( $pieces[0] );
-            }
-            
-            $path = \Dsc\Filesystem\Path::clean( $dir . "/" . $view_string . "/" . $requested_folder . "/" );
-
-            if ($path = \Dsc\Filesystem\Path::real( $path ))
-            {
-                $path_pattern = $path . $requested_filename;
-                if (file_exists($path_pattern))
-                {
-                	$string = $this->loadFile($path_pattern);
-                }
-            }
-        }
-        
-        // if the overrides section above has set $string, then return it, otherwise continue
-        if (! is_null( $string ))
-        {
-            return $string;
-        }
-        
-        if (count( $pieces ) > 1)
-        {
-
-            // we're looking for a specific view (e.g. Blog/Site/View::posts/category.php)
-            // $view is a specific app's view/template.php, so try to find & render it
-            $view_string = $pieces[0];
-            $requested_file = $pieces[1];
-            
-            $view_dir = $this->getViewPath( $view_string );
-
-            $path_pattern = $view_dir . $requested_file;
-
-            if (file_exists($path_pattern)) {
-                $string = $this->loadFile($path_pattern);
-            }
-        }
-        else 
-        {
-            $requested_file = $pieces[0];            
-        	// it's a view in the format 'common/pagination.php'
-        	// try to find it in the registered paths
-        	foreach (\Dsc\ArrayHelper::get( $this->dsc_theme, 'views.paths' ) as $view_path) 
-        	{
-        	    $path_pattern = $view_path . $requested_file;
-        	    if (file_exists($path_pattern)) {
-        	        $string = $this->loadFile($path_pattern);
-        	        break;
-        	    }
-        	}
-        }
-        
-        if (is_null( $string ))
-        {
-            // throw an error?
-            // try to find it?
+            $string = $this->loadFile($view_file);
         }
         
         return $string;
@@ -447,6 +376,12 @@ class Theme extends \View
         return \Dsc\ArrayHelper::get( $this->dsc_theme, 'buffers.' . $type . "." . $name );
     }
 
+    /**
+     * Shortcut for triggering an event within a view
+     *
+     * @param unknown $eventName
+     * @param unknown $arguments
+     */
     public function trigger( $eventName, $arguments = array() )
     {
         $event = new \Joomla\Event\Event( $eventName );
@@ -456,6 +391,92 @@ class Theme extends \View
         }
         
         return \Dsc\System::instance()->getDispatcher()->triggerEvent( $event );
+    }
+    
+    /**
+     * Finds the path to the requested view, accounting for overrides
+     * 
+     * @param unknown $view
+     * @return Ambigous <boolean, string>
+     */
+    public function findViewFile( $view )
+    {
+        $string = false;
+        
+        $view = str_replace( "\\", "/", $view );
+        $pieces = \Dsc\String::split( str_replace( array(
+            "::",
+            ":"
+        ), "|", $view ) );
+        
+        // Overrides!
+        // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
+        $dir = \Dsc\Filesystem\Path::clean( $this->getThemePath( $this->getCurrentTheme() ) . "Overrides/" );
+        if ($dir = \Dsc\Filesystem\Path::real( $dir ))
+        {
+            if (count( $pieces ) > 1)
+            {
+                // we're looking for a specific view (e.g. Blog/Site/View::posts/category.php)
+                $view_string = $pieces[0];
+                $requested_file = $pieces[1];
+                $requested_folder = (dirname( $pieces[1] ) == ".") ? null : dirname( $pieces[1] );
+                $requested_filename = basename( $pieces[1] );
+            }
+            else
+            {
+                // (e.g. posts/category.php) that has been requested, so look for it in the overrides dir
+                $view_string = null;
+                $requested_file = $pieces[0];
+                $requested_folder = (dirname( $pieces[0] ) == ".") ? null : dirname( $pieces[0] );
+                $requested_filename = basename( $pieces[0] );
+            }
+        
+            $path = \Dsc\Filesystem\Path::clean( $dir . "/" . $view_string . "/" . $requested_folder . "/" );
+        
+            if ($path = \Dsc\Filesystem\Path::real( $path ))
+            {
+                $path_pattern = $path . $requested_filename;
+                if (file_exists($path_pattern))
+                {
+                    $string = $path_pattern;
+                    return $string;
+                }
+            }
+        }
+        
+        if (count( $pieces ) > 1)
+        {
+            // we're looking for a specific view (e.g. Blog/Site/View::posts/category.php)
+            // $view is a specific app's view/template.php, so try to find it
+            $view_string = $pieces[0];
+            $requested_file = $pieces[1];
+        
+            $view_dir = $this->getViewPath( $view_string );
+        
+            $path_pattern = $view_dir . $requested_file;
+        
+            if (file_exists($path_pattern)) 
+            {
+                $string = $path_pattern;
+            }
+        }
+        else
+        {
+            $requested_file = $pieces[0];
+            // it's a view in the format 'common/pagination.php'
+            // try to find it in the registered paths
+            foreach (\Dsc\ArrayHelper::get( $this->dsc_theme, 'views.paths' ) as $view_path)
+            {
+                $path_pattern = $view_path . $requested_file;
+                if (file_exists($path_pattern)) 
+                {
+                    $string = $path_pattern;
+                    break;
+                }
+            }
+        }
+
+        return $string;
     }
 }
 ?>
