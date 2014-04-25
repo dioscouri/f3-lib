@@ -73,8 +73,8 @@ trait Element
         // $onclick_reset = custom js to execute after user resets the element
         // $reset_string = custom string for the "Reset" button                
         
-        $select_function_name = $this->getElementSelectFunction();
-        $reset_function_name = $this->inputfilter->clean(strtolower( get_class() ), 'ALNUM') . "_reset";
+        $select_function_name = $this->getElementSelectFunction() . '_' . $this->inputfilter->clean( $id );
+        $reset_function_name = $this->inputfilter->clean(strtolower( get_class() ), 'ALNUM') . "_reset_" . $this->inputfilter->clean( $id );
 
         $url = $f3->get('BASE') . str_replace('{id}', $id, $this->getElementUrl());
         if (!empty($options['url']))
