@@ -40,7 +40,7 @@ class Apps extends Singleton
             {
                 if (file_exists( $path . $folder . '/bootstrap.php' )) {
                     require_once $path . $folder . '/bootstrap.php';
-                    if( isset( $app ) ){
+                    if( !empty( $app ) ){
                     	$apps []= $app;                    	
                     }
                 }
@@ -49,13 +49,14 @@ class Apps extends Singleton
         
         // then do the custom apps 
         $path = $f3->get('PATH_ROOT') . 'apps/';
+        $app = null;
         if ($folders = \Joomla\Filesystem\Folder::folders( $path ))
         {
         	foreach ($folders as $folder)
         	{
         		if (file_exists( $path . $folder . '/bootstrap.php' )) {
         			require_once $path . $folder . '/bootstrap.php';
-        		    if( isset( $app ) ){
+        		    if( !empty( $app ) ){
                     	$apps []= $app;                    	
                     }
         		}
@@ -64,6 +65,7 @@ class Apps extends Singleton
 
         
         // then do any additional paths
+        $app = null;
         foreach ($additional_paths as $additional_path) 
         {
         	if ($folders = \Joomla\Filesystem\Folder::folders( $additional_path ))
@@ -73,9 +75,8 @@ class Apps extends Singleton
         		{
                 
         			if (file_exists( $additional_path . $folder . '/bootstrap.php' )) {
-
         				require_once $additional_path . $folder . '/bootstrap.php';
-        			    if( isset( $app ) ){
+        			    if( !empty( $app ) ){
                     		$apps []= $app;                    	
                     	}
         			}
