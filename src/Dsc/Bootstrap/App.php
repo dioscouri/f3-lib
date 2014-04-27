@@ -85,13 +85,12 @@ abstract class App extends \Dsc\Bootstrap
     	 
     	if (file_exists( $this->dir . '/' . $app . '/Views/' ))
     	{
-    	// new way
     		\Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/' . $app . '/Views/', $this->namespace . '/' . $app . '/Views' );
-    		// old way
-    		$ui = $f3->get( 'UI' );
-    		$ui .= ";" . $this->dir .  '/' . $app . "/Views/";
-    		$f3->set( 'UI', $ui );
     	}
+    	if (file_exists( $this->dir . '/Views/' ))
+    	{
+    		\Dsc\System::instance()->get( 'theme' )->registerViewPath( $this->dir . '/Views/', $this->namespace . '/Views' );
+    	}    		
     }
     
     /**
