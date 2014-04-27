@@ -44,12 +44,12 @@ abstract class Bootstrap
 
     protected function runAdmin()
     {
-        $this->_runBase('Admin');
+        $this->runBase('Admin');
     }
 
     protected function runSite()
     {
-        $this->_runBase('Site');
+        $this->runBase('Site');
     }
 
     /**
@@ -58,7 +58,7 @@ abstract class Bootstrap
      * @param $app Name
      *            of the part of application
      */
-    protected function _runBase($app)
+    protected function runBase($app)
     {
         $f3 = \Base::instance();
         $router = "\\" . $this->namespace . "\\Routes";
