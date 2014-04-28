@@ -62,4 +62,16 @@ class Navigation extends \Dsc\Mongo\Collections\Nested
     
         return $this;
     }
+    
+    /**
+     *
+     * @return array
+     */
+    public function getRoots()
+    {
+        $return = array();
+        $return = $this->emptyState()->setState('filter.root', true)->getList();
+    
+        return $return;
+    }
 }
