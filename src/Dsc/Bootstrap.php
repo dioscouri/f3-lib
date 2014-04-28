@@ -118,6 +118,9 @@ abstract class Bootstrap
                 \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
             }
         }
+
+        // register the app's shared views
+        \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
     }
 
     /**
