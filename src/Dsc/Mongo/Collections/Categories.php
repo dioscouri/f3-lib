@@ -266,4 +266,19 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     
         return false;
     }
+    
+    /**
+     * Determines the depth of this model in the tree
+     *
+     * @return number
+     */
+    public function getDepth()
+    {
+        if (!isset($this->depth))
+        {
+            $this->depth = substr_count( $this->path, "/" );
+        }
+    
+        return (int) $this->depth;
+    }
 }
