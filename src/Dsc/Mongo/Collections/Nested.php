@@ -636,6 +636,12 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
             $node = $this->getRoot( $tree );
         }
 
+        if (empty($node)) 
+        {
+            $return = $left + 1;
+            return $return;
+        }
+        
         // the right value of this node is the left value + 1
         $right = $left + 1;
         
