@@ -11,6 +11,10 @@ class Select extends \Dsc\Singleton
 	*/
     public static function options($options, $selected) {
     	$html = '';
+    	if( empty( $options ) ){
+    		return '';
+    	}
+    	
     	if(is_array($options[0])) {
     		foreach ($options as  $option) {
     			$html .= '<option value="';
