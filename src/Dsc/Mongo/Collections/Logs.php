@@ -67,4 +67,20 @@ class Logs extends \Dsc\Mongo\Collection
         
         return $this;
     }
+    
+    /**
+     *
+     * @param array $types
+     * @return unknown
+     */
+    public static function distinctCategories($query=array())
+    {
+        $model = new static();
+        $distinct = $model->collection()->distinct("category", $query);
+        $distinct = array_values( array_filter( $distinct ) );
+        
+        sort($distinct);
+        
+        return $distinct;
+    }    
 }
