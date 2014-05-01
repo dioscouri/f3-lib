@@ -82,11 +82,6 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     		{
     			$slug = $base_slug . '-' . $n;
     			$n++;
-    			
-    			if( $n == 100 ){
-    				echo 'here46';
-    				exit(0);
-    			}
     		}
     	}
     

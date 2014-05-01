@@ -436,10 +436,6 @@ class Collection extends \Dsc\Models
      */
     public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
     {
-    	echo '###';
-    	print_r( $conditions );
-    	echo '<br><br><br><br>';
-    	 
     	if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
         {
         	$this->bind( $item );

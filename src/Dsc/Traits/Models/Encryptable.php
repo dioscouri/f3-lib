@@ -236,20 +236,12 @@ trait Encryptable{
 	
 		$doc = $this->cast();
 		$arr = $this->encryptFieldsModel( $doc );
-		print_r( $arr );
-		try{
 		$this->__last_operation = $this->collection()->update(array(
 				'_id' => new \MongoId((string) $this->get('id'))
 		), $arr, array(
 				'upsert' => true,
 				'multiple' => false
 		));
-		} catch( \Exception $e ){
-			print_r( $e );
-			print_r( $arr );
-			exit(0);
-				
-		}
 		
 		$this->afterUpdate();
 		$this->afterSave();
