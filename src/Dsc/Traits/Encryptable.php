@@ -41,6 +41,7 @@ trait Encryptable{
 			$this->setError( "No encryption key was founded!" );
 			$key = '';
 		}
+		
 		return $key;
 	}
 
@@ -77,6 +78,28 @@ trait Encryptable{
 	public function encryptText($text){
 		return $this->getCipher()->encrypt( $text );
 	}
+
+	/**
+	 * This method uses actually selected cipher and returns encrypted content of the field
+	 *
+	 * @param	$text		text to be encrypted
+	 *
+	 * @return	Content of the text in base64 format
+	 */
+	public function encryptTextBase64($text){
+		return base64_encode( $this->getCipher()->encrypt( $text ) );
+	}
+	
+	/**
+	 * This method uses actually selected cipher and returns encrypted content of the field
+	 *
+	 * @param	$text		text to be encrypted
+	 *
+	 * @return	Content of the text in base64 format and escaped for mongo query
+	 */
+	public function encryptTextMongo($text){
+        return preg_replace( '/\+/', '\\+' , base64_encode( $this->getCipher()->encrypt( $text ) ) );
+	}
 	
 	/**
 	 * This method uses actually selected cipher and returns decrypted content of the field
@@ -87,5 +110,16 @@ trait Encryptable{
 	 */
 	public function decryptText($text){
 		return $this->getCipher()->decrypt( $text );
+	}
+	
+	/**
+	 * This method uses actually selected cipher and returns decrypted content of the field
+	 * 
+	 * @param	$text		text to be decrypted in base 64 format
+	 * 
+	 * @return	Content of the text
+	 */
+	public function decryptTextBase64($text){
+		return $this->getCipher()->decrypt( base64_decode( $text ) );
 	}
 }

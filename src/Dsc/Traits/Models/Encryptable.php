@@ -38,7 +38,7 @@ trait Encryptable{
 				$filter_field = $this->getState('filter.' . $field);
 				if (!empty($filter_field) )
 				{
-					$encrypted = base64_encode( $this->encryptText($filter_field) );
+					$encrypted = $this->encryptTextBase64($filter_field);
 					$this->setCondition($field, $encrypted);
 				}
 			}
@@ -89,7 +89,9 @@ trait Encryptable{
 			
 			foreach ($encrypted_fields as $field)
 			{
-				$model->$field = $this->decryptText( base64_decode($model->$field ) );
+				if( strlen( $model->$field ) ) {
+					$model->$field = $this->decryptTextBase64( $model->$field );
+				}
 			}
 		}
 	}
@@ -113,7 +115,7 @@ trait Encryptable{
 			{
 				$field_text = \Dsc\ArrayHelper::get( $arr, $field );
 				if( !is_null( $field_text ) ) {
-					\Dsc\ArrayHelper::set( $arr, $field, base64_encode( $this->encryptText( $field_text ) ) );
+					\Dsc\ArrayHelper::set( $arr, $field, $this->encryptTextBase64( $field_text ) );
 				}
 			}
 		}
