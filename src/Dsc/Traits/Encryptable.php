@@ -34,12 +34,14 @@ trait Encryptable{
 	 * @return	Encryption key
 	 */
 	private function getEncryptionKey(){
-		$res = file_get_contents( \Base::instance()->get('PATH_ROOT').'config/key.ini' );
-		if( $res === false ){
+		$f3 = \Base::instance();
+		$f3->config( $f3->get('PATH_ROOT') . 'config/common.config.ini');
+		$key = $f3->get('encryption.key');
+		if( empty( $key )  ){
 			$this->setError( "No encryption key was founded!" );
-			$res = '';
+			$key = '';
 		}
-		return $res;
+		return $key;
 	}
 
 	/**
