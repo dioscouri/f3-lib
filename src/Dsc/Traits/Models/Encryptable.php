@@ -38,7 +38,7 @@ trait Encryptable{
 				$filter_field = $this->getState('filter.' . $field);
 				if (!empty($filter_field) )
 				{
-					$encrypted = $this->encryptText($filter_field);
+					$encrypted = base64_encode( $this->encryptText($filter_field) );
 					$this->setCondition($field, $encrypted);
 				}
 			}
