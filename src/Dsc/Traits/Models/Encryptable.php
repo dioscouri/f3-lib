@@ -1,11 +1,11 @@
 <?php
 
-namespace \Dsc\Traits\Models;
+namespace Dsc\Traits\Models;
 
 /**
  * This trait handles encryption of data on model level
  */
-trait ModelEncryptable{
+trait Encryptable{
 	
 	/**
 	 * List of field to be encrypted should be procided in model's config array like:
@@ -25,9 +25,10 @@ trait ModelEncryptable{
 	 */
 	public function conditions()
 	{
-		$this->fetchConditions();
-	
-		if( !empty( $this->__config['context'] ) ){
+        if (empty($this->__query_params['conditions'])) {
+        	$this->fetchConditions();
+        }
+		if( !empty( $this->__config['encrypted_fields'] ) ){
 			$encrypted_fields = $this->__config['encrypted_fields'];
 			if( is_array( $encrypted_fields ) === false ) {
 				$encrypted_fields = array( $encrypted_fields );
@@ -37,12 +38,12 @@ trait ModelEncryptable{
 				$filter_field = $this->getState('filter.' . $field);
 				if (!empty($filter_field) )
 				{
-					$encrypted = $this->encrypt($filter_field);
+					$encrypted = $this->encryptText($filter_field);
 					$this->setCondition($field, $encrypted);
 				}
 			}
 		}
-	
+		
 		return $this->__query_params['conditions'];
 	}
 	
@@ -80,7 +81,7 @@ trait ModelEncryptable{
 	}
 	
 	private function decryptFieldsModel(&$model){
-		if( !empty( $this->__config['context'] ) ){
+		if( !empty( $this->__config['encrypted_fields'] ) ){
 			$encrypted_fields = $this->__config['encrypted_fields'];
 			if( is_array( $encrypted_fields ) === false ) {
 				$encrypted_fields = array( $encrypted_fields );
@@ -88,7 +89,7 @@ trait ModelEncryptable{
 			
 			foreach ($encrypted_fields as $field)
 			{
-				$model->$field = $this->decryptText( $model->$field );
+				$model->$field = $this->decryptText( base64_decode($model->$field ) );
 			}
 		}
 	}
@@ -102,7 +103,7 @@ trait ModelEncryptable{
 	 * @return	Array with encrypted fields
 	 */
 	private function encryptFieldsModel($arr){
-		if( !empty( $this->__config['context'] ) ){
+		if( !empty( $this->__config['encrypted_fields'] ) ){
 			$encrypted_fields = $this->__config['encrypted_fields'];
 			if( is_array( $encrypted_fields ) === false ) {
 				$encrypted_fields = array( $encrypted_fields );
@@ -112,7 +113,7 @@ trait ModelEncryptable{
 			{
 				$field_text = \Dsc\ArrayHelper::get( $arr, $field );
 				if( !is_null( $field_text ) ) {
-					\Dsc\ArrayHelper::get( $arr, $field, $this->encryptText( $field_text ) );
+					\Dsc\ArrayHelper::set( $arr, $field, base64_encode( $this->encryptText( $field_text ) ) );
 				}
 			}
 		}
@@ -127,7 +128,7 @@ trait ModelEncryptable{
 	protected function fetchItem()
 	{
 		$this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
-	
+		
 		if ($this->getParam('sort'))
 		{
 			$this->__cursor->sort($this->getParam('sort'));
@@ -155,9 +156,9 @@ trait ModelEncryptable{
 	public function insert($document = array(), $options = array())
 	{
 		$this->__options = $options;
-	
+		
 		$this->bind($document, $options);
-	
+		
 		$this->beforeValidate();
 		$this->validate();
 		$this->beforeCreate();
@@ -168,7 +169,8 @@ trait ModelEncryptable{
 			$this->set('_id', new \MongoId());
 		}
 	
-		$array = $this->encryptFieldsModel( $this->cast() );
+		$doc = $this->cast();
+		$array = $this->encryptFieldsModel( $doc );
 		
 		if ($this->__last_operation = $this->collection()->insert($array))
 		{
@@ -195,12 +197,11 @@ trait ModelEncryptable{
 		{
 			return $this->overwrite($document, $options);
 		}
-	
+		
 		$this->beforeUpdate();
 		$this->beforeSave();
-	
-		$array = $this->encryptFieldsModel( $document );
-			
+		$document = $this->encryptFieldsModel( $document );
+		
 		// otherwise do a selective update with $set = array() and multi=false
 		$this->__last_operation = $this->collection()->update(array(
 				'_id' => new \MongoId((string) $this->get('id'))
@@ -233,15 +234,23 @@ trait ModelEncryptable{
 		$this->beforeUpdate();
 		$this->beforeSave();
 	
-		$array = $this->encryptFieldsModel( $this->cast() );
-		
+		$doc = $this->cast();
+		$arr = $this->encryptFieldsModel( $doc );
+		print_r( $arr );
+		try{
 		$this->__last_operation = $this->collection()->update(array(
 				'_id' => new \MongoId((string) $this->get('id'))
-		), $array, array(
+		), $arr, array(
 				'upsert' => true,
 				'multiple' => false
 		));
-	
+		} catch( \Exception $e ){
+			print_r( $e );
+			print_r( $arr );
+			exit(0);
+				
+		}
+		
 		$this->afterUpdate();
 		$this->afterSave();
 	

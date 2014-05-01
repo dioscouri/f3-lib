@@ -1,6 +1,6 @@
 <?php 
 
-namespace \Dsc\Traits;
+namespace Dsc\Traits;
 
 /**
  * 
@@ -34,7 +34,7 @@ trait Encryptable{
 	 * @return	Encryption key
 	 */
 	private function getEncryptionKey(){
-		$res = file_get_contents( \Bas::instance()->get('PATH_ROOT').'çonfig/key.ini' );
+		$res = file_get_contents( \Base::instance()->get('PATH_ROOT').'config/key.ini' );
 		if( $res === false ){
 			$this->setError( "No encryption key was founded!" );
 			$res = '';
@@ -83,7 +83,7 @@ trait Encryptable{
 	 * 
 	 * @return	Content of the text
 	 */
-	public function dencryptText($text){
+	public function decryptText($text){
 		return $this->getCipher()->decrypt( $text );
 	}
 }

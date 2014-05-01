@@ -284,7 +284,6 @@ class Collection extends \Dsc\Models
     protected function fetchConditions()
     {
         $this->__query_params['conditions'] = array();
-        
         $filter_id = $this->getState('filter.id');
         if (!empty($filter_id))
         {
@@ -437,7 +436,11 @@ class Collection extends \Dsc\Models
      */
     public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
     {
-        if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
+    	echo '###';
+    	print_r( $conditions );
+    	echo '<br><br><br><br>';
+    	 
+    	if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
         {
         	$this->bind( $item );
         }
@@ -499,7 +502,6 @@ class Collection extends \Dsc\Models
     public function insert($document=array(), $options=array())
     {
         $this->__options = $options;
-        
         $this->bind($document, $options);
         
         $this->beforeValidate();
