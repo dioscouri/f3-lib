@@ -89,8 +89,9 @@ trait Encryptable{
 			
 			foreach ($encrypted_fields as $field)
 			{
-				if( strlen( $model->$field ) ) {
-					$model->$field = $this->decryptTextBase64( $model->$field );
+				$text = trim( $model->$field );
+				if( strlen( $text ) ) {
+					$model->$field = $this->decryptTextBase64( $text );
 				}
 			}
 		}
