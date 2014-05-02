@@ -138,6 +138,11 @@ class Collection extends \Dsc\Models
         }
         $this->setParam('sort', $this->getState('list.sort'));
         
+        if ($this->getState('list.limit'))
+        {
+            $this->setParam('limit', $this->getState('list.limit'));
+        }
+        
         // TODO Store the state
         // TODO Implement caching
         return $this->fetchItems();
