@@ -109,10 +109,6 @@ trait Encryptable{
 	 * @return	Content of the text
 	 */
 	public function decryptText($text){
-	    $text = trim($text);
-	    if (empty($text)) {
-	        return null;
-	    }	    
 		return $this->getCipher()->decrypt( $text );
 	}
 	
@@ -124,10 +120,6 @@ trait Encryptable{
 	 * @return	Content of the text
 	 */
 	public function decryptTextBase64($text){
-	    $text = trim($text);
-	    if (empty($text)) {
-	    	return null;
-	    }
 		return $this->getCipher()->decrypt( base64_decode( $text ) );
 	}
 }
