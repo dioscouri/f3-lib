@@ -16,7 +16,7 @@ trait Encryptable{
 	
 	/**
 	 * This method returns encryption key for this cypher
-	 * By default, the encryption key is stored in a file public/../config/key.ini
+	 * By default, the encryption key is stored in a file public/./config/key.ini
 	 * This file should be owned by apache user and only apache user should be able to read it
 	 * 
 	 * NOTE: DES, 3DES, Blowfish are considered depreciated
