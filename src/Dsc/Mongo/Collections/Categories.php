@@ -281,4 +281,30 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     
         return (int) $this->depth;
     }
+    
+    /**
+     * Gets the ancestors of an item
+     * 
+     * @return array
+     */
+    public function ancestors()
+    {
+        $return = array();
+        
+        $item = $this;
+        while (!empty($item->parent)) 
+        {
+        	$clone = (new static)->load(array('_id'=>new \MongoId( (string) $item->parent) ));
+        	unset($item);
+        	if (!empty($clone->id)) 
+        	{
+        	    array_unshift($return, $clone);
+        	    if (!empty($clone->parent)) {
+        	        $item = $clone;
+        	    }
+        	}
+        }
+        
+        return $return;
+    }
 }
