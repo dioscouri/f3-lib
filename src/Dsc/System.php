@@ -208,8 +208,8 @@ class System extends Singleton
     public function setUserState($key, $value)
     {
         $registry = $this->getSessionRegistry();
-    
-        if (!is_null($registry))
+        
+        if (!empty($registry) && $registry instanceof \Joomla\Registry\Registry)
         {
             return $registry->set($key, $value);
         }
