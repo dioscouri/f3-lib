@@ -270,9 +270,9 @@ class Models extends \Dsc\Magic
         return false;
     }
     
-
     /**
-     *
+     * Models are reused a lot, so their context must be 
+     * url-specific but without the pagination parts of the url
      */
     public function context()
     {
@@ -280,7 +280,10 @@ class Models extends \Dsc\Magic
             $this->__config['context'] = strtolower(get_class($this));
         }
     
-        return $this->__config['context'];
+        $path = \Dsc\Pagination::checkRoute( \Base::instance()->hive()['PATH'] );
+        $context = $path . '.' . $this->__config['context'];
+    
+        return $context;
     }
     
     /**
