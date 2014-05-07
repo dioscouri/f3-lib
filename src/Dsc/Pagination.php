@@ -299,7 +299,7 @@ class Pagination
      *
      * @return string
      */
-    public function checkRoute($route)
+    public static function checkRoute($route)
     {
         $txt = $route;
         
