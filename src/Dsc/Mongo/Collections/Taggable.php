@@ -19,11 +19,11 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
             $this->setCondition('tags', $filter_tag);
         }
         
-        $filter_tags = $this->getState('filter.tags');
-        if (!empty($filter_tags) && is_array($filter_tags)) 
+        $filter_tags = (array) $this->getState('filter.tags');
+        if (!empty($filter_tags)) 
         {
             $filter_tags = array_filter( array_values( $filter_tags ) );
-            $this->setCondition('tags', array( '$in' => $tags ) );
+            $this->setCondition('tags', array( '$in' => $filter_tags ) );
         }
         
         return $this;
