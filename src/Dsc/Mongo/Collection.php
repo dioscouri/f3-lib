@@ -221,6 +221,7 @@ class Collection extends \Dsc\Models
     public static function surrounding( $id, array $query_params=array() )
     {
         $return = array(
+        	'found' => false,
         	'prev' => null,
             'next' => null
         );
@@ -240,6 +241,7 @@ class Collection extends \Dsc\Models
             $model->__cursor->skip($model->getParam('skip'));
         }
         	
+        $found = false;
         $prev = null;
         $next = null;
         foreach ($model->__cursor as $doc)
@@ -247,6 +249,7 @@ class Collection extends \Dsc\Models
             // if the doc is the one we're looking for, get the next one, then break
             if ((string) $doc['_id'] == (string) $id)
             {
+            	$found = true;
                 if ($nextDoc = $model->__cursor->getNext()) {
                     $next = new static( $nextDoc );
                 } else {
@@ -269,7 +272,7 @@ class Collection extends \Dsc\Models
                 }
                 
                 // If this is the first doc in the list (if $prev == null),
-                if (empty($prev)) 
+                if (!empty($next) && empty($prev)) 
                 {
                 	// and if this is a paginated set, and if we're not on page 1,                	
                 	if ($model->getParam('skip') > $model->getParam('limit')) 
@@ -300,14 +303,18 @@ class Collection extends \Dsc\Models
             	$prev = $doc;
             }
         }
-        	
-        if (!empty($prev))
+
+        if ($found) 
         {
-            $prev = new static( $prev );
+        	if (!empty($prev))
+        	{
+        		$prev = new static( $prev );
+        	}
+        	
+        	$return['found'] = $found;
+        	$return['prev'] = $prev;
+        	$return['next'] = $next;
         }
-        
-        $return['prev'] = $prev;
-        $return['next'] = $next;
         
         return $return;
     }
