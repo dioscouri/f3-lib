@@ -88,6 +88,7 @@ class Session
     }
     
     /**
+     * Tracks a model state, pushing it to the top of the stack
      * 
      * @param unknown $model_name
      * @param array $state
@@ -100,11 +101,13 @@ class Session
         	$current = array();
         }        
         array_unshift( $current, (array) $state );
-         
-    	return $this->set( $key, $current );
+        $this->set( $key, $current );
+        
+    	return $this;
     }
     
     /**
+     * Gets the most recent state for the selected model
      * 
      * @param unknown $model_name
      * @return multitype:
@@ -123,7 +126,8 @@ class Session
     }
     
     /**
-     *
+     * Tracks a url, pushing it to the top of the stack
+     * 
      * @param unknown $model_name
      * @param array $state
      */
@@ -143,13 +147,15 @@ class Session
     		'url' => $url
     	) );
     	 
-    	return $this->set( $key, $current );
+    	$this->set( $key, $current );
+    	
+    	return $this;
     }
     
     /**
-     *
-     * @param unknown $model_name
-     * @return multitype:
+     * Gets the last tracked url
+     * 
+     * @return Ambigous <multitype:, unknown>
      */
     public function lastUrl()
     {
@@ -165,9 +171,9 @@ class Session
     }
     
     /**
-     *
-     * @param unknown $model_name
-     * @return multitype:
+     * Gets all of the tracked urls (breadcrumbs) for this session
+     * 
+     * @return Ambigous <multitype:, array>
      */
     public function lastUrls()
     {
@@ -183,15 +189,16 @@ class Session
     }
     
     /**
-     *
-     * @param unknown $model_name
-     * @param array $state
+     * Clears tracked urls
+     * 
+     * @return \Dsc\Session
      */
     public function clearUrls()
     {
     	$key = 'trackUrl';
+    	$this->remove( $key );
     	
-    	return $this->remove( $key );
+    	return $this;
     }
 }
 ?>
