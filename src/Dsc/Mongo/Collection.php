@@ -236,9 +236,6 @@ class Collection extends \Dsc\Models
         if ($model->getParam('sort')) {
             $model->__cursor->sort($model->getParam('sort'));
         }
-        if ($model->getParam('limit')) {
-            $model->__cursor->limit($model->getParam('limit'));
-        }
         if ($model->getParam('skip')) {
             $model->__cursor->skip($model->getParam('skip'));
         }
@@ -256,8 +253,6 @@ class Collection extends \Dsc\Models
                 	$total = $model->collection()->count( $model->conditions() );
                 	if ($total > $model->getParam('skip') && $model->getParam('limit')) {
                 		$skip = $model->getParam('skip') + $model->getParam('limit');
-                		$query_params['skip'] = $skip;
-                		\Dsc\System::instance()->get('session')->trackState( get_class( $model ), $query_params );
                 		
                 		$model->__cursor = $model->collection()->find($model->conditions(), $model->fields());
                 		if ($model->getParam('sort')) {
@@ -266,12 +261,14 @@ class Collection extends \Dsc\Models
                 		$model->__cursor->limit(1);
                 		$model->__cursor->skip($skip);
                 		if ($model->__cursor->hasNext()) {
+                			$query_params['skip'] = $skip;
+                			\Dsc\System::instance()->get('session')->trackState( get_class( $model ), $query_params );                			
                 			$next = new static( $model->__cursor->getNext() );
                 		}
                 	}
                 }
                 
-                // TODO If this is the first doc in the list (if $prev == null),
+                // If this is the first doc in the list (if $prev == null),
                 if (empty($prev)) 
                 {
                 	// and if this is a paginated set, and if we're not on page 1,                	
@@ -279,8 +276,6 @@ class Collection extends \Dsc\Models
                 	{
                 		// try to load the previous page.  Set the new page as the new state
                 		$skip = $model->getParam('skip') - $model->getParam('limit');
-                		$query_params['skip'] = $skip;
-                		\Dsc\System::instance()->get('session')->trackState( get_class( $model ), $query_params );
                 		
                 		$model->__cursor = $model->collection()->find($model->conditions(), $model->fields());
                 		if ($model->getParam('sort')) {
@@ -289,10 +284,11 @@ class Collection extends \Dsc\Models
                 		$model->__cursor->limit(1);
                 		$model->__cursor->skip($skip + ($model->getParam('limit')-1));
                 		if ($model->__cursor->hasNext()) {
-                			$prev = new static( $model->__cursor->getNext() );
+                			$prev = $model->__cursor->getNext();
+                			$query_params['skip'] = $skip;
+                			\Dsc\System::instance()->get('session')->trackState( get_class( $model ), $query_params );                			
                 		}                		
                 	}
-
 
                 } 
                 
