@@ -212,6 +212,111 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Attempt to get the items in a filtered list that immediately flank a certain one
+     * 
+     * @param unknown $id
+     * @param array $query_params
+     * @return multitype:NULL Ambigous <NULL, \Dsc\Mongo\Collection> Ambigous <NULL, \Dsc\Mongo\Collection, unknown>
+     */
+    public static function surrounding( $id, array $query_params=array() )
+    {
+        $return = array(
+        	'prev' => null,
+            'next' => null
+        );
+        
+        $model = new static;
+        foreach ($query_params as $key=>$value)
+        {
+            $model->setParam($key, $value);
+        }
+        	
+        $model->__cursor = $model->collection()->find($model->conditions(), $model->fields());
+        	
+        if ($model->getParam('sort')) {
+            $model->__cursor->sort($model->getParam('sort'));
+        }
+        if ($model->getParam('limit')) {
+            $model->__cursor->limit($model->getParam('limit'));
+        }
+        if ($model->getParam('skip')) {
+            $model->__cursor->skip($model->getParam('skip'));
+        }
+        	
+        $prev = null;
+        $next = null;
+        foreach ($model->__cursor as $doc)
+        {
+            // if the doc is the one we're looking for, get the next one, then break
+            if ((string) $doc['_id'] == (string) $id)
+            {
+                if ($nextDoc = $model->__cursor->getNext()) {
+                    $next = new static( $nextDoc );
+                } else {
+                	$total = $model->collection()->count( $model->conditions() );
+                	if ($total > $model->getParam('skip') && $model->getParam('limit')) {
+                		$skip = $model->getParam('skip') + $model->getParam('limit');
+                		$query_params['skip'] = $skip;
+                		\Dsc\System::instance()->get('session')->trackState( get_class( $model ), $query_params );
+                		
+                		$model->__cursor = $model->collection()->find($model->conditions(), $model->fields());
+                		if ($model->getParam('sort')) {
+                			$model->__cursor->sort($model->getParam('sort'));
+                		}
+                		$model->__cursor->limit(1);
+                		$model->__cursor->skip($skip);
+                		if ($model->__cursor->hasNext()) {
+                			$next = new static( $model->__cursor->getNext() );
+                		}
+                	}
+                }
+                
+                // TODO If this is the first doc in the list (if $prev == null),
+                if (empty($prev)) 
+                {
+                	// and if this is a paginated set, and if we're not on page 1,                	
+                	if ($model->getParam('skip') > $model->getParam('limit')) 
+                	{
+                		// try to load the previous page.  Set the new page as the new state
+                		$skip = $model->getParam('skip') - $model->getParam('limit');
+                		$query_params['skip'] = $skip;
+                		\Dsc\System::instance()->get('session')->trackState( get_class( $model ), $query_params );
+                		
+                		$model->__cursor = $model->collection()->find($model->conditions(), $model->fields());
+                		if ($model->getParam('sort')) {
+                			$model->__cursor->sort($model->getParam('sort'));
+                		}
+                		$model->__cursor->limit(1);
+                		$model->__cursor->skip($skip + ($model->getParam('limit')-1));
+                		if ($model->__cursor->hasNext()) {
+                			$prev = new static( $model->__cursor->getNext() );
+                		}                		
+                	}
+
+
+                } 
+                
+                break;
+            }
+            // otherwise, set the doc as the prev and continue on
+            else 
+            {
+            	$prev = $doc;
+            }
+        }
+        	
+        if (!empty($prev))
+        {
+            $prev = new static( $prev );
+        }
+        
+        $return['prev'] = $prev;
+        $return['next'] = $next;
+        
+        return $return;
+    }
+    
+    /**
      * Returns a pagination object
      * merged with a result set
      *

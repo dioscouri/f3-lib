@@ -86,5 +86,112 @@ class Session
         session_start();
         return session_destroy();
     }
+    
+    /**
+     * 
+     * @param unknown $model_name
+     * @param array $state
+     */
+    public function trackState( $model_name, array $state, $url_title=null, $url=null ) 
+    {
+        $key = 'trackState.' . $model_name;
+        $current = $this->get( $key );
+        if (empty($current) || !is_array($current)) {
+        	$current = array();
+        }        
+        array_unshift( $current, (array) $state );
+         
+    	return $this->set( $key, $current );
+    }
+    
+    /**
+     * 
+     * @param unknown $model_name
+     * @return multitype:
+     */
+    public function lastState( $model_name ) 
+    {
+    	$state = array();
+    	
+    	$key = 'trackState.' . $model_name;
+    	$current = $this->get( $key );
+    	if (!empty($current) && is_array($current)) {
+    	    $state = $current[0];
+    	}
+
+    	return $state;
+    }
+    
+    /**
+     *
+     * @param unknown $model_name
+     * @param array $state
+     */
+    public function trackUrl( $url_title, $url=null )
+    {
+    	if (empty($url)) {
+    		$url = \Base::instance()->hive()['PATH'];
+    	}
+    	
+    	$key = 'trackUrl';
+    	$current = $this->get( $key );
+    	if (empty($current) || !is_array($current)) {
+    		$current = array();
+    	}
+    	array_unshift( $current, array(
+    		'title' => $url_title,
+    		'url' => $url
+    	) );
+    	 
+    	return $this->set( $key, $current );
+    }
+    
+    /**
+     *
+     * @param unknown $model_name
+     * @return multitype:
+     */
+    public function lastUrl()
+    {
+    	$state = array();
+    	 
+    	$key = 'trackUrl';
+    	$current = $this->get( $key );
+    	if (!empty($current) && is_array($current)) {
+    		$state = $current[0];
+    	}
+    
+    	return $state;
+    }
+    
+    /**
+     *
+     * @param unknown $model_name
+     * @return multitype:
+     */
+    public function lastUrls()
+    {
+    	$state = array();
+    
+    	$key = 'trackUrl';
+    	$current = (array) $this->get( $key );
+    	if (!empty($current) && is_array($current)) {
+    		$state = $current;
+    	}
+    
+    	return $state;
+    }
+    
+    /**
+     *
+     * @param unknown $model_name
+     * @param array $state
+     */
+    public function clearUrls()
+    {
+    	$key = 'trackUrl';
+    	
+    	return $this->remove( $key );
+    }
 }
 ?>
