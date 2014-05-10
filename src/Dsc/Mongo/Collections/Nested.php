@@ -25,6 +25,18 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     protected function fetchConditions()
     {
         parent::fetchConditions();
+        
+        $filter_keyword = $this->getState('filter.keyword');
+        if ($filter_keyword && is_string($filter_keyword))
+        {
+        	$key =  new \MongoRegex('/'. $filter_keyword .'/i');
+
+        	$where = array();
+        	$where[] = array('title'=>$key);
+        	$where[] = array('slug'=>$key);
+
+        	$this->setCondition('$or', $where);
+        }
     
         $filter_slug = $this->getState('filter.slug');
         if (strlen($filter_slug))
