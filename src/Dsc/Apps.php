@@ -104,4 +104,29 @@ class Apps extends Singleton
         
         return $this;
     }
+    
+    /**
+     * Registers a path so application can look for its code there
+     *
+     * @param $path		Path
+     * @param $app		Name of app
+     */
+    public static function registerPath( $path, $app )
+    {
+    	$paths = \Base::instance()->get('dsc.'.$app.'.paths');
+    	if (empty($paths) || !is_array($paths))
+    	{
+    		$paths = array();
+    	}
+    
+    	// if $path is not already registered, register it
+    	// last ones inserted are given priority by using unshift
+    	if (!in_array($path, $paths))
+    	{
+    		array_unshift( $paths, $path );
+    		\Base::instance()->set('dsc.'.$app.'.paths', $paths);
+    	}
+    
+    	return $paths;
+    }
 }
