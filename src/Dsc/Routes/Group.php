@@ -96,14 +96,14 @@ abstract class Group
     public function addCrudItem( $controller, $params = array() )
     {
         $orig_params = array(
-            'prefix_url' => '',
+            'url_prefix' => '',
             'rest_actions' => false,
             'exclude' => array() 
         );
         $params = $params + $orig_params;
-        if (strlen( $params['prefix_url'] ) == 0)
+        if (strlen( $params['url_prefix'] ) == 0)
         { // use controller name as fallback option
-            $params['prefix_url'] = '/' . strtolower( $controller );
+            $params['url_prefix'] = '/' . strtolower( $controller );
         }
         
         // this array defines parameters for all CRUD operations for an item
@@ -190,7 +190,7 @@ abstract class Group
         // add all routes you can
         if (count( $routes ))
         {
-            $this->addBulkRoutes( $routes, $controller, $params['prefix_url'] );
+            $this->addBulkRoutes( $routes, $controller, $params['url_prefix'] );
         }
     }
 
@@ -200,13 +200,13 @@ abstract class Group
      * @param $controller Name
      *            of controller
      * @param $params Parameters
-     *            of the route (prefix_url is required)
+     *            of the route (url_prefix is required)
      *            
      */
     public function addCrudList( $controller, $params = array() )
     {
         $orig_params = array(
-            'prefix_url' => '',
+            'url_prefix' => '',
             'exclude' => array(),
             
             'datatable_links' => false,
@@ -214,9 +214,9 @@ abstract class Group
             'pagination_list' => true 
         );
         $params = $params + $orig_params;
-        if (strlen( $params['prefix_url'] ) == 0)
+        if (strlen( $params['url_prefix'] ) == 0)
         { // use controller name as fallback option
-            $params['prefix_url'] = '/' . strtolower( $controller );
+            $params['url_prefix'] = '/' . strtolower( $controller );
         }
         
         // this array defines parameters for all CRUD operations for an item
@@ -284,18 +284,18 @@ abstract class Group
         // add all routes you can
         if (count( $routes ))
         {
-            $this->addBulkRoutes( $routes, $controller, $params['prefix_url'] );
+            $this->addBulkRoutes( $routes, $controller, $params['url_prefix'] );
         }
     }
 
     /**
      * Adds routes for settings
      *
-     * @param $prefix_url Prefix
+     * @param $url_prefix Prefix
      *            of URL
      *            
      */
-    public function addSettingsRoutes( $prefix_url = '' )
+    public function addSettingsRoutes( $url_prefix = '' )
     {
         $routes = array(
             array(
@@ -311,7 +311,7 @@ abstract class Group
         );
         
         // add all routes you can
-        $this->addBulkRoutes( $routes, 'Settings', $prefix_url );
+        $this->addBulkRoutes( $routes, 'Settings', $url_prefix );
     }
 
     /**
@@ -321,10 +321,10 @@ abstract class Group
      *            of routes to add
      * @param $controller Controller
      *            for all added routes
-     * @param $prefix_url Prefix
+     * @param $url_prefix Prefix
      *            for all added routes
      */
-    private function addBulkRoutes( $routes_list, $controller, $prefix_url )
+    private function addBulkRoutes( $routes_list, $controller, $url_prefix )
     {
         foreach ( $routes_list as $routes )
         {
@@ -339,7 +339,7 @@ abstract class Group
             foreach ( $routes as $route )
             {
                 $ajax = isset( $route['ajax'] ) ? (bool) $route['ajax'] : false;
-                $this->add( $prefix_url . $route['route'], $route['request'], array(
+                $this->add( $url_prefix . $route['route'], $route['request'], array(
                     'controller' => $controller,
                     'action' => $route['action'],
                     'ajax' => $ajax 

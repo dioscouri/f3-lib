@@ -13,9 +13,9 @@ trait CrudItemCollection
      * Here is a typical format.
      * 
     protected $list_route = '/admin/items';
-    protected $create_item_route = '/admin/item';
-    protected $get_item_route = '/admin/item/{id}';    
-    protected $edit_item_route = '/admin/item/{id}/edit';
+    protected $create_item_route = '/admin/item/create';
+    protected $get_item_route = '/admin/item/read/{id}';    
+    protected $edit_item_route = '/admin/item/edit/{id}';
     */
         
     abstract protected function getModel();
