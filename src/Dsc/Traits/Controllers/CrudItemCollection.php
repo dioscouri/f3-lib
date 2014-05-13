@@ -141,19 +141,9 @@ trait CrudItemCollection
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
+            \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
             if (\Base::instance()->get('DEBUG')) {
-                \Dsc\System::instance()->addMessage($e, 'error');
-            } else {
-                \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            }
-            
-            foreach ($model->getErrors() as $error)
-            {
-                if (\Base::instance()->get('DEBUG')) {
-                    \Dsc\System::instance()->addMessage($error, 'error');
-                } else {
-                    \Dsc\System::instance()->addMessage($error->getMessage(), 'error');
-                }                
+                \Dsc\System::instance()->addMessage($e->getTraceAsString(), 'error');
             }
             
             if ($f3->get('AJAX')) {
@@ -163,7 +153,7 @@ trait CrudItemCollection
                         'message' => \Dsc\System::instance()->renderMessages()
                 ) ) );
             }
-            
+           
             // redirect back to the create form with the fields pre-populated
             \Dsc\System::instance()->setUserState('use_flash.' . $this->create_item_route, true);
             $flash->store($data);
@@ -252,19 +242,9 @@ trait CrudItemCollection
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
+            \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
             if (\Base::instance()->get('DEBUG')) {
-                \Dsc\System::instance()->addMessage($e, 'error');
-            } else {
-                \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            }            
-
-            foreach ($model->getErrors() as $error)
-            {
-                if (\Base::instance()->get('DEBUG')) {
-                    \Dsc\System::instance()->addMessage($error, 'error');
-                } else {
-                    \Dsc\System::instance()->addMessage($error->getMessage(), 'error');
-                }                
+                \Dsc\System::instance()->addMessage($e->getTraceAsString(), 'error');
             }
             
             if ($f3->get('AJAX')) {
@@ -337,21 +317,11 @@ trait CrudItemCollection
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Delete failed with the following errors:', 'error');
+            \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
             if (\Base::instance()->get('DEBUG')) {
-                \Dsc\System::instance()->addMessage($e, 'error');
-            } else {
-                \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
+                \Dsc\System::instance()->addMessage($e->getTraceAsString(), 'error');
             }
-            
-            foreach ($model->getErrors() as $error)
-            {
-                if (\Base::instance()->get('DEBUG')) {
-                    \Dsc\System::instance()->addMessage($error, 'error');
-                } else {
-                    \Dsc\System::instance()->addMessage($error->getMessage(), 'error');
-                }                
-            }
-        
+                        
             if ($f3->get('AJAX')) {
                 // output system messages in response object
                 return $this->outputJson( $this->getJsonResponse( array(

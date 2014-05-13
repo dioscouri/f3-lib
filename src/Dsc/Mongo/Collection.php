@@ -725,13 +725,7 @@ class Collection extends \Dsc\Models
      */
     public function validate()
     {
-        $errors = $this->getErrors();
-        if (!empty($errors))
-        {
-            return false;
-        }
-                
-        return $this;
+        return $this->checkErrors();
     }
     
     /**
