@@ -270,9 +270,11 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 $values['metadata']['title'] = $values['md5'];
             }
 
+            $model->bind($values);
+            
             $values['metadata']['slug'] = $model->generateSlug( $values );
             $values['url'] = "/asset/" . $values['metadata']['slug'];
-
+            
             // save the file
             if ($storedfile = $grid->storeBytes( $buffer, $values ))
             {
