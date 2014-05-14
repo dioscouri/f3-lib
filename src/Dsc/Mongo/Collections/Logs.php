@@ -83,4 +83,20 @@ class Logs extends \Dsc\Mongo\Collection
         
         return $distinct;
     }    
+    
+    /**
+     *
+     * @param array $types
+     * @return unknown
+     */
+    public static function distinctPriorities($query=array())
+    {
+        $model = new static();
+        $distinct = $model->collection()->distinct("priority", $query);
+        $distinct = array_values( array_filter( $distinct ) );
+    
+        sort($distinct);
+    
+        return $distinct;
+    }
 }
