@@ -326,9 +326,11 @@ class Models extends \Dsc\Magic
         if (!is_null($this->getState('list.order')) && !is_null($this->getState('list.direction')))
         {
             switch(strtolower($this->getState('list.direction'))) {
+                case "-1":
             	case "desc":
             	    $dir = -1;
             	    break;
+            	case "1":
             	case "asc":
             	default:
             	    $dir = 1;
@@ -342,6 +344,11 @@ class Models extends \Dsc\Magic
         if (is_null($this->getState('list.sort')))
         {
             $this->setState('list.sort', $this->__config['default_sort']);
+            if (reset($this->__config['default_sort'])) {
+                list($key, $value) = each($this->__config['default_sort']);
+                $this->setState('list.order', $key);
+                $this->setState('list.direction', $value);
+            }
         }
     
         return $this;
