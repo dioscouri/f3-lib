@@ -7,12 +7,19 @@ class Settings extends \Dsc\Mongo\Collection
     protected $__type = 'common.settings';
     
     /**
-     * Returns the Settings object for the current __type
+     * Returns the requested Settings Model
+     * defaults to the current Model's __type
+     * 
+     * @param string $type
+     * @return \Dsc\Mongo\Collections\Settings
      */
-    public static function fetch()
+    public static function fetch($type=null)
     {
         $item = new static;
-        $item->load(array('type' => $item->type()));
+        if (empty($type)) {
+            $type = $item->type();
+        }
+        $item->load(array('type' => $type));
         return $item;
     }
     
