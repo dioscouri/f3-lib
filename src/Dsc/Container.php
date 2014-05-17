@@ -12,6 +12,10 @@ class Container extends \Joomla\DI\Container
 
     public function setDefaults()
     {
+        $this->share( 'app', function() {
+            return \Base::instance();
+        } );
+                
         $this->share( 'input', function() {
             return new \Joomla\Input\Input;
         } );
