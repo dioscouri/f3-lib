@@ -39,7 +39,9 @@ trait Settings
     	$view = \Dsc\System::instance()->get('theme');
     	$eventNameSuffix = $this->inputfilter->clean( explode('\\', __CLASS__)[0], 'ALNUM');
     	$view->event = $view->trigger( 'onDisplaySettings' . $eventNameSuffix, array( 'item' => $item, 'tabs' => array(), 'content' => array() ) );
-    	    	
+
+    	$this->app->set('meta.title', $eventNameSuffix . ' Settings');
+    	
     	echo $view->render($this->layout_link);
     }
     
