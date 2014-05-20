@@ -8,7 +8,7 @@ namespace Dsc\Traits\Models;
 trait Encryptable{
 	
 	/**
-	 * List of field to be encrypted should be procided in model's config array like:
+	 * List of field to be encrypted should be defined in model's config array like:
 	 * 
 	 * protected $__config = array(
 	 *	 'encrypted_fields' => array(
@@ -98,7 +98,7 @@ trait Encryptable{
 	}
 
 	
-	/*
+	/**
 	 * This method encrypts fields in provided array
 	 * 
 	 * @param $arr		Array with field to be encrypted

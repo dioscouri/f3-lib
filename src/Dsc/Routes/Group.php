@@ -71,16 +71,16 @@ abstract class Group
      *
      * @param $plural Controller
      *            list
-     * @param $singual Controller
+     * @param $singular Controller
      *            item
      * @param $plural_params Custom
      *            for list routes
-     * @param $singual_params Custom
+     * @param $singular_params Custom
      *            for item routes
      */
-    public function addCrudGroup( $plural, $singual, $plural_params = array(), $singual_params = array() )
+    public function addCrudGroup( $plural, $singular, $plural_params = array(), $singular_params = array() )
     {
-        $this->addCrudItem( $singual, $singual_params );
+        $this->addCrudItem( $singular, $singular_params );
         $this->addCrudList( $plural, $plural_params );
     }
 
