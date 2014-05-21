@@ -67,6 +67,18 @@ class Session
     }
     
     /**
+     * Empty an app's set of session values
+     *
+     * @param unknown $key
+     * @param string $app_space
+     */
+    public function removeAppSpace()
+    {
+        $global_app_name = \Base::instance()->get('APP_NAME');
+        \Base::instance()->set('SESSION.' . $global_app_name, null );
+    }
+    
+    /**
      * Completely destroy all session data
      * regardless of app namespace.
      * 
