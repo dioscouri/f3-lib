@@ -29,7 +29,7 @@ trait Pusher {
 	 * @return array
 	 */
 	
-	public function push($pusher_fields = null)
+	public function pusherPush($pusher_fields = null)
 	{
         if(empty($pusher_fields)) {
 	        if( !empty( $this->__config['pusher_fields'] ) ){
