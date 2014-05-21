@@ -11,8 +11,10 @@ trait OrderableItemCollection
 {
 	public function moveUp()
     {
-    	$item = $this->getModel()->getItem();
-        if (!$this->canUpdate( $item )) {
+        $f3 = \Base::instance();
+    	$id = $this->inputfilter->clean( $f3->get('PARAMS.id'), 'alnum' );
+        $item = $this->getModel()->setState('filter.id', $id)->getItem();
+    	if (!$this->canUpdate( $item )) {
             throw new \Exception('Not allowed to update record');
         }
         
@@ -27,7 +29,9 @@ trait OrderableItemCollection
     
     public function moveDown()
     {
-        $item = $this->getModel()->getItem();
+        $f3 = \Base::instance();
+    	$id = $this->inputfilter->clean( $f3->get('PARAMS.id'), 'alnum' );
+        $item = $this->getModel()->setState('filter.id', $id)->getItem();
         if (!$this->canUpdate($item )) {
             throw new \Exception('Not allowed to update record');
         }
