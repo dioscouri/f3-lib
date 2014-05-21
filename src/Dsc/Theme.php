@@ -24,10 +24,6 @@ class Theme extends \View
     
     public function __get($key)
     {
-        if (strtolower($key)=='app') {
-            return \Base::instance();
-        }
-        
         return \Dsc\System::instance()->get($key);
     }
 

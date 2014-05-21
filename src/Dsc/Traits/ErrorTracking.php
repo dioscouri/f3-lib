@@ -15,7 +15,15 @@ trait ErrorTracking
     {
         if (is_string( $error ))
         {
-            $error = new \Exception( $error );
+            $error = trim($error);
+            if (!empty($error)) 
+            {
+                $error = new \Exception( $error );
+            }
+            else 
+            {
+            	return $this;
+            }
         }
         
         if (is_a( $error, 'Exception' ))
@@ -59,10 +67,19 @@ trait ErrorTracking
         $messages = array();
         foreach ( $errors as $exception )
         {
-            $messages[] = $exception->getMessage();
+            $message = trim($exception->getMessage());
+            if (!empty($message)) 
+            {
+                $messages[] = $message;
+            }
         }
-        $messages = implode( ". ", $messages );
         
+        if (empty($messages)) 
+        {
+        	return $this;
+        }
+        
+        $messages = implode( ". ", $messages );
         throw new \Exception( $messages );
     }
 }

@@ -68,9 +68,34 @@ class Collection extends \Dsc\Models
      * Set a condition in the query
      *
      */
-    public function setCondition( $key, $value )
+    public function setCondition( $key, $value, $method='overwrite' )
     {
-        $this->__query_params['conditions'][$key] = $value;
+        switch ($method) 
+        {
+        	case "merge":
+        	    if (empty($this->__query_params['conditions'][$key]) || !is_array($this->__query_params['conditions'][$key])) {
+        	        $this->__query_params['conditions'][$key] = array();
+        	    }
+        	    $this->__query_params['conditions'][$key] = array_merge($this->__query_params['conditions'][$key], $value);
+        	    break;
+        	case "append":
+        	    if (empty($this->__query_params['conditions'][$key]) || !is_array($this->__query_params['conditions'][$key])) {
+        	        $this->__query_params['conditions'][$key] = array();
+        	    }
+        	    $this->__query_params['conditions'][$key][] = $value;
+        	    break;
+        	case "prepend":
+        	    if (empty($this->__query_params['conditions'][$key]) || !is_array($this->__query_params['conditions'][$key])) {
+        	        $this->__query_params['conditions'][$key] = array();
+        	    }
+        	    array_unshift( $this->__query_params['conditions'][$key], $value );
+        	    break;
+        	case "overwrite":
+        	default:
+        	    $this->__query_params['conditions'][$key] = $value;
+        	    break;
+        }
+        
     
         return $this;
     }
@@ -725,13 +750,7 @@ class Collection extends \Dsc\Models
      */
     public function validate()
     {
-        $errors = $this->getErrors();
-        if (!empty($errors))
-        {
-            return false;
-        }
-                
-        return $this;
+        return $this->checkErrors();
     }
     
     /**
