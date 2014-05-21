@@ -9,15 +9,14 @@ namespace Dsc\Traits\Controllers;
  */
 trait OrderableItemCollection 
 {
-   public function moveUp()
+	public function moveUp()
     {
-        $data = \Base::instance()->get('REQUEST');
-        
-        if (!$this->canUpdate($data, $this->getItemKey())) {
+    	$item = $this->getModel()->getItem();
+        if (!$this->canUpdate( $item )) {
             throw new \Exception('Not allowed to update record');
         }
         
-        $this->doMoveUp($data, $this->getItemKey());
+        $this->doMoveUp( $item );
 
         if ($route = $this->getRedirect()) {
             \Base::instance()->reroute( $route );
@@ -28,13 +27,12 @@ trait OrderableItemCollection
     
     public function moveDown()
     {
-        $data = \Base::instance()->get('REQUEST');
-        
-        if (!$this->canUpdate($data, $this->getItemKey())) {
+        $item = $this->getModel()->getItem();
+        if (!$this->canUpdate($item )) {
             throw new \Exception('Not allowed to update record');
         }
         
-        $this->doMoveDown($data, $this->getItemKey());
+        $this->doMoveDown( $item );
         
         if ($route = $this->getRedirect()) {
             \Base::instance()->reroute( $route );
@@ -43,7 +41,7 @@ trait OrderableItemCollection
         return;
     }
     
-    protected function doMoveUp(array $data, $key=null)
+    protected function doMoveUp($item )
     {
         if (empty($this->list_route)) {
             throw new \Exception('Must define a route for listing the items');
@@ -52,13 +50,13 @@ trait OrderableItemCollection
         $f3 = \Base::instance();
     
         try {
-            $this->item = $this->getItem()->moveUp();
+            $item->moveUp();
             \Dsc\System::instance()->addMessage('Item moved up');
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Item move failed with the following errors:', 'error');
             \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            foreach ($this->item->getErrors() as $error)
+            foreach ($item->getErrors() as $error)
             {
                 \Dsc\System::instance()->addMessage($error, 'error');
             }
@@ -88,7 +86,7 @@ trait OrderableItemCollection
         return $this;
     }
     
-    protected function doMoveDown(array $data, $key=null)
+    protected function doMoveDown( $item )
     {
         if (empty($this->list_route)) {
             throw new \Exception('Must define a route for listing the items');
@@ -97,7 +95,7 @@ trait OrderableItemCollection
         $f3 = \Base::instance();
     
         try {
-            $this->item = $this->getItem()->moveDown();
+            $item->moveDown();
             \Dsc\System::instance()->addMessage('Item moved down');
         }
         catch (\Exception $e) {

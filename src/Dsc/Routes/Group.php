@@ -347,7 +347,33 @@ abstract class Group
             }
         }
     }
-
+    /**
+     * Adds routes for changing a state of an item in list view (EnablableItem trait)
+     *
+     * @param $controller 	Name of controller
+     * @param $url_prefix 	Prefix of URL
+     *
+     */
+    public function addChangeStateListRoutes( $controller, $url_prefix )
+    {
+    	$routes = array(
+    			array(
+    					'action' => 'EnablableItemChangeStateItemDisable',
+    					'request' => 'GET',
+    					'route' => '/disable/@id'
+    			),
+    			array(
+    					'action' => 'EnablableItemChangeStateItemEnable',
+    					'request' => 'GET',
+    					'route' => '/enable/@id'
+    			)
+    	);    	 
+    	// TODO: Add routes for bulk enable/disable action
+    
+    	// add all routes you can
+    	$this->addBulkRoutes( $routes, $controller, $url_prefix );
+    }
+    
     /**
      * This method returns array of correctly formatted routes and operations assigned to them
      */

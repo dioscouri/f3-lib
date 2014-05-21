@@ -24,7 +24,7 @@ trait OrderableCollection
     }
     
     /**
-     * Move the model up, meaning increase ordering value and decrease all others where ordering = $this->ordering+1 and _id != $this->id
+     * Move the model down, meaning increase ordering value and decrease all others where ordering = $this->ordering+1 and _id != $this->id
      *
      * @return \Dsc\Traits\Models\OrderableCollection
      */
