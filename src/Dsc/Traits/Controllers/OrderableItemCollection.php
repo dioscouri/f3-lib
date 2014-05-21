@@ -9,9 +9,7 @@ namespace Dsc\Traits\Controllers;
  */
 trait OrderableItemCollection 
 {
-    use \Dsc\Traits\Controllers\CrudItemCollection;
-    
-    public function moveUp()
+   public function moveUp()
     {
         $data = \Base::instance()->get('REQUEST');
         
