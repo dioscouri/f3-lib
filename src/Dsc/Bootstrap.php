@@ -10,9 +10,49 @@ abstract class Bootstrap
     protected $namespace = '';
     
     /**
-     * This needs to be set in bootstrap.php of every app
+     * The full path to the app's bootstrap.php file
+     * @var string
      */
     protected $dir = '';
+    
+    /**
+     * The full path to the folder containing the app's namespaced files
+     * @var string
+     */
+    protected $base = '';
+    
+    public function __construct()
+    {
+        if (empty($this->base)) {
+        	$this->base = $this->dir . '/src/' . $this->namespace;
+        }
+        
+        static::registerApp( $this->namespace, $this->base );
+    }
+    
+    /**
+     * 
+     * @param unknown $app
+     * @param unknown $path
+     * @return Ambigous <array, multitype:unknown >
+     */
+    public static function registerApp( $app, $path ) 
+    {
+        $apps = (array) \Base::instance()->get('dsc.apps' );
+        if (empty($apps) || !is_array($apps))
+        {
+            $apps = array();
+        }
+        
+        // if $apps is not already registered, register it
+        if (!array_key_exists($app, $apps))
+        {
+            $apps[$app] = $path;
+            \Base::instance()->set('dsc.apps', $apps);
+        }
+        
+        return $apps;
+    }
 
     /**
      * Triggers a command for a specific part of application
