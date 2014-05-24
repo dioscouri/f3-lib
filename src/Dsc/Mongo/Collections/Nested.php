@@ -662,10 +662,14 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         // the children of this node we also know the right value
         $node->lft = $left;
         $node->rgt = $right;
-        // not using $node->save() so we avoid recursion.  Just update the doc directly        
+        
+        // not using $node->save() so we avoid recursion.  Just update the doc directly
+        $cast = $node->cast();
+        unset($cast['_id']);
+                
         $this->collection()->update(
             array('_id'=> new \MongoId((string) $node->id ) ),
-            array('$set' => $node->cast() ),
+            array('$set' => $cast ),
             array('multiple'=>false)
         );
         
