@@ -397,13 +397,24 @@ class Theme extends \View
      */
     public function findViewFile( $view )
     {
-        $string = false;
+        static $paths;
+        
+        if (empty($paths)) {
+            $paths = array();
+        }
         
         $view = str_replace( "\\", "/", $view );
         $pieces = \Dsc\String::split( str_replace( array(
             "::",
             ":"
         ), "|", $view ) );
+        
+        if (isset($paths[$view]))
+        {
+            return $paths[$view];
+        }
+        
+        $paths[$view] = false;
         
         // Overrides!
         // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
@@ -434,8 +445,8 @@ class Theme extends \View
                 $path_pattern = $path . $requested_filename;
                 if (file_exists($path_pattern))
                 {
-                    $string = $path_pattern;
-                    return $string;
+                    $paths[$view] = $path_pattern;
+                    return $paths[$view];
                 }
             }
         }
@@ -453,7 +464,7 @@ class Theme extends \View
         
             if (file_exists($path_pattern)) 
             {
-                $string = $path_pattern;
+                $paths[$view] = $path_pattern;
             }
         }
         else
@@ -466,13 +477,102 @@ class Theme extends \View
                 $path_pattern = $view_path . $requested_file;
                 if (file_exists($path_pattern)) 
                 {
-                    $string = $path_pattern;
+                    $paths[$view] = $path_pattern;
                     break;
                 }
             }
         }
 
-        return $string;
+        return $paths[$view];
+    }
+    
+    /**
+     * Determines if any variants exist for the provided view file
+     *  
+     * @param unknown $view
+     * @param string $site
+     * @return multitype:
+     */
+    public function variants( $view, $site='site' ) 
+    {
+        $return = array();
+        
+        $view = str_replace( ".php", "", $view );
+        $view = str_replace( "::", "/", $view );
+        $view = str_replace( "\\", "/", $view );
+        $pieces = explode('/', $view);
+        
+        $themes = (array) \Base::instance()->get('dsc.themes.' . $site);
+        foreach ($themes as $theme=>$theme_path) 
+        {
+            // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
+            $dir = \Dsc\Filesystem\Path::clean( $theme_path . "Overrides/" );
+
+            if ($dir = \Dsc\Filesystem\Path::real( $dir ))
+            {
+                $path = \Dsc\Filesystem\Path::clean( $dir . "/" . $view );
+            
+                if ($path = \Dsc\Filesystem\Path::real( $path ))
+                {
+                    $files = \Joomla\Filesystem\Folder::files( $path );
+                    
+                    if ($files) 
+                    {
+                        $return = \Dsc\ArrayHelper::set( $return, $theme, $files );
+                    }
+                }
+            }        	
+        }
+
+        // now find the requested file's original app, and its corresponding view files
+        $app = $pieces[0];
+        $apps = (array) \Base::instance()->get('dsc.apps' );
+        if (array_key_exists($app, $apps))
+        {
+            $dir = $apps[$app];
+            unset($pieces[0]);
+            $view = implode('/', $pieces);
+            
+            if ($dir = \Dsc\Filesystem\Path::real( $dir ))
+            {
+                $path = \Dsc\Filesystem\Path::clean( $dir . "/" . $view );
+            
+                if ($path = \Dsc\Filesystem\Path::real( $path ))
+                {
+                    $files = \Joomla\Filesystem\Folder::files( $path );
+            
+                    if ($files)
+                    {
+                        $return = \Dsc\ArrayHelper::set( $return, $app, $files );
+                    }
+                }
+            }
+        }
+        
+        return $return;
+    }
+    
+    /**
+     * Registers a theme with the system
+     *
+     * @param unknown $path
+     */
+    public static function registerTheme( $theme, $path, $site='site' )
+    {
+        $themes = (array) \Base::instance()->get('dsc.themes.' . $site );
+        if (empty($themes) || !is_array($themes))
+        {
+            $themes = array();
+        }
+    
+        // if $themes is not already registered, register it
+        if (!array_key_exists($theme, $themes))
+        {
+            $themes[$theme] = $path;
+            \Base::instance()->set('dsc.themes.' . $site, $themes);
+        }
+    
+        return $themes;
     }
 }
 ?>
