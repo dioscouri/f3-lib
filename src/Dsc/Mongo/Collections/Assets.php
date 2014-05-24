@@ -188,6 +188,12 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     		$this->setCondition( 'contentType', $key );
     	}
     	 
+        $filter_storage = $this->getState('filter.storage');
+    	if (strlen($filter_storage))
+    	{
+    		$this->setCondition( 'storage', $filter_storage );
+    	}
+    	
     	return $this;
     }
     
@@ -333,5 +339,79 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         }
         
         return false;
+    }
+    
+    
+    /**
+     * This method moves this asset to Amazon S3
+     */
+    public function moveToS3(){
+    	$app = \Base::instance();
+    	
+    	if (empty($app->get('aws.serverPublicKey'))
+    	|| empty($app->get('aws.serverPrivateKey'))
+    	) {
+    		throw new \Exception('Invalid configuration settings');
+    		return;
+    	}
+    	$bucket = $app->get( 'aws.bucketname' );
+    	$s3 = \Aws\S3\S3Client::factory(array(
+                'key' => $app->get('aws.serverPublicKey'),
+                'secret' => $app->get('aws.serverPrivateKey')
+        ));
+    	
+    	$pathinfo = pathinfo($this->filename );
+    	$key = (string)$this->id.'.'.$pathinfo['extension'];
+    	$idx = 1;
+    	while( $s3->doesObjectExist( $bucket, $key ) ){
+    		$key = (string)$this->id.'-'.$idx.'.'.$pathinfo['extension'];;
+    		$idx++;
+    	}
+    	
+    	$chunks = ceil( $this->length / $this->chunkSize );
+    	
+    	$collChunkName = $this->collectionNameGridFS() . ".chunks";
+    	$collChunks = $this->getDb()->{$collChunkName};
+    	$data = '';
+    	for( $i=0; $i<$chunks; $i++ )
+    	{
+    		$chunk = $collChunks->findOne( array( "files_id" => $this->id, "n" => $i ) );
+    		$data .= (string) $chunk["data"]->bin;
+    	}
+    	 
+    	$res = $s3->putObject(array(
+    		'Bucket' => $bucket,
+    		'Key' => $key,
+    		'Body' => $data,
+   			'ContentType' => $this->contentType,
+    	));
+    	
+    	$s3->waitUntil('ObjectExists', array(
+    			'Bucket' => $bucket,
+    			'Key'    => $key
+    	));
+    	if( !$s3->doesObjectExist( $bucket, $key ) ){
+    		throw new \Exception( "Upload to Amazon S3 failed! - Asset #".(string)$this->id );
+    		return;
+    	}
+    	$objectInfoValues = $s3->headObject(array(
+                    'Bucket' => $bucket,
+                    'Key' => $key))->getAll();
+    	
+    	$this->storage = 's3';
+    	$this->url = $s3->getObjectUrl($bucket, $key);
+    	$this->details = array(
+    					'bucket' => $bucket,
+    					'key' => $key,
+    					'filename' => $pathinfo['basename'],
+    					'uuid' => (string)$this->id) + $objectInfoValues;
+    	
+    	$this->clear( 'chunkSize' );
+    	$this->save();
+    	
+    	// delete all chunks
+    	$collChunks->remove( array( "files_id" => $this->id ) );
+    	    	
+    	return true;
     }
 }
