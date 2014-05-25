@@ -59,7 +59,6 @@ class Router
                     {
                         foreach ( $routes as $route )
                         {
-                        	echo $route->ttl.';';
                             $f3->route( $route->pattern, $route->handler, $route->ttl, $route->kbps );
                         }
                     }
