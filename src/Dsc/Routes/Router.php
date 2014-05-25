@@ -59,7 +59,7 @@ class Router
                     {
                         foreach ( $routes as $route )
                         {
-                            $f3->route( $route[0], $route[1] );
+                            $f3->route( $route->pattern, $route->handler, $route->ttl, $route->kbps );
                         }
                     }
                 }

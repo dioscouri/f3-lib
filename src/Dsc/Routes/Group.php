@@ -16,7 +16,9 @@ abstract class Group
             'controller' => '',
             'action' => '',
             'namespace' => '',
-            'url_prefix' => '' 
+            'url_prefix' => '',
+        	'kbps' => 0,
+        	'ttl' => 0,
         );
     }
 
@@ -55,15 +57,18 @@ abstract class Group
             'ajax' => false,
             'namespace' => '',
             'controller' => '',
-            'action' => '' 
+            'action' => '', 
+        	'kbps' => 0,
+        	'ttl' => 0,
         );
         
         $params = array_merge( $orig_params, $params );
+        
         $this->routes[] = array(
             'route' => $route,
             'type' => $request_type,
             'params' => $params 
-        );
+        );	
     }
 
     /**
@@ -324,7 +329,7 @@ abstract class Group
      * @param $url_prefix Prefix
      *            for all added routes
      */
-    private function addBulkRoutes( $routes_list, $controller, $url_prefix )
+    private function addBulkRoutes( $routes_list, $controller, $url_prefix, $params = array() )
     {
         foreach ( $routes_list as $routes )
         {
@@ -343,7 +348,7 @@ abstract class Group
                     'controller' => $controller,
                     'action' => $route['action'],
                     'ajax' => $ajax 
-                ) );
+                ) + $params );
             }
         }
     }
@@ -434,10 +439,21 @@ abstract class Group
                 }
                 $action_str .= '->' . (string) $act['params']['action'];
                 
-                $result[] = array(
-                    $route_str,
-                    $action_str 
-                );
+                $kbps = $this->default_params['kbps'];
+                if( isset( $act['params']['kbps'] ) ){
+                	$kbps = $act['params']['kbps'];
+                }
+                $ttl = $this->default_params['ttl'];
+                if( isset( $act['params']['ttl'] ) ){
+                	$ttl = $act['params']['ttl'];
+                }
+                
+                $route = new \stdclass();
+                $route->pattern = $route_str;
+                $route->handler = $action_str;
+                $route->ttl = $ttl;
+                $route->kbps =  $kbps;
+                $result[] = $route;
             }
         }
         
