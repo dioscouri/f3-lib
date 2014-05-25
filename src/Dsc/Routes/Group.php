@@ -58,8 +58,6 @@ abstract class Group
             'namespace' => '',
             'controller' => '',
             'action' => '', 
-        	'kbps' => 0,
-        	'ttl' => 0,
         );
         
         $params = array_merge( $orig_params, $params );
