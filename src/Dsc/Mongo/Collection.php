@@ -202,6 +202,52 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Fetches multiple random items from a collection using set conditions
+     * 
+     * @param $forceUnique 		All items have to be unique
+     */
+    public function getItemsRandom($forceUnique = true){
+    	$conditions = $this->conditions();
+    	$count = $this->collection()->find( $conditions )->count();
+    	
+    	$limit = $this->getParam('limit');
+    	if( empty( $limit ) ){ // precaution in case limit is not set
+    		$limit = 1;
+    	}
+    	
+    	if( $forceUnique && $limit > $count ){ // prevent infinite loop by looking for more  random documents than the collection really contains
+    		$limit = $count;
+    	}
+    	
+    	$items = array();
+    	for( $i = 0; $i < $limit; $i++ ){
+    		$not_unique = true;
+    		$item = null;
+    		while( $not_unique || !$forceUnique ){
+    			$rand = rand(0, $count-1);
+    			$item = new static( 
+    					$this->collection()->find( $conditions, $this->fields())
+    										->limit(-1)
+    										->skip($rand)
+    											->getNext()
+					    			);
+    			// check uniqueness by comparing IDs
+    			$not_unique = false; // presume it's unique
+    			foreach( (array) $items as $it ){
+    				if( (string)$it->id == (string)$item->id ) { // we found match so a new document needs to be fetched
+    					$not_unique = true;
+    					break;
+    				}
+    			}
+    		}
+    		
+    		$items[] = $item;
+    	}
+    	
+    	return $items;
+    }
+    
+    /**
      * An alias for findOne
      * that uses the model's state
      * and implements caching (if enabled)
