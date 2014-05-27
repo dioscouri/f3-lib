@@ -3,6 +3,13 @@ namespace Dsc\Mongo\Collections;
 
 class Assets extends \Dsc\Mongo\Collections\Describable 
 {
+    public $thumb = null;       // binary data
+    public $url = null;         // path to asset
+    public $uploadDate = null;  // MongoDate
+    public $details = array();
+    public $md5 = null;
+    public $contentType = null;     // e.g. image/jpeg
+    
     protected $__collection_name = 'common.assets.files';
     protected $__collection_name_gridfs = 'common.assets';
     protected $__type = 'common.assets';
@@ -345,26 +352,49 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     /**
      * This method moves this asset to Amazon S3
      */
-    public function moveToS3(){
+    public function moveToS3()
+    {
     	$app = \Base::instance();
     	
-    	if (empty($app->get('aws.serverPublicKey'))
-    	|| empty($app->get('aws.serverPrivateKey'))
-    	) {
-    		throw new \Exception('Invalid configuration settings');
-    		return;
+    	$options = array(
+    	    'clientPrivateKey' => $app->get('aws.clientPrivateKey'),
+    	    'serverPublicKey' => $app->get('aws.serverPublicKey'),
+    	    'serverPrivateKey' => $app->get('aws.serverPrivateKey'),
+    	    'expectedBucketName' => $app->get('aws.bucketname'),
+    	    'expectedMaxSize' => $app->get('aws.maxsize'),
+    	    'cors_origin' => $app->get('SCHEME') . "://" . $app->get('HOST') . $app->get('BASE')
+    	);
+    	
+    	if (!class_exists('\Aws\S3\S3Client')
+    	|| empty($options['clientPrivateKey'])
+    	|| empty($options['serverPublicKey'])
+    	|| empty($options['serverPrivateKey'])
+    	|| empty($options['expectedBucketName'])
+    	|| empty($options['expectedMaxSize'])
+    	)
+    	{
+    	    throw new \Exception('Invalid configuration settings');
     	}
+    	
     	$bucket = $app->get( 'aws.bucketname' );
     	$s3 = \Aws\S3\S3Client::factory(array(
-                'key' => $app->get('aws.serverPublicKey'),
-                'secret' => $app->get('aws.serverPrivateKey')
+            'key' => $app->get('aws.serverPublicKey'),
+            'secret' => $app->get('aws.serverPrivateKey')
         ));
+
+    	$pathinfo = pathinfo($this->{'details.filename'});
+    	$key = (string) $this->id;
+    	if (!empty($pathinfo['extension'])) {
+    	    $key .= '.' . $pathinfo['extension'];
+    	}
     	
-    	$pathinfo = pathinfo($this->filename );
-    	$key = (string)$this->id.'.'.$pathinfo['extension'];
     	$idx = 1;
-    	while( $s3->doesObjectExist( $bucket, $key ) ){
-    		$key = (string)$this->id.'-'.$idx.'.'.$pathinfo['extension'];;
+    	while ($s3->doesObjectExist( $bucket, $key ) )
+    	{
+    		$key = (string) $this->id . '-' . $idx;
+    		if (!empty($pathinfo['extension'])) {
+    		    $key .= '.' . $pathinfo['extension'];
+    		}
     		$idx++;
     	}
     	
@@ -387,24 +417,27 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     	));
     	
     	$s3->waitUntil('ObjectExists', array(
-    			'Bucket' => $bucket,
-    			'Key'    => $key
+			'Bucket' => $bucket,
+			'Key'    => $key
     	));
+    	
     	if( !$s3->doesObjectExist( $bucket, $key ) ){
     		throw new \Exception( "Upload to Amazon S3 failed! - Asset #".(string)$this->id );
-    		return;
     	}
+    	
     	$objectInfoValues = $s3->headObject(array(
-                    'Bucket' => $bucket,
-                    'Key' => $key))->getAll();
+            'Bucket' => $bucket,
+            'Key' => $key
+    	))->getAll();
     	
     	$this->storage = 's3';
     	$this->url = $s3->getObjectUrl($bucket, $key);
     	$this->details = array(
-    					'bucket' => $bucket,
-    					'key' => $key,
-    					'filename' => $pathinfo['basename'],
-    					'uuid' => (string)$this->id) + $objectInfoValues;
+    		'bucket' => $bucket,
+    		'key' => $key,
+    		'filename' => $pathinfo['basename'],
+    		'uuid' => (string)$this->id
+    	) + $objectInfoValues;
     	
     	$this->clear( 'chunkSize' );
     	$this->save();
@@ -412,6 +445,39 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     	// delete all chunks
     	$collChunks->remove( array( "files_id" => $this->id ) );
     	    	
-    	return true;
+    	return $this;
+    }
+    
+    /**
+     * Returns an associative array of object's public properties
+     * removing any that begin with a double-underscore (__)
+     * 
+     * Also removes binary data from cast array
+     *
+     * @param boolean $public
+     *            If true, returns only the public properties.
+     *
+     * @return array
+     */
+    public function castBinarySafe( $public = true )
+    {
+        $vars = get_object_vars( $this );
+        if ($public)
+        {
+            foreach ( $vars as $key => $value )
+            {
+                if (substr( $key, 0, 2 ) == '__' || ! $this->isPublic( $key ))
+                {
+                    unset( $vars[$key] );
+                }
+            }
+        }
+        
+        if (!empty($vars['thumb'])) 
+        {
+            $vars['thumb'] = '<binary>';
+        } 
+        
+        return $vars;
     }
 }
