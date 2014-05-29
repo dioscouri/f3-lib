@@ -610,4 +610,29 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         
         return $vars;
     }
+    
+    /**
+     * Check if a URL is valid
+     * 
+     * @param string $url
+     * @return boolean
+     */
+    public static function checkUrl($url)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);         // only make a HEAD request
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);    // fail if response >= 400
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        
+        if (curl_exec($ch) !== false)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
