@@ -6,6 +6,8 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     public $thumb = null;       // binary data
     public $url = null;         // path to asset
     public $uploadDate = null;  // MongoDate
+    public $source_url = null;
+    public $filename = null;
     public $details = array();
     public $md5 = null;
     public $contentType = null;     // e.g. image/jpeg
@@ -270,36 +272,30 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 'md5' => md5( $filename ),
                 'thumb' => $thumb,
                 'url' => null,
-                'metadata' => array(
-                    "title" => $title
-                ),
                 'title' => $title,
-                'details' => array(
-                    "filename" => $filename,
-                    "source_url" => $url
-                )
+                "filename" => $filename,
+                "source_url" => $url,
             );
-
-            if (empty($values['metadata']['title'])) {
-                $values['metadata']['title'] = $values['md5'];
-            }
 
             $model->bind($values);
             
-            $values['metadata']['slug'] = $model->generateSlug( $values );
-            $values['url'] = "/asset/" . $values['metadata']['slug'];
+            $values['slug'] = $model->generateSlug();
+            $values['url'] = "/asset/" . $values['slug'];
             
             // save the file
             if ($storedfile = $grid->storeBytes( $buffer, $values ))
             {
                 $model->load(array('_id'=>$storedfile));
                 $model->bind($values);
-                $model->save();
+                if ($model->save()) 
+                {
+                    
+                }
             }
 
             // $storedfile has newly stored file's Document ID
             $result["asset_id"] = (string) $storedfile;
-            $result["slug"] = $model->{'metadata.slug'};
+            $result["slug"] = $model->{'slug'};
             $result['error'] = false;
         } 
             else 
@@ -310,6 +306,124 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     
         return $result;
     }
+
+    /**
+     * Creates an asset directly from a URL
+     * and send it directly to S3
+     * 
+     * @param string $url
+     * @param array $options
+     * @throws \Exception
+     */
+    public static function createFromUrlToS3( $url, $options=array() )
+    {
+        $app = \Base::instance();
+         
+        $s3_options = array(
+            'clientPrivateKey' => $app->get('aws.clientPrivateKey'),
+            'serverPublicKey' => $app->get('aws.serverPublicKey'),
+            'serverPrivateKey' => $app->get('aws.serverPrivateKey'),
+            'expectedBucketName' => $app->get('aws.bucketname'),
+            'expectedMaxSize' => $app->get('aws.maxsize'),
+            'cors_origin' => $app->get('SCHEME') . "://" . $app->get('HOST') . $app->get('BASE')
+        );
+         
+        if (!class_exists('\Aws\S3\S3Client')
+        || empty($s3_options['clientPrivateKey'])
+        || empty($s3_options['serverPublicKey'])
+        || empty($s3_options['serverPrivateKey'])
+        || empty($s3_options['expectedBucketName'])
+        || empty($s3_options['expectedMaxSize'])
+        )
+        {
+            throw new \Exception('Invalid configuration settings');
+        }
+                
+        $options = $options + array('width'=>460, 'height'=>308);
+    
+        $request = \Web::instance()->request( $url );
+        if (empty($request['body'])) {
+            throw new \Exception('Could not download asset from provided URL');
+        }
+        
+        $model = new static;
+        
+        $url_path = parse_url( $url , PHP_URL_PATH );
+        $pathinfo = pathinfo( $url_path );
+        $filename = $model->inputfilter()->clean( $url_path );
+        $buffer = $request['body'];
+        $originalname = str_replace( "/", "-", $filename );
+        
+        $thumb = null;
+        if ( $thumb_binary_data = $model->getThumb( $buffer, null, $options )) {
+            $thumb = new \MongoBinData( $thumb_binary_data, 2 );
+        }
+        
+        $title = \Joomla\String\Normalise::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) );
+        
+        $values = array(
+            'storage' => 's3',
+            'contentType' => $model->getMimeType( $buffer ),
+            'md5' => md5( $filename ),
+            'thumb' => $thumb,
+            'url' => null,
+            "source_url" => $url,
+            "filename" => $filename,
+            'title' => $title,
+        );
+        
+        $model->bind($values);
+        
+        // these need to happen after the bind
+        $model->slug = $model->generateSlug();
+        $model->_id = new \MongoId;
+        
+        /**
+         * Push to S3
+         */
+        $bucket = $app->get( 'aws.bucketname' );
+        $s3 = \Aws\S3\S3Client::factory(array(
+            'key' => $app->get('aws.serverPublicKey'),
+            'secret' => $app->get('aws.serverPrivateKey')
+        ));
+        
+        $key = (string) $model->_id;
+        
+        $res = $s3->putObject(array(
+            'Bucket' => $bucket,
+            'Key' => $key,
+            'Body' => $buffer,
+            'ContentType' => $model->contentType,
+        ));
+         
+        $s3->waitUntil('ObjectExists', array(
+            'Bucket' => $bucket,
+            'Key'    => $key
+        ));
+         
+        if( !$s3->doesObjectExist( $bucket, $key ) ){
+            throw new \Exception( "Upload to Amazon S3 failed" );
+        }
+         
+        $objectInfoValues = $s3->headObject(array(
+            'Bucket' => $bucket,
+            'Key' => $key
+        ))->getAll();
+        
+        /**
+         * END Push to S3
+        */
+        
+        $model->url = $s3->getObjectUrl($bucket, $key);
+         
+        $model->details = array_merge( array(), (array) $model->details, array(
+            'bucket' => $bucket,
+            'key' => $key,
+            'uuid' => (string) $model->_id
+        ) )  + $objectInfoValues;
+        
+        return $model->save();
+    }    
     
     /**
      *
