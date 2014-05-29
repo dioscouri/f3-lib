@@ -184,7 +184,8 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     		$where[] = array('title'=>$key);
     		$where[] = array('slug'=>$key);
     		$where[] = array('metadata.creator.name'=>$key);
-    
+    		$where[] = array('md5'=>$key);
+    		
     		$this->setCondition('$or', $where);
     	}
     	
@@ -446,12 +447,13 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     	
     	$this->storage = 's3';
     	$this->url = $s3->getObjectUrl($bucket, $key);
-    	$this->details = array(
+    	
+    	$this->details = array_merge( array(), (array) $this->details, array(
     		'bucket' => $bucket,
     		'key' => $key,
     		'filename' => $pathinfo['basename'],
     		'uuid' => (string)$this->id
-    	) + $objectInfoValues;
+    	) )  + $objectInfoValues;
     	
     	$this->clear( 'chunkSize' );
     	$this->save();
