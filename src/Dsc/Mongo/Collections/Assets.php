@@ -6,9 +6,9 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     public $thumb = null;       // binary data
     public $url = null;         // path to asset
     public $uploadDate = null;  // MongoDate
-    public $source_url = null;
-    public $filename = null;
-    public $details = array();
+    public $source_url = null;  // URL where file originally was (only used on URL uploads)  
+    public $filename = null;    // filename of original file
+    public $s3 = array();       // the object's s3 info values
     public $md5 = null;
     public $contentType = null;     // e.g. image/jpeg
     
@@ -215,10 +215,10 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         
         if (empty($this->md5 ) )
         {
-			if (!empty($this->{'details.ETag'})) {
-                $this->md5 = str_replace('"', '', $this->{'details.ETag'} );
+			if (!empty($this->{'s3.ETag'})) {
+                $this->md5 = str_replace('"', '', $this->{'s3.ETag'} );
             }
-            elseif (!empty($this->filename)) {
+            elseif (!empty($this->filename) && file_exists($this->filename)) {
                 $this->md5 = md5_file( $this->filename );
             }            
             else {
@@ -416,7 +416,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         
         $model->url = $s3->getObjectUrl($bucket, $key);
          
-        $model->details = array_merge( array(), (array) $model->details, array(
+        $model->s3 = array_merge( array(), (array) $model->s3, array(
             'bucket' => $bucket,
             'key' => $key,
             'uuid' => (string) $model->_id
@@ -511,7 +511,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             'secret' => $app->get('aws.serverPrivateKey')
         ));
 
-    	$pathinfo = pathinfo($this->{'details.filename'});
+    	$pathinfo = pathinfo($this->{'filename'});
     	$key = (string) $this->id;
     	if (!empty($pathinfo['extension'])) {
     	    $key .= '.' . $pathinfo['extension'];
@@ -562,7 +562,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     	$this->storage = 's3';
     	$this->url = $s3->getObjectUrl($bucket, $key);
     	
-    	$this->details = array_merge( array(), (array) $this->details, array(
+    	$this->s3 = array_merge( array(), (array) $this->s3, array(
     		'bucket' => $bucket,
     		'key' => $key,
     		'filename' => $pathinfo['basename'],
