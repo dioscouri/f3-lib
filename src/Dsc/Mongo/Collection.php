@@ -636,7 +636,7 @@ class Collection extends \Dsc\Models
      * @param array $sort
      * @return \Dsc\Mongo\Collection
      */
-    public function refresh()
+    public function reload()
     {
         if (empty($this->id)) {
         	return $this;
