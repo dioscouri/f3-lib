@@ -629,6 +629,25 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Refresh $this by reloading it from the database
+     *
+     * @param array $conditions
+     * @param array $fields
+     * @param array $sort
+     * @return \Dsc\Mongo\Collection
+     */
+    public function refresh()
+    {
+        if (empty($this->id)) {
+        	return $this;
+        }
+        
+        return $this->load( array(
+        	'_id' => new \MongoId( (string) $this->id )
+        ) );
+    }
+    
+    /**
      * Save an item
      * 
      * @param unknown $document
