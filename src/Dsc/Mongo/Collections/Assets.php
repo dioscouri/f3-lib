@@ -637,4 +637,116 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             return false;
         }
     }
+
+    /**
+     * Gets the binary data for the requested asset's thumbnail,
+     * first looking for the cached filesystem version,
+     * then loading the asset (throwing an exception if invalid)
+     * and recreating the filesystem version
+     * 
+     * @param unknown $slug
+     * @param bool $refresh
+     * 
+     * @throws \Exception
+     * 
+     * @return array
+     */
+    public static function cachedThumb($slug, $refresh=false)
+    {
+        $binary_data = null;
+        $last_modified = null;
+        $md5 = null;
+        
+        $app = \Base::instance();
+        $files_path = $app->get('TEMP') . "assets_thumbs";
+        if (!file_exists($files_path)) {
+            mkdir( $files_path, \Base::MODE, true );
+        }
+        
+        $file_path = $files_path . '/' . $slug;
+        
+        if (!file_exists($file_path) || $refresh) 
+        {
+            $item = (new static)->setState('filter.slug', $slug)->getItem();
+            if (empty($item->id))
+            {
+                throw new \Exception( 'Invalid Item' );
+            }            
+            
+            $binary_data = $item->thumb->bin;
+            $last_modified = (int) $item->{'metadata.last_modified.time'};
+            $md5 = $item->md5;
+                        
+            file_put_contents( $file_path, $binary_data );
+        }
+        else 
+        {
+            $binary_data = file_get_contents( $file_path );
+            $last_modified = filemtime( $file_path );
+            $md5 = md5_file( $file_path );            
+        }
+        
+        return array(
+        	'bin' => $binary_data,
+            'last_modified' => $last_modified,
+            'md5' => $md5,
+        );
+    }
+    
+    public function rebuildThumb()
+    {
+        // Get the full image's binary data -- whether from S3 or GridFS
+        switch ($this->storage)
+        {
+        	case "s3":
+        
+        	    $request = \Web::instance()->request( $this->url );
+        	    if (empty($request['body'])) {
+        	        throw new \Exception('Invalid Item URL');
+        	    }
+        
+        	    $buffer = $request['body'];
+        
+        	    break;
+        
+        	case "gridfs":
+        
+        	    $db = $this->getDb();
+        	    $gridfs = $db->getGridFS( $this->collectionNameGridFS() );
+        	    $length = $this->{"length"};
+        	    $chunkSize = $this->{"chunkSize"};
+        	    $chunks = ceil( $length / $chunkSize );
+        	    $collChunkName = $this->collectionNameGridFS() . ".chunks";
+        	    $collChunks = $this->getDb()->{$collChunkName};
+        	    	
+        	    $buffer = null;
+        	    for( $i=0; $i<$chunks; $i++ )
+        	    {
+        	        $chunk = $collChunks->findOne( array( "files_id" => $this->id, "n" => $i ) );
+        	        $buffer .= (string) $chunk["data"]->bin;
+        	    }
+        
+        	    break;
+        
+        	default:
+
+        	    throw new \Exception('Invalid Item Storage');
+        	     
+        	    break;
+        }
+
+        if ( $thumb_binary_data = $this->getThumb( $buffer )) {
+            $thumb = new \MongoBinData( $thumb_binary_data, 2 );
+        }
+        
+        $app = \Base::instance();
+        $files_path = $app->get('TEMP') . "assets_thumbs";
+        if (!file_exists($files_path)) {
+            mkdir( $files_path, \Base::MODE, true );
+        }
+        $file_path = $files_path . '/' . $this->slug;
+        file_put_contents( $file_path, $thumb_binary_data );
+        
+        return $this->set( 'thumb', $thumb )->save();
+    }
 }
