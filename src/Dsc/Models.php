@@ -190,7 +190,9 @@ class Models extends \Dsc\Magic
             \Dsc\ObjectHelper::set( $this, $key, $val );
         }
         
-        return \Dsc\ArrayHelper::set( $this->__doc, $key, $val );
+        \Dsc\ArrayHelper::set( $this->__doc, $key, $val );
+        
+        return $this; 
     }
 
     /**
