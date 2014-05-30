@@ -59,6 +59,8 @@ class Models extends \Dsc\Magic
     public function log( $message, $priority='INFO', $category='General' )
     {
         \Dsc\Mongo\Collections\Logs::add( $message, $priority, $category );
+        
+        return $this;
     }
     
     /**
