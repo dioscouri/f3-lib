@@ -60,6 +60,10 @@ class Container extends \Joomla\DI\Container
         $this->share( 'mailer', function() {
             return new \Mailer\Factory;
         });
+        
+        $this->share( 'flash', function() {
+            return new \Dsc\Flash;
+        } );
     }
 }
 ?>
