@@ -44,7 +44,7 @@ class Nodes extends \Dsc\Mongo\Collection
         $filter_creator_id = $this->getState('filter.creator.id');
         if (strlen($filter_creator_id))
         {
-            $this->setCondition('metadata.creator.id', $filter_creator_id );
+            $this->setCondition('metadata.creator.id', new \MongoId( (string) $filter_creator_id ) );
         }
         
         // TODO Add date-range filters for created & last_modified
