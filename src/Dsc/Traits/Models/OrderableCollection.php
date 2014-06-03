@@ -83,7 +83,7 @@ trait OrderableCollection
         ) );
         
         if (!empty($result['ok'])) {
-            $return = (int) $result['result'][0]['maxOrdering'] + 1;
+            $return = (int) @$result['result'][0]['maxOrdering'] + 1;
         } else {
             $return = 999999999;
         }
