@@ -82,10 +82,9 @@ trait OrderableCollection
             array( '$group' => array( '_id' => 0, 'maxOrdering' => array( '$max' => '$ordering' ) ) )
         ) );
         
-        if (!empty($result['ok'])) {
-            $return = (int) @$result['result'][0]['maxOrdering'] + 1;
-        } else {
-            $return = 999999999;
+        $return = 999999999;
+        if (!empty($result['ok']) && isset($result['result'][0]['maxOrdering'])) {
+            $return = (int) $result['result'][0]['maxOrdering'] + 1;
         }
         
         return $return;
