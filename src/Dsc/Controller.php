@@ -137,12 +137,12 @@ class Controller extends Singleton
             $this->requireIdentity();
         }
         
-        // TODO If the user has multiple roles (is that possible) then loop through them
+        // TODO If the user has multiple roles (is that possible) then loop through them        
         if ($hasAccess = \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $resource, $method))
         {
             return $this;
         }
-
+        
         if (\Base::instance()->get('DEBUG')) {
             \Dsc\System::addMessage( \Dsc\Debug::dump( 'Debugging is enabled := $role: ' . $identity->role . ", " . '$resource: ' . $resource . ", " . '$method: ' . $method) );
         }

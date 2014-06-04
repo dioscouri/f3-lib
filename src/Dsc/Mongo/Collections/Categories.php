@@ -251,14 +251,16 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
      */
     public function slugExists( $slug, $parent = null )
     {
+    	$conditions = array('slug'=>$slug);
         if (!empty($parent)) 
         {
-            $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type, 'parent'=>new \MongoId($parent) ));
-        } 
-        else 
-        {
-            $clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->__type));
+        	$conditions['parent'] = new \MongoId($parent);
         }
+        if (!empty($this->_type))
+        {
+        	$conditions['type'] = $this->_type;
+        }
+        $clone = (new static())->load($conditions);
         
         if (!empty($clone->id)) {
             return $clone;
