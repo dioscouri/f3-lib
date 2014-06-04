@@ -10,9 +10,10 @@ trait SupportPreview
      */
     private function canPreview( $onlyTest = false ) 
     {
-    	$this->addPreviewResourceAction();
     	$model_name = get_class( $this->getModel() );
-    	
+    	// add resource and resource actioon, if needed
+    	\Dsc\System::instance()->get( 'acl' )->getAcl()->addResourceAction( $model_name, 'Preview' );
+    	 
     	if( $onlyTest ){
 	    	$identity = $this->getIdentity();
 	   		$this->requireIdentity();
@@ -22,17 +23,5 @@ trait SupportPreview
     		return $this->checkAccess( $model_name, 'Preview' );
     	}
     }
-    
-    /**
-     * Adds resource, resource action, if needed
-     */
-    private function addPreviewResourceAction(){
-    	$model_name = get_class( $this->getModel() );
-    	
-    	$acl = \Dsc\System::instance()->get( 'acl' )->getAcl();
-    	$resource = new \Users\Lib\Acl\Resource( $model_name);
-    	$acl->addResource( $resource );
-    }
-    
 }
 ?>
