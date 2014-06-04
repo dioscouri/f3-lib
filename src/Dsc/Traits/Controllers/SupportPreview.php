@@ -8,19 +8,22 @@ trait SupportPreview
      * 
      * @param string $onlyTest 	If True, only test for permission is carried out (no redirection in case of missing permissions)
      */
-    private function canPreview( $onlyTest = false ) 
+    private function canPreview( $onlyTest = false, $force_resource = null ) 
     {
-    	$model_name = get_class( $this->getModel() );
+    	$resource_name = $force_resource;
+    	if( $resource_name == null ){
+    		$resource_name = get_class( $this->getModel() );
+    	}
     	// add resource and resource actioon, if needed
-    	\Dsc\System::instance()->get( 'acl' )->getAcl()->addResourceAction( $model_name, 'Preview' );
+    	\Dsc\System::instance()->get( 'acl' )->getAcl()->addResourceAction( $resource_name, 'Preview' );
     	 
     	if( $onlyTest ){
 	    	$identity = $this->getIdentity();
 	   		$this->requireIdentity();
     	 
-    		return \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $model_name, 'Preview');
+    		return \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $resource_name, 'Preview');
     	} else {
-    		return $this->checkAccess( $model_name, 'Preview' );
+    		return $this->checkAccess( $resource_name, 'Preview' );
     	}
     }
 }
