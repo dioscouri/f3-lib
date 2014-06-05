@@ -95,6 +95,11 @@ class Controller extends Singleton
         if (empty($identity->id))
         {
             $path = $this->inputfilter->clean( $f3->hive()['PATH'], 'string' );
+            if ($query = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY )) 
+            {
+            	$path .= '?' . $query; 
+            }
+            
             $global_app_name = strtolower( $f3->get('APP_NAME') );
             switch ($global_app_name) 
             {
