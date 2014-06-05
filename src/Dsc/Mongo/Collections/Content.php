@@ -139,6 +139,10 @@ class Content extends \Dsc\Mongo\Collections\Describable
         return parent::beforeSave();
     }
     
+    /**
+     * 
+     * @param unknown $query
+     */
     public static function distinctTags($query=array())
     {
         $query = $query + array(
@@ -147,4 +151,29 @@ class Content extends \Dsc\Mongo\Collections\Describable
         
         return parent::distinctTags($query);
     }
+    
+    /**
+     * This method returns an abstract of this content item.
+     * Description field is given priority, after which the first paragraph is extracted.
+     * If all else fails, return the copy.
+     * 
+     */
+    public function getAbstract()
+    {
+        $abstract = $this->description;
+    
+        if (empty($abstract))
+        {
+            $abstract = $this->{'copy'};
+    
+            preg_match('%(<p[^>]*>.*?</p>)%i', $this->{'copy'}, $regs);
+            if (count($regs))
+            {
+                $abstract = $regs[1];
+            }
+        }
+    
+        return $abstract;
+    }
+    
 }
