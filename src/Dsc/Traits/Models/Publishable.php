@@ -69,6 +69,12 @@ trait Publishable
         ));
     }
 
+    /**
+     * Method to check that publication fields are set to some defaults.
+     * You will need to call this in your model's beforeSave() method.
+     * 
+     * @return \Dsc\Traits\Models\Publishable
+     */
     protected function publishableBeforeSave()
     {
         if (!empty($this->{'publication.start_date'}))
