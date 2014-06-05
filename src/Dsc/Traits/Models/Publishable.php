@@ -4,6 +4,16 @@ namespace Dsc\Traits\Models;
 trait Publishable
 {
 
+    public $publication = array(
+        'status' => 'published',
+        'start_date' => null,
+        'start_time' => null,
+        'end_date' => null,
+        'end_time' => null,
+        'start' => null,
+        'end' => null
+    );
+
     /**
      * Checks if the model is published as of today
      *
@@ -72,7 +82,7 @@ trait Publishable
     /**
      * Method to check that publication fields are set to some defaults.
      * You will need to call this in your model's beforeSave() method.
-     * 
+     *
      * @return \Dsc\Traits\Models\Publishable
      */
     protected function publishableBeforeSave()
