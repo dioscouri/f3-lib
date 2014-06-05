@@ -9,7 +9,7 @@ trait ForSelection
 		'slug' => 'slug',
 	);
 	
-	private function forSelectionBeforeValidate( $field ){
+	protected function forSelectionBeforeValidate( $field ){
 		
 		if (!empty($this->$field) && !is_array($this->$field))
 		{
