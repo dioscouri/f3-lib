@@ -138,4 +138,13 @@ class Content extends \Dsc\Mongo\Collections\Describable
         
         return parent::beforeSave();
     }
+    
+    public static function distinctTags($query=array())
+    {
+        $query = $query + array(
+        	'type' => (new static)->type()
+        );
+        
+        return parent::distinctTags($query);
+    }
 }
