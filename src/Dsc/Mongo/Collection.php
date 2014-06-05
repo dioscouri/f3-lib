@@ -749,7 +749,7 @@ class Collection extends \Dsc\Models
         $this->afterUpdate();
         $this->afterSave();
                 
-        return $this->lastOperation();
+        return $this;
     }
     
     /**
@@ -793,7 +793,7 @@ class Collection extends \Dsc\Models
         
         $this->afterDelete();
         
-        return $this->lastOperation();
+        return $this;
     }
     
     /**
