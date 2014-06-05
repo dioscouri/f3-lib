@@ -117,4 +117,37 @@ trait Publishable
         
         return $this;
     }
+    
+    /**
+     * Get a status label class 
+     * 
+     * @return string
+     */
+    public function publishableStatusLabel()
+    {
+        switch ($this->{'publication.status'}) 
+        {
+        	case "unpublished":
+        	    $label_class = 'label-danger';
+        	    break;
+    	    case "pending":
+    	        $label_class = 'label-info';
+    	        break;        	    
+        	case "draft":
+        	    $label_class = 'label-default';
+        	    break;
+        	case "published":
+        	default:
+        	    $label_class = 'label-success';
+        	    
+        	    if (!$this->published()) 
+        	    {
+        	        // would mean status == published but publication date range doesn't include today
+        	        $label_class = 'label-warning';
+        	    }
+        	    break;        
+        }        
+        
+        return $label_class;
+    }
 }
