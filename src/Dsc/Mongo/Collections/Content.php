@@ -3,22 +3,9 @@ namespace Dsc\Mongo\Collections;
 
 class Content extends \Dsc\Mongo\Collections\Describable
 {
-
-    /**
-     * Default Document Structure
-     * 
-     * @var unknown
-     */
-    public $copy; // text
-    public $publication = array(
-        'status' => 'published',
-        'start_date' => null,
-        'start_time' => null,
-        'end_date' => null,
-        'end_time' => null,
-        'start' => null,
-        'end' => null
-    );
+    use \Dsc\Traits\Models\Publishable;
+    
+    public $copy;
 
     protected $__collection_name = 'common.content';
 
@@ -147,33 +134,7 @@ class Content extends \Dsc\Mongo\Collections\Describable
 
     protected function beforeSave()
     {
-        if (!empty($this->{'publication.start_date'}))
-        {
-            $string = $this->{'publication.start_date'};
-            if (!empty($this->{'publication.start_time'}))
-            {
-                $string .= ' '.$this->{'publication.start_time'};
-            }
-            $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate(trim($string));
-        }
-        else
-        {
-            $this->{'publication.start'} = \Dsc\Mongo\Metastamp::getDate('now');
-        }
-        
-        if (empty($this->{'publication.end_date'}))
-        {
-            unset($this->{'publication.end'});
-        }
-        elseif (!empty($this->{'publication.end_date'}))
-        {
-            $string = $this->{'publication.end_date'};
-            if (!empty($this->{'publication.end_time'}))
-            {
-                $string .= ' '.$this->{'publication.end_time'};
-            }
-            $this->{'publication.end'} = \Dsc\Mongo\Metastamp::getDate(trim($string));
-        }
+        $this->publishableBeforeSave();
         
         return parent::beforeSave();
     }
