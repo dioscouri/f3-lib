@@ -1,7 +1,7 @@
 <?php
 namespace Dsc\Traits\Models;
 
-trait ForSelect
+trait ForSelection
 {
 	public $__select2_fields = array(
 		'id' => '_id',
@@ -9,7 +9,7 @@ trait ForSelect
 		'slug' => 'slug',
 	);
 	
-	private function ForSelectBeforeValidate( $field ){
+	private function forSelectionBeforeValidate( $field ){
 		
 		if (!empty($this->$field) && !is_array($this->$field))
 		{
