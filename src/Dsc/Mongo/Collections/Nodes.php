@@ -119,7 +119,7 @@ class Nodes extends \Dsc\Mongo\Collection
                     ),
                     array(
                         'metadata.last_modified.time' => array(
-                            '$lte' => $filter_last_modified_after
+                            '$gte' => $filter_last_modified_after
                         )
                     )
                 )
@@ -146,7 +146,7 @@ class Nodes extends \Dsc\Mongo\Collection
                     ),
                     array(
                         'metadata.last_modified.time' => array(
-                            '$gt' => $filter_last_modified_before
+                            '$lt' => $filter_last_modified_before
                         )
                     )
                 )
