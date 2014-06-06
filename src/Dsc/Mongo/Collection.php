@@ -273,7 +273,7 @@ class Collection extends \Dsc\Models
         $this->__cursor->limit(1);
         $this->__cursor->skip(0);
         
-        $item = new static;
+        $item = null;
         if ($this->__cursor->hasNext()) {
             $item = new static( $this->__cursor->getNext() );
         }
