@@ -158,7 +158,10 @@ trait CrudItemCollection
             \Dsc\System::instance()->setUserState('use_flash.' . $this->create_item_route, true);
             $flash->store($data);
             
-            $this->setRedirect( $this->create_item_route );
+            $custom_redirect = \Dsc\System::instance()->get( 'session' )->get( 'create.redirect' );
+            $route = $custom_redirect ? $custom_redirect : $this->create_item_route;
+                        
+            $this->setRedirect( $route );
                         
             return false;
         }
@@ -194,6 +197,9 @@ trait CrudItemCollection
                 break;
         }
 
+        $custom_redirect = \Dsc\System::instance()->get( 'session' )->get( 'create.redirect' );
+        $route = $custom_redirect ? $custom_redirect : $route;
+        
         $this->setRedirect( $route );
         
         return $this;
@@ -261,6 +267,9 @@ trait CrudItemCollection
             $id = $this->item->get( $this->getItemKey() );
             $route = str_replace('{id}', $id, $this->edit_item_route );
                         
+            $custom_redirect = \Dsc\System::instance()->get( 'session' )->get( 'update.redirect' );
+            $route = $custom_redirect ? $custom_redirect : $route;
+            
             $this->setRedirect( $route );
             
             return false;           
@@ -296,6 +305,9 @@ trait CrudItemCollection
                 break;
         }
 
+        $custom_redirect = \Dsc\System::instance()->get( 'session' )->get( 'update.redirect' );
+        $route = $custom_redirect ? $custom_redirect : $route;
+        
         $this->setRedirect( $route );
         
         return $this;        
@@ -307,6 +319,9 @@ trait CrudItemCollection
             throw new \Exception('Must define a route for listing the items');
         }
         
+        $custom_redirect = \Dsc\System::instance()->get( 'session' )->get( 'delete.redirect' );
+        $redirect = $custom_redirect ? $custom_redirect : $this->list_route;        
+        
         $f3 = \Base::instance();
         $model = $this->getModel();
         $this->item = $this->getItem();
@@ -314,6 +329,13 @@ trait CrudItemCollection
         try {
             $this->item->remove();
             \Dsc\System::instance()->addMessage('Item deleted', 'success');
+            
+            if ($f3->get('AJAX')) {
+                return $this->outputJson( $this->getJsonResponse( array(
+                    'message' => \Dsc\System::instance()->renderMessages()
+                ) ) );
+            }
+            
         }
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Delete failed with the following errors:', 'error');
@@ -329,20 +351,10 @@ trait CrudItemCollection
                         'message' => \Dsc\System::instance()->renderMessages()
                 ) ) );
             }
-        
-            // redirect back to the list view
-            $this->setRedirect( $this->list_route );
-            
-            return false;
-        }
-        
-        if ($f3->get('AJAX')) {
-            return $this->outputJson( $this->getJsonResponse( array(
-                    'message' => \Dsc\System::instance()->renderMessages()
-            ) ) );
         }
 
-        $this->setRedirect( $this->list_route );
+        \Dsc\System::instance()->get( 'session' )->set( 'delete.redirect', null );
+        $this->setRedirect( $redirect );
         
         return $this;
     }
