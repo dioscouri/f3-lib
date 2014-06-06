@@ -5,7 +5,7 @@ namespace Dsc;
  * This is base bootstrap class for every f3 application enabling us to hook up some services before
  * the real bootstrapping occurs
  */
-abstract class Bootstrap
+abstract class Bootstrap extends \Dsc\Singleton
 {
     protected $namespace = '';
     
