@@ -414,6 +414,18 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Gets the count of items that match the current set conditions
+     * 
+     * @return number
+     */
+    public function getCount()
+    {
+        $total = $this->collection()->count( $this->conditions() );
+        
+        return (int) $total;
+    }
+    
+    /**
      * Gets the array of fields set to be returned by the next query,
      * fetching them if necessary
      *  
