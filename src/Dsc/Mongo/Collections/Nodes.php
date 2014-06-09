@@ -61,11 +61,11 @@ class Nodes extends \Dsc\Mongo\Collection
             $and[] = array(
                 '$or' => array(
                     array(
-                        'metadata.created.time' => null
+                        'metadata.created.time' => 0
                     ),
                     array(
                         'metadata.created.time' => array(
-                            '$lte' => $filter_created_after
+                            '$gte' => $filter_created_after
                         )
                     )
                 )
@@ -88,11 +88,11 @@ class Nodes extends \Dsc\Mongo\Collection
             $and[] = array(
                 '$or' => array(
                     array(
-                        'metadata.created.time' => null
+                        'metadata.created.time' => 0
                     ),
                     array(
                         'metadata.created.time' => array(
-                            '$gt' => $filter_created_before
+                            '$lte' => $filter_created_before
                         )
                     )
                 )
