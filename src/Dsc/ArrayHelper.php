@@ -315,4 +315,31 @@ class ArrayHelper extends \Prefab
 	    
 	    return $a;
 	}
+	
+	/**
+	 * Extracts a column from an array of arrays or objects
+	 *
+	 * @param   array   $array  The source array
+	 * @param   string  $index  The index of the column or name of object property
+	 *
+	 * @return  array  Column of values from the source array
+	 */
+	public static function getColumn(array $array, $index)
+	{
+	    $result = array();
+	
+	    foreach ($array as $item)
+	    {
+	        if (is_array($item) && isset($item[$index]))
+	        {
+	            $result[] = $item[$index];
+	        }
+	        elseif (is_object($item) && isset($item->$index))
+	        {
+	            $result[] = $item->$index;
+	        }
+	    }
+	
+	    return $result;
+	}
 }
