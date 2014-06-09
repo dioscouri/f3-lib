@@ -150,4 +150,19 @@ trait Publishable
         
         return $label_class;
     }
+    
+    public function publishStarts($format='Y-m-d') 
+    {
+        return date( $format, $this->{'publication.start.time'} );
+    }
+    
+    public function publishEnds($format='Y-m-d')
+    {
+        if (!$this->{'publication.end.time'}) 
+        {
+        	return 'Never';
+        }
+        
+        return date( $format, $this->{'publication.end.time'} );
+    }
 }
