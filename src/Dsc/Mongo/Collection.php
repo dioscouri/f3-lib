@@ -496,6 +496,17 @@ class Collection extends \Dsc\Models
             $this->setCondition('_id', array('$in' => $_ids) );
         }
         
+        $filter_ids_excluded = $this->getState('filter.ids_excluded');
+        if (!empty($filter_ids_excluded) && is_array($filter_ids_excluded))
+        {
+            $_ids = array();
+            foreach ($filter_ids_excluded as $_filter_id)
+            {
+                $_ids[] = new \MongoId( (string) $_filter_id);
+            }
+            $this->setCondition('_id', array('$nin' => $_ids) );
+        }
+        
         return $this;
     }
     

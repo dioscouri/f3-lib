@@ -27,6 +27,14 @@ trait Ancestors
             $this->setCondition('path', $filter_path);
         }
         
+        $filter_path_begins_with = $this->getState('filter.path_begins_with');
+        if ($filter_path_begins_with && is_string($filter_path_begins_with))
+        {
+            $key = new \MongoRegex('/^'.$filter_path_begins_with.'/i');
+            
+            $this->setCondition('path', $key);
+        }
+        
         return $this;
     }
 
@@ -285,8 +293,28 @@ trait Ancestors
         return $return;
     }
     
-    public function ancestorsIndentedTitle()
+    /**
+     * Get the descendants of an item.
+     * 
+     * @return unknown
+     */
+    public function ancestorsGetDescendants($exclude_this=true)
     {
-        return str_repeat( "&ndash;", substr_count( $this->path, "/" ) - 1 ) . " " . $this->title;
+        $model = (new static)->setState('filter.path_begins_with', $this->path);
+        if ($exclude_this) {
+        	$model->setState('filter.ids_excluded', array( $this->id ));
+        }        
+        $items = $model->getItems();
+
+        return $items;
+    }
+    
+    /**
+     * Get a string version of this items title, indented to indicate its depth
+     * @return string
+     */
+    public function ancestorsIndentedTitle($char="&ndash;")
+    {
+        return str_repeat( $char, substr_count( $this->path, "/" ) - 1 ) . " " . $this->title;
     }
 }
