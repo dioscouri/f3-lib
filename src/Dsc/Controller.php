@@ -27,6 +27,31 @@ class Controller extends Singleton
         }
     }
     
+    protected  function outputCsv( $filename, $data, $csv_header = array() ){
+    	header( 'Content-Type: text/csv');
+    	header( 'Pragma: public' );
+    	header( 'Case-Control: must-revalidate, post-check=0, pre-check=0' );
+    	header( 'Case-Control: public' );
+    	header( 'Content-Desription: File Transfer' );
+    	header( 'Content-Disposition: attachment; filename='.$filename );
+    	
+    	if( !empty( $csv_header ) ){
+    		foreach($csv_header as $h) {
+    			$csv[] = '"' . str_replace('"', '""', $h) . '"';
+    		}
+    		echo implode(",", $csv) . "\r\n";    		
+    	}
+    	
+    	foreach($data as $item) {
+    		$csv = array();
+    		foreach($item as $v) {
+    			$csv[] = '"' . str_replace('"', '""', $v) . '"';
+    		}
+    		echo implode(",", $csv) . "\r\n";
+    	}
+    	return;    	
+    }
+    
     /**
      * Create a standard object for responding to ajax requests
      * 
