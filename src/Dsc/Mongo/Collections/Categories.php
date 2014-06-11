@@ -3,6 +3,8 @@ namespace Dsc\Mongo\Collections;
 
 class Categories extends \Dsc\Mongo\Collections\Nodes 
 {
+    use \Dsc\Traits\Models\Seo;
+    
     /**
      * Default Document Structure
      * @var unknown
