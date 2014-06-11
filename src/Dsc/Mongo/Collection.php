@@ -206,7 +206,23 @@ class Collection extends \Dsc\Models
      * 
      * @param $forceUnique 		All items have to be unique
      */
-    public function getItemsRandom($forceUnique = true){
+    public function getItemsRandom($forceUnique = true)
+    {
+        if (is_null($this->getState('list.sort')))
+        {
+            if (!empty($this->getParam('sort'))) {
+                $this->setState('list.sort', $this->getParam('sort'));
+            } else {
+                $this->setState('list.sort', $this->__config['default_sort']);
+            }
+        }
+        $this->setParam('sort', $this->getState('list.sort'));
+        
+        if ($this->getState('list.limit'))
+        {
+            $this->setParam('limit', $this->getState('list.limit'));
+        }
+                
     	$conditions = $this->conditions();
     	$count = $this->collection()->find( $conditions )->count();
     	
