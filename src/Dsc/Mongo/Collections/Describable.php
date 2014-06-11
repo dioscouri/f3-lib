@@ -3,7 +3,8 @@ namespace Dsc\Mongo\Collections;
 
 class Describable extends \Dsc\Mongo\Collections\Taggable 
 {
-	
+    use \Dsc\Traits\Models\Seo;
+    
     public $title; // string INDEX
     public $slug; // string INDEX
     public $description; // text

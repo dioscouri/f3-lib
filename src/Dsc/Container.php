@@ -24,6 +24,10 @@ class Container extends \Joomla\DI\Container
             return new \Joomla\Filter\InputFilter;
         } );
         
+        $this->share( 'outputfilter', function() {
+            return new \Joomla\Filter\OutputFilter;
+        } );
+        
         $db_name = \Base::instance()->get('db.mongo.database');
         $db_server = \Base::instance()->get('db.mongo.server');
         if ($db_name && $db_server) {
