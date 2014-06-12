@@ -171,6 +171,10 @@ abstract class Bootstrap extends \Dsc\Singleton
      */
     protected function registerModules($app)
     {
+        if (!class_exists('\Modules\Factory')) {
+        	return;
+        }
+        
         // register the modules path, if you can
         $modules_path = $this->dir . "/src/" . $this->namespace . "/Modules/";
         if (! file_exists($modules_path))
