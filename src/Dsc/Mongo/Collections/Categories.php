@@ -3,6 +3,8 @@ namespace Dsc\Mongo\Collections;
 
 class Categories extends \Dsc\Mongo\Collections\Nodes 
 {
+    use \Dsc\Traits\Models\Ancestors;
+    use \Dsc\Traits\Models\ForSelection;
     use \Dsc\Traits\Models\Seo;
     
     /**
@@ -12,9 +14,9 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     public $title; // string INDEX
     public $slug; // string INDEX
     public $description; // text
-    public $parent; // MongoId(),
-    public $path; // '/path/to/the/current/category/using/slugs' INDEX UNIQUE
-    public $ancestors = array(); // array( array('MongoId', 'slug', 'title') )
+    //public $parent; // MongoId(),
+    //public $path; // '/path/to/the/current/category/using/slugs' INDEX UNIQUE
+    //public $ancestors = array(); // array( array('MongoId', 'slug', 'title') )
     
     protected $__collection_name = 'common.categories';
     protected $__type = 'common.categories';
