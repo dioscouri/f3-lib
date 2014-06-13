@@ -66,7 +66,7 @@ class Theme extends \View {
 	 * @param number $ttl        	
 	 */
 	public function render($file, $mime = 'text/html', array $hive = NULL, $ttl = 0) {
-	
+		$this->outputDebug ();
 		return static::renderTheme ( $file, array (
 				'mime' => $mime,
 				'hive' => $hive,
@@ -158,14 +158,33 @@ class Theme extends \View {
 		$string = null;
 		
 		if ($view_file = $this->findViewFile ( $view )) {
-	
+			$this->trackView ( $view_file );
 			$string = $this->loadFile ( $view_file );
 		}
 		
 		return $string;
 	}
+	/**
+	 * Track view files that have been loaded for easier template debugging
+	 *
+	 * @param unknown $theme
+	 */
+	private function trackView($view_file) {
+		$loaded_view_files = \Dsc\System::instance ()->get ( 'session' )->get ( 'loaded_view_files' );
+		$loaded_view_files [] = $view_file;
+		\Dsc\System::instance ()->get ( 'session' )->set ( 'loaded_view_files', $loaded_view_files );
 	
-	
+	}
+	/**
+	 * Outputs the debuging to the hive for templating
+	 *
+	 * @param unknown $theme
+	 */
+	public function outputDebug() {
+		$loaded_view_files = \Dsc\System::instance ()->get ( 'session' )->get ( 'loaded_view_files' );
+		\Dsc\System::instance ()->get ( 'session' )->set ( 'loaded_view_files', null );
+		$this->app->set ( 'loaded_view_files', $loaded_view_files );
+	}
 	
 	/**
 	 * Sets the theme to be used for the current rendering, but only if it has been registered.
