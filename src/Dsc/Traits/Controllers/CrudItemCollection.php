@@ -6,125 +6,142 @@ namespace Dsc\Traits\Controllers;
  */
 trait CrudItemCollection
 {
-    use \Dsc\Traits\Controllers\Crud;
-    
+    use\Dsc\Traits\Controllers\Crud;
+
     /**
      * These MUST be defined in your controller.
      * Here is a typical format.
-     * 
-    protected $list_route = '/admin/items';
-    protected $create_item_route = '/admin/item/create';
-    protected $get_item_route = '/admin/item/read/{id}';    
-    protected $edit_item_route = '/admin/item/edit/{id}';
-    */
-        
+     *
+     * protected $list_route = '/admin/items';
+     * protected $create_item_route = '/admin/item/create';
+     * protected $get_item_route = '/admin/item/read/{id}';
+     * protected $edit_item_route = '/admin/item/edit/{id}';
+     */
     abstract protected function getModel();
+
     abstract protected function getItem();
 
     abstract protected function displayCreate();
+
     abstract protected function displayRead();
+
     abstract protected function displayEdit();
 
     protected function getItemKey()
     {
-        if (empty($this->crud_item_key)) {
+        if (empty($this->crud_item_key))
+        {
             $this->crud_item_key = $this->getModel()->getItemKey();
         }
         
-        if (empty($this->crud_item_key)) {
+        if (empty($this->crud_item_key))
+        {
             throw new \Exception('Must define an item key');
         }
         
         return $this->crud_item_key;
     }
-    
+
     protected function doCreate(array $data)
     {
         $f3 = \Base::instance();
         $flash = \Dsc\Flash::instance();
-        $f3->set('flash', $flash );
+        $f3->set('flash', $flash);
         
         $use_flash = \Dsc\System::instance()->getUserState('use_flash.' . $this->create_item_route);
-        if (!$use_flash) {
+        if (!$use_flash)
+        {
             $flash->store(array());
         }
         \Dsc\System::instance()->setUserState('use_flash.' . $this->create_item_route, false);
         
         $model = $this->getModel();
-        $f3->set('model', $model );
+        $f3->set('model', $model);
         $this->displayCreate();
         
         return $this;
     }
-    
+
     protected function doEdit(array $data)
     {
         $f3 = \Base::instance();
         $flash = \Dsc\Flash::instance();
-        $f3->set('flash', $flash );
-    
+        $f3->set('flash', $flash);
+        
         $model = $this->getModel();
         $item = $this->getItem();
         
-        $f3->set('model', $model );
-        $f3->set('item', $item );
+        $f3->set('model', $model);
+        $f3->set('item', $item);
         
         $use_flash = \Dsc\System::instance()->getUserState('use_flash.' . $this->edit_item_route);
-        if (!$use_flash) {
+        if (!$use_flash)
+        {
             $item_data = array();
-            if (method_exists($item, 'cast')) {
+            if (method_exists($item, 'cast'))
+            {
                 $item_data = $item->cast();
-            } elseif (is_object($item)) {
+            }
+            elseif (is_object($item))
+            {
                 $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
             }
             $flash->store($item_data);
         }
-        \Dsc\System::instance()->setUserState('use_flash.' . $this->edit_item_route, false);        
+        \Dsc\System::instance()->setUserState('use_flash.' . $this->edit_item_route, false);
         
         $this->displayEdit();
-    
+        
         return $this;
     }
-    
-    protected function doRead(array $data, $key=null) {
+
+    protected function doRead(array $data, $key = null)
+    {
         $f3 = \Base::instance();
         $flash = \Dsc\Flash::instance();
-        $f3->set('flash', $flash );
-    
+        $f3->set('flash', $flash);
+        
         $model = $this->getModel();
         $item = $this->getItem();
-    
-        $f3->set('model', $model );
-        $f3->set('item', $item );
+        
+        $f3->set('model', $model);
+        $f3->set('item', $item);
         
         $item_data = array();
-        if (method_exists($item, 'cast')) {
+        if (method_exists($item, 'cast'))
+        {
             $item_data = $item->cast();
-        } elseif (is_object($item)) {
+        }
+        elseif (is_object($item))
+        {
             $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
         }
         $flash->store($item_data);
-    
+        
         $this->displayRead();
-    
+        
         return $this;
     }
-    
-    protected function doAdd($data) 
+
+    protected function doAdd($data)
     {
-        if (empty($this->list_route)) {
+        if (empty($this->list_route))
+        {
             throw new \Exception('Must define a route for listing the items');
         }
-                
-        if (empty($this->create_item_route)) {
+        
+        if (empty($this->create_item_route))
+        {
             throw new \Exception('Must define a route for creating the item');
         }
-                
-        if (empty($this->edit_item_route)) {
-            throw new \Exception('Must define a route for editing the item'); 
+        
+        if (empty($this->edit_item_route))
+        {
+            throw new \Exception('Must define a route for editing the item');
         }
         
-        if (!isset($data['submitType'])) {
+        if (!isset($data['submitType']))
+        {
             $data['submitType'] = "save_edit";
         }
         
@@ -133,53 +150,65 @@ trait CrudItemCollection
         $model = $this->getModel();
         
         // save
-        try {
+        try
+        {
             $values = $data;
             unset($values['submitType']);
-            //\Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
+            // \Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
             $this->item = $model->create($values);
         }
-        catch (\Exception $e) {
+        catch (\Exception $e)
+        {
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
             \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            if (\Base::instance()->get('DEBUG')) {
+            if (\Base::instance()->get('DEBUG'))
+            {
                 \Dsc\System::instance()->addMessage($e->getTraceAsString(), 'error');
             }
             
-            if ($f3->get('AJAX')) {
+            if ($f3->get('AJAX'))
+            {
                 // output system messages in response object
-                return $this->outputJson( $this->getJsonResponse( array(
-                        'error' => true,
-                        'message' => \Dsc\System::instance()->renderMessages()
-                ) ) );
+                return $this->outputJson($this->getJsonResponse(array(
+                    'error' => true,
+                    'message' => \Dsc\System::instance()->renderMessages()
+                )));
             }
-           
+            
             // redirect back to the create form with the fields pre-populated
             \Dsc\System::instance()->setUserState('use_flash.' . $this->create_item_route, true);
             $flash->store($data);
             
-            $this->setRedirect( $this->create_item_route );
-                        
+            $custom_redirect = \Dsc\System::instance()->get('session')->get('create.redirect');
+            $route = $custom_redirect ? $custom_redirect : $this->create_item_route;
+            $route = $this->create_item_route;
+            
+            $this->setRedirect($route);
+            
             return false;
         }
-                
+        
         // redirect to the editing form for the new item
         \Dsc\System::instance()->addMessage('Item saved', 'success');
         
-        if (method_exists($this->item, 'cast')) {
+        if (method_exists($this->item, 'cast'))
+        {
             $this->item_data = $this->item->cast();
-        } else {
+        }
+        else
+        {
             $this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
         }
         
-        if ($f3->get('AJAX')) {
-            return $this->outputJson( $this->getJsonResponse( array(
-                    'message' => \Dsc\System::instance()->renderMessages(),
-                    'result' => $this->item_data
-            ) ) );
+        if ($f3->get('AJAX'))
+        {
+            return $this->outputJson($this->getJsonResponse(array(
+                'message' => \Dsc\System::instance()->renderMessages(),
+                'result' => $this->item_data
+            )));
         }
         
-        switch ($data['submitType']) 
+        switch ($data['submitType'])
         {
             case "save_new":
                 $route = $this->create_item_route;
@@ -189,31 +218,38 @@ trait CrudItemCollection
                 break;
             default:
                 $flash->store($this->item_data);
-                $id = $this->item->get( $this->getItemKey() );
-                $route = str_replace('{id}', $id, $this->edit_item_route );                
+                $id = $this->item->get($this->getItemKey());
+                $route = str_replace('{id}', $id, $this->edit_item_route);
                 break;
         }
-
-        $this->setRedirect( $route );
+        
+        $custom_redirect = \Dsc\System::instance()->get('session')->get('create.redirect');
+        //$route = $custom_redirect ? $custom_redirect : $route;
+        
+        $this->setRedirect($route);
         
         return $this;
     }
-    
-    protected function doUpdate(array $data, $key=null) 
+
+    protected function doUpdate(array $data, $key = null)
     {
-        if (empty($this->list_route)) {
+        if (empty($this->list_route))
+        {
             throw new \Exception('Must define a route for listing the items');
         }
-                
-        if (empty($this->create_item_route)) {
+        
+        if (empty($this->create_item_route))
+        {
             throw new \Exception('Must define a route for creating the item');
         }
-                
-        if (empty($this->edit_item_route)) {
-            throw new \Exception('Must define a route for editing the item'); 
+        
+        if (empty($this->edit_item_route))
+        {
+            throw new \Exception('Must define a route for editing the item');
         }
         
-        if (!isset($data['submitType'])) {
+        if (!isset($data['submitType']))
+        {
             $data['submitType'] = "save_edit";
         }
         
@@ -221,63 +257,73 @@ trait CrudItemCollection
         $flash = \Dsc\Flash::instance();
         $model = $this->getModel();
         $this->item = $this->getItem();
-
+        
         // save
         $save_as = false;
-        try {
-            $values = $data; 
+        try
+        {
+            $values = $data;
             unset($values['submitType']);
-            //\Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
-            if ($data['submitType'] == 'save_as') 
+            // \Dsc\System::instance()->addMessage(\Dsc\Debug::dump($values), 'warning');
+            if ($data['submitType'] == 'save_as')
             {
                 $this->item = $this->item->saveAs($values);
                 \Dsc\System::instance()->addMessage('Item cloned. You are now editing the new item.', 'success');
-            } 
-            else 
+            }
+            else
             {
                 $this->item = $this->item->update($values);
                 \Dsc\System::instance()->addMessage('Item updated', 'success');
             }
-            
         }
-        catch (\Exception $e) {
+        catch (\Exception $e)
+        {
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
             \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            if (\Base::instance()->get('DEBUG')) {
+            if (\Base::instance()->get('DEBUG'))
+            {
                 \Dsc\System::instance()->addMessage($e->getTraceAsString(), 'error');
             }
             
-            if ($f3->get('AJAX')) {
+            if ($f3->get('AJAX'))
+            {
                 // output system messages in response object
-                return $this->outputJson( $this->getJsonResponse( array(
-                        'error' => true,
-                        'message' => \Dsc\System::instance()->renderMessages()
-                ) ) );
+                return $this->outputJson($this->getJsonResponse(array(
+                    'error' => true,
+                    'message' => \Dsc\System::instance()->renderMessages()
+                )));
             }
-        
+            
             // redirect back to the edit form with the fields pre-populated
             \Dsc\System::instance()->setUserState('use_flash.' . $this->edit_item_route, true);
             $flash->store($data);
-            $id = $this->item->get( $this->getItemKey() );
-            $route = str_replace('{id}', $id, $this->edit_item_route );
-                        
-            $this->setRedirect( $route );
+            $id = $this->item->get($this->getItemKey());
+            $route = str_replace('{id}', $id, $this->edit_item_route);
             
-            return false;           
+            $custom_redirect = \Dsc\System::instance()->get('session')->get('update.redirect');
+            $route = $custom_redirect ? $custom_redirect : $route;
+            
+            $this->setRedirect($route);
+            
+            return false;
         }
         
         // redirect to the editing form for the new item
-        if (method_exists($this->item, 'cast')) {
+        if (method_exists($this->item, 'cast'))
+        {
             $this->item_data = $this->item->cast();
-        } else {
+        }
+        else
+        {
             $this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
         }
         
-        if ($f3->get('AJAX')) {
-            return $this->outputJson( $this->getJsonResponse( array(
-                    'message' => \Dsc\System::instance()->renderMessages(),
-                    'result' => $this->item_data
-            ) ) );
+        if ($f3->get('AJAX'))
+        {
+            return $this->outputJson($this->getJsonResponse(array(
+                'message' => \Dsc\System::instance()->renderMessages(),
+                'result' => $this->item_data
+            )));
         }
         
         switch ($data['submitType'])
@@ -291,60 +337,68 @@ trait CrudItemCollection
             case "save_as":
             default:
                 $flash->store($this->item_data);
-                $id = $this->item->get( $this->getItemKey() );
-                $route = str_replace('{id}', $id, $this->edit_item_route );
+                $id = $this->item->get($this->getItemKey());
+                $route = str_replace('{id}', $id, $this->edit_item_route);
                 break;
         }
-
-        $this->setRedirect( $route );
         
-        return $this;        
+        $custom_redirect = \Dsc\System::instance()->get('session')->get('update.redirect');
+        //$route = $custom_redirect ? $custom_redirect : $route;
+        
+        $this->setRedirect($route);
+        
+        return $this;
     }
-        
-    protected function doDelete(array $data, $key=null) 
+
+    protected function doDelete(array $data, $key = null)
     {
-        if (empty($this->list_route)) {
+        if (empty($this->list_route))
+        {
             throw new \Exception('Must define a route for listing the items');
         }
+        
+        $custom_redirect = \Dsc\System::instance()->get('session')->get('delete.redirect');
+        $redirect = $custom_redirect ? $custom_redirect : $this->list_route;
+        $redirect = $this->list_route;
         
         $f3 = \Base::instance();
         $model = $this->getModel();
         $this->item = $this->getItem();
         
-        try {
+        try
+        {
             $this->item->remove();
             \Dsc\System::instance()->addMessage('Item deleted', 'success');
+            
+            if ($f3->get('AJAX'))
+            {
+                return $this->outputJson($this->getJsonResponse(array(
+                    'message' => \Dsc\System::instance()->renderMessages()
+                )));
+            }
         }
-        catch (\Exception $e) {
+        catch (\Exception $e)
+        {
             \Dsc\System::instance()->addMessage('Delete failed with the following errors:', 'error');
             \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            if (\Base::instance()->get('DEBUG')) {
+            if (\Base::instance()->get('DEBUG'))
+            {
                 \Dsc\System::instance()->addMessage($e->getTraceAsString(), 'error');
             }
-                        
-            if ($f3->get('AJAX')) {
-                // output system messages in response object
-                return $this->outputJson( $this->getJsonResponse( array(
-                        'error' => true,
-                        'message' => \Dsc\System::instance()->renderMessages()
-                ) ) );
-            }
-        
-            // redirect back to the list view
-            $this->setRedirect( $this->list_route );
             
-            return false;
+            if ($f3->get('AJAX'))
+            {
+                // output system messages in response object
+                return $this->outputJson($this->getJsonResponse(array(
+                    'error' => true,
+                    'message' => \Dsc\System::instance()->renderMessages()
+                )));
+            }
         }
         
-        if ($f3->get('AJAX')) {
-            return $this->outputJson( $this->getJsonResponse( array(
-                    'message' => \Dsc\System::instance()->renderMessages()
-            ) ) );
-        }
-
-        $this->setRedirect( $this->list_route );
+        \Dsc\System::instance()->get('session')->set('delete.redirect', null);
+        $this->setRedirect($redirect);
         
         return $this;
     }
-
 }

@@ -3,8 +3,11 @@ namespace Dsc\Mongo\Collections;
 
 class Nested extends \Dsc\Mongo\Collections\Nodes
 {
+    use \Dsc\Traits\Models\Seo;
+    
     public $title;
-    public $slug;    
+    public $slug; 
+    public $description;
     public $is_root;
     public $tree;
     public $parent;

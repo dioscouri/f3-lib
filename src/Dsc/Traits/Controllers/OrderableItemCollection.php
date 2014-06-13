@@ -14,7 +14,7 @@ trait OrderableItemCollection
         $f3 = \Base::instance();
     	$id = $this->inputfilter->clean( $f3->get('PARAMS.id'), 'alnum' );
         $item = $this->getModel()->setState('filter.id', $id)->getItem();
-    	if (!$this->canUpdate( $item )) {
+    	if (!$this->canUpdate( $item->cast() )) {
             throw new \Exception('Not allowed to update record');
         }
         
@@ -32,7 +32,7 @@ trait OrderableItemCollection
         $f3 = \Base::instance();
     	$id = $this->inputfilter->clean( $f3->get('PARAMS.id'), 'alnum' );
         $item = $this->getModel()->setState('filter.id', $id)->getItem();
-        if (!$this->canUpdate($item )) {
+        if (!$this->canUpdate( $item->cast() )) {
             throw new \Exception('Not allowed to update record');
         }
         

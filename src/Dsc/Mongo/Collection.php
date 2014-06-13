@@ -206,7 +206,23 @@ class Collection extends \Dsc\Models
      * 
      * @param $forceUnique 		All items have to be unique
      */
-    public function getItemsRandom($forceUnique = true){
+    public function getItemsRandom($forceUnique = true)
+    {
+        if (is_null($this->getState('list.sort')))
+        {
+            if (!empty($this->getParam('sort'))) {
+                $this->setState('list.sort', $this->getParam('sort'));
+            } else {
+                $this->setState('list.sort', $this->__config['default_sort']);
+            }
+        }
+        $this->setParam('sort', $this->getState('list.sort'));
+        
+        if ($this->getState('list.limit'))
+        {
+            $this->setParam('limit', $this->getState('list.limit'));
+        }
+                
     	$conditions = $this->conditions();
     	$count = $this->collection()->find( $conditions )->count();
     	
@@ -260,9 +276,8 @@ class Collection extends \Dsc\Models
     }
     
     /**
-     * Fetches an item from the collection using set conditions
      * 
-     * @return Ambigous <NULL, \Dsc\Mongo\Collection>
+     * @return \Dsc\Mongo\Collection
      */
     protected function fetchItem()
     {
@@ -415,6 +430,18 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Gets the count of items that match the current set conditions
+     * 
+     * @return number
+     */
+    public function getCount()
+    {
+        $total = $this->collection()->count( $this->conditions() );
+        
+        return (int) $total;
+    }
+    
+    /**
      * Gets the array of fields set to be returned by the next query,
      * fetching them if necessary
      *  
@@ -483,6 +510,17 @@ class Collection extends \Dsc\Models
             	$_ids[] = new \MongoId( (string) $_filter_id);
             }
             $this->setCondition('_id', array('$in' => $_ids) );
+        }
+        
+        $filter_ids_excluded = $this->getState('filter.ids_excluded');
+        if (!empty($filter_ids_excluded) && is_array($filter_ids_excluded))
+        {
+            $_ids = array();
+            foreach ($filter_ids_excluded as $_filter_id)
+            {
+                $_ids[] = new \MongoId( (string) $_filter_id);
+            }
+            $this->setCondition('_id', array('$nin' => $_ids) );
         }
         
         return $this;
@@ -749,7 +787,7 @@ class Collection extends \Dsc\Models
         $this->afterUpdate();
         $this->afterSave();
                 
-        return $this->lastOperation();
+        return $this;
     }
     
     /**
@@ -793,7 +831,7 @@ class Collection extends \Dsc\Models
         
         $this->afterDelete();
         
-        return $this->lastOperation();
+        return $this;
     }
     
     /**
