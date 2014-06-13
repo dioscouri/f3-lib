@@ -6,7 +6,7 @@ namespace Dsc\Routes;
  *
  * @author Lukas Polak
  */
-abstract class Group
+abstract class Group extends \Dsc\Singleton
 {
     protected $default_params;
     protected $routes = array(); // initialized routes

@@ -299,6 +299,14 @@ class Models extends \Dsc\Magic
     }
     
     /**
+     * Gets the output filter object
+     */
+    public function outputFilter()
+    {
+        return \Dsc\System::instance()->get('outputfilter');
+    }
+    
+    /**
      * Method to auto-populate the model state.
      *
      */

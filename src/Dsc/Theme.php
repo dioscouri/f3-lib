@@ -173,6 +173,7 @@ class Theme extends \View {
 		$loaded_view_files = \Dsc\System::instance ()->get ( 'session' )->get ( 'loaded_view_files' );
 		$loaded_view_files [] = $view_file;
 		\Dsc\System::instance ()->get ( 'session' )->set ( 'loaded_view_files', $loaded_view_files );
+	
 	}
 	/**
 	 * Outputs the debuging to the hive for templating

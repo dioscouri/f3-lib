@@ -44,11 +44,117 @@ class Nodes extends \Dsc\Mongo\Collection
         $filter_creator_id = $this->getState('filter.creator.id');
         if (strlen($filter_creator_id))
         {
-            $this->setCondition('metadata.creator.id', $filter_creator_id );
+            $this->setCondition('metadata.creator.id', new \MongoId( (string) $filter_creator_id ) );
         }
         
-        // TODO Add date-range filters for created & last_modified
+        $filter_created_after = $this->getState('filter.created_after');
+        if (strlen($filter_created_after))
+        {
+            $filter_created_after = strtotime($filter_created_after);
+            
+            // add $and conditions to the query stack
+            if (!$and = $this->getCondition('$and'))
+            {
+                $and = array();
+            }
         
+            $and[] = array(
+                '$or' => array(
+                    array(
+                        'metadata.created.time' => 0
+                    ),
+                    array(
+                        'metadata.created.time' => array(
+                            '$gte' => $filter_created_after
+                        )
+                    )
+                )
+            );
+        
+            $this->setCondition('$and', $and);
+        }
+        
+        $filter_created_before = $this->getState('filter.created_before');
+        if (strlen($filter_created_before))
+        {
+            $filter_created_before = strtotime($filter_created_before);
+        
+            // add $and conditions to the query stack
+            if (!$and = $this->getCondition('$and'))
+            {
+                $and = array();
+            }
+        
+            $and[] = array(
+                '$or' => array(
+                    array(
+                        'metadata.created.time' => 0
+                    ),
+                    array(
+                        'metadata.created.time' => array(
+                            '$lte' => $filter_created_before
+                        )
+                    )
+                )
+            );
+        
+            $this->setCondition('$and', $and);
+        }    
+
+        $filter_last_modified_after = $this->getState('filter.last_modified_after');
+        if (strlen($filter_last_modified_after))
+        {
+            $filter_last_modified_after = strtotime($filter_last_modified_after);
+        
+            // add $and conditions to the query stack
+            if (!$and = $this->getCondition('$and'))
+            {
+                $and = array();
+            }
+        
+            $and[] = array(
+                '$or' => array(
+                    array(
+                        'metadata.last_modified.time' => null
+                    ),
+                    array(
+                        'metadata.last_modified.time' => array(
+                            '$gte' => $filter_last_modified_after
+                        )
+                    )
+                )
+            );
+        
+            $this->setCondition('$and', $and);
+        }
+        
+        $filter_last_modified_before = $this->getState('filter.last_modified_before');
+        if (strlen($filter_last_modified_before))
+        {
+            $filter_last_modified_before = strtotime($filter_last_modified_before);
+        
+            // add $and conditions to the query stack
+            if (!$and = $this->getCondition('$and'))
+            {
+                $and = array();
+            }
+        
+            $and[] = array(
+                '$or' => array(
+                    array(
+                        'metadata.last_modified.time' => null
+                    ),
+                    array(
+                        'metadata.last_modified.time' => array(
+                            '$lt' => $filter_last_modified_before
+                        )
+                    )
+                )
+            );
+        
+            $this->setCondition('$and', $and);
+        }
+                
         return $this;
     }
     

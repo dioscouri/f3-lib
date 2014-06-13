@@ -5,7 +5,7 @@ namespace Dsc;
  * This is base bootstrap class for every f3 application enabling us to hook up some services before
  * the real bootstrapping occurs
  */
-abstract class Bootstrap
+abstract class Bootstrap extends \Dsc\Singleton
 {
     protected $namespace = '';
     
@@ -171,6 +171,10 @@ abstract class Bootstrap
      */
     protected function registerModules($app)
     {
+        if (!class_exists('\Modules\Factory')) {
+        	return;
+        }
+        
         // register the modules path, if you can
         $modules_path = $this->dir . "/src/" . $this->namespace . "/Modules/";
         if (! file_exists($modules_path))

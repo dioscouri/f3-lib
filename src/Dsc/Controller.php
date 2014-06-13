@@ -27,6 +27,31 @@ class Controller extends Singleton
         }
     }
     
+    protected  function outputCsv( $filename, $data, $csv_header = array() ){
+    	header( 'Content-Type: text/csv');
+    	header( 'Pragma: public' );
+    	header( 'Case-Control: must-revalidate, post-check=0, pre-check=0' );
+    	header( 'Case-Control: public' );
+    	header( 'Content-Desription: File Transfer' );
+    	header( 'Content-Disposition: attachment; filename='.$filename );
+    	
+    	if( !empty( $csv_header ) ){
+    		foreach($csv_header as $h) {
+    			$csv[] = '"' . str_replace('"', '""', $h) . '"';
+    		}
+    		echo implode(",", $csv) . "\r\n";    		
+    	}
+    	
+    	foreach($data as $item) {
+    		$csv = array();
+    		foreach($item as $v) {
+    			$csv[] = '"' . str_replace('"', '""', $v) . '"';
+    		}
+    		echo implode(",", $csv) . "\r\n";
+    	}
+    	return;    	
+    }
+    
     /**
      * Create a standard object for responding to ajax requests
      * 
@@ -95,6 +120,11 @@ class Controller extends Singleton
         if (empty($identity->id))
         {
             $path = $this->inputfilter->clean( $f3->hive()['PATH'], 'string' );
+            if ($query = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY )) 
+            {
+            	$path .= '?' . $query; 
+            }
+            
             $global_app_name = strtolower( $f3->get('APP_NAME') );
             switch ($global_app_name) 
             {
@@ -137,12 +167,12 @@ class Controller extends Singleton
             $this->requireIdentity();
         }
         
-        // TODO If the user has multiple roles (is that possible) then loop through them
+        // TODO If the user has multiple roles (is that possible) then loop through them        
         if ($hasAccess = \Dsc\System::instance()->get('acl')->isAllowed($identity->role, $resource, $method))
         {
             return $this;
         }
-
+        
         if (\Base::instance()->get('DEBUG')) {
             \Dsc\System::addMessage( \Dsc\Debug::dump( 'Debugging is enabled := $role: ' . $identity->role . ", " . '$resource: ' . $resource . ", " . '$method: ' . $method) );
         }

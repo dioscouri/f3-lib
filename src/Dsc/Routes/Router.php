@@ -6,7 +6,7 @@ namespace Dsc\Routes;
  *
  * @author Lukas Polak
  */
-class Router
+class Router extends \Dsc\Singleton
 {
     private $groups = array();
 
