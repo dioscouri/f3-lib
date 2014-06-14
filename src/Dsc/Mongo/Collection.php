@@ -836,19 +836,6 @@ class Collection extends \Dsc\Models
     
     /**
      * 
-     * @param string $model
-     */
-    public function delete( $model=null )
-    {
-        if (!empty($model)) {
-        	return $model->remove();
-        }
-        
-        return $this->remove();
-    }
-    
-    /**
-     * 
      * @return boolean|\Dsc\Mongo\Collection
      */
     public function validate()
