@@ -43,7 +43,7 @@ class Apps extends Singleton
         {
             foreach ($folders as $folder)
             {
-		        $app = null;
+		$app = null;
             	if (file_exists($path . $folder . '/bootstrap.php'))
                 {
                     require_once $path . $folder . '/bootstrap.php';
@@ -61,7 +61,7 @@ class Apps extends Singleton
         {
             foreach ($folders as $folder)
             {
-		        $app = null;
+		 $app = null;
             	if (file_exists($path . $folder . '/bootstrap.php'))
                 {
                     require_once $path . $folder . '/bootstrap.php';
@@ -74,7 +74,6 @@ class Apps extends Singleton
         }
         
         // then do any additional paths
-        $app = null;
         foreach ($additional_paths as $additional_path)
         {
             if ($folders = \Joomla\Filesystem\Folder::folders($additional_path))
@@ -82,7 +81,7 @@ class Apps extends Singleton
                 
                 foreach ($folders as $folder)
                 {
-                	$app = null;
+		    $app = null;
                 	 
                     if (file_exists($additional_path . $folder . '/bootstrap.php'))
                     {
