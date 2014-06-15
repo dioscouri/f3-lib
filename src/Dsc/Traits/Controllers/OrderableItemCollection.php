@@ -13,12 +13,12 @@ trait OrderableItemCollection
     {
         $f3 = \Base::instance();
     	$id = $this->inputfilter->clean( $f3->get('PARAMS.id'), 'alnum' );
-        $item = $this->getModel()->setState('filter.id', $id)->getItem();
-    	if (!$this->canUpdate( $item->cast() )) {
+        $this->item = $this->getModel()->setState('filter.id', $id)->getItem();
+    	if (!$this->canUpdate( $this->item->cast() )) {
             throw new \Exception('Not allowed to update record');
         }
         
-        $this->doMoveUp( $item );
+        $this->doMoveUp( $this->item );
 
         if ($route = $this->getRedirect()) {
             \Base::instance()->reroute( $route );
@@ -31,12 +31,12 @@ trait OrderableItemCollection
     {
         $f3 = \Base::instance();
     	$id = $this->inputfilter->clean( $f3->get('PARAMS.id'), 'alnum' );
-        $item = $this->getModel()->setState('filter.id', $id)->getItem();
-        if (!$this->canUpdate( $item->cast() )) {
+        $this->item = $this->getModel()->setState('filter.id', $id)->getItem();
+        if (!$this->canUpdate( $this->item->cast() )) {
             throw new \Exception('Not allowed to update record');
         }
         
-        $this->doMoveDown( $item );
+        $this->doMoveDown( $this->item );
         
         if ($route = $this->getRedirect()) {
             \Base::instance()->reroute( $route );
@@ -45,7 +45,7 @@ trait OrderableItemCollection
         return;
     }
     
-    protected function doMoveUp($item )
+    protected function doMoveUp( &$item )
     {
         if (empty($this->list_route)) {
             throw new \Exception('Must define a route for listing the items');
@@ -90,7 +90,7 @@ trait OrderableItemCollection
         return $this;
     }
     
-    protected function doMoveDown( $item )
+    protected function doMoveDown( &$item )
     {
         if (empty($this->list_route)) {
             throw new \Exception('Must define a route for listing the items');
@@ -105,7 +105,7 @@ trait OrderableItemCollection
         catch (\Exception $e) {
             \Dsc\System::instance()->addMessage('Item move failed with the following errors:', 'error');
             \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
-            foreach ($this->item->getErrors() as $error)
+            foreach ($item->getErrors() as $error)
             {
                 \Dsc\System::instance()->addMessage($error, 'error');
             }
