@@ -23,6 +23,7 @@ class Apps extends Singleton
                     $apps[] = $app;
                 }
             }
+            
             return $this;
         }
         
@@ -43,8 +44,8 @@ class Apps extends Singleton
         {
             foreach ($folders as $folder)
             {
-		$app = null;
-            	if (file_exists($path . $folder . '/bootstrap.php'))
+                $app = null;
+                if (file_exists($path . $folder . '/bootstrap.php'))
                 {
                     require_once $path . $folder . '/bootstrap.php';
                     if (!empty($app))
@@ -61,8 +62,8 @@ class Apps extends Singleton
         {
             foreach ($folders as $folder)
             {
-		 $app = null;
-            	if (file_exists($path . $folder . '/bootstrap.php'))
+                $app = null;
+                if (file_exists($path . $folder . '/bootstrap.php'))
                 {
                     require_once $path . $folder . '/bootstrap.php';
                     if (!empty($app))
@@ -81,8 +82,8 @@ class Apps extends Singleton
                 
                 foreach ($folders as $folder)
                 {
-		    $app = null;
-                	 
+                    $app = null;
+                    
                     if (file_exists($additional_path . $folder . '/bootstrap.php'))
                     {
                         require_once $additional_path . $folder . '/bootstrap.php';
