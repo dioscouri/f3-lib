@@ -97,6 +97,7 @@ class Apps extends Singleton
         }
         
         //\FB::error( $this->app->hive()['PATH'] );
+        //\FB::warn(round(memory_get_usage(TRUE)/1e3,1) . ' KB');
         
         // now let's run all the apps
         if (count($bootstraps) > 0)
@@ -120,6 +121,8 @@ class Apps extends Singleton
                 $bootstrap->command('post', $global_app_name);
             }
         }
+        
+        //\FB::warn(round(memory_get_usage(TRUE)/1e3,1) . ' KB');
         
         return $this;
     }

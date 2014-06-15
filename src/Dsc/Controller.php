@@ -201,5 +201,12 @@ class Controller extends Singleton
         $current_user = $this->auth->getIdentity();
         return $current_user;
     }
+    
+    /*
+    public function afterRoute()
+    {
+        \FB::warn(round(memory_get_usage(TRUE)/1e3,1) . ' KB');
+    }
+    */
 }
 ?>
