@@ -50,6 +50,11 @@ class Collection extends \Dsc\Models
     
     protected $__last_operation = null;
     
+    public function defaultSort()
+    {
+        return $this->__config['default_sort'];
+    }
+    
     /**
      * Manually set a query param without using setState()
      *
