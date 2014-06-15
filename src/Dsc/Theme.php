@@ -20,7 +20,9 @@ class Theme extends \View
     );
 
     public function __construct($config = array())
-    {}
+    {
+        $this->registerViewPath( __DIR__ . '/Themes/SystemTheme/Views/', 'SystemTheme/Views');
+    }
 
     public function __get($key)
     {
