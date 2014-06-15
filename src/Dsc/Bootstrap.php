@@ -218,4 +218,12 @@ abstract class Bootstrap extends \Dsc\Singleton
 
     protected function postSite()
     {}
+    
+    /**
+     * What's the name of this app?
+     */
+    public function name() 
+    {
+    	return $this->namespace;
+    }
 }
