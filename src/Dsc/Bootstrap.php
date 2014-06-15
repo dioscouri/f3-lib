@@ -7,38 +7,42 @@ namespace Dsc;
  */
 abstract class Bootstrap extends \Dsc\Singleton
 {
+
     protected $namespace = '';
-    
+
     /**
      * The full path to the app's bootstrap.php file
+     * 
      * @var string
      */
     protected $dir = '';
-    
+
     /**
      * The full path to the folder containing the app's namespaced files
+     * 
      * @var string
      */
     protected $base = '';
-    
+
     public function __construct()
     {
-        if (empty($this->base)) {
-        	$this->base = $this->dir . '/src/' . $this->namespace;
+        if (empty($this->base))
+        {
+            $this->base = $this->dir . '/src/' . $this->namespace;
         }
         
-        static::registerApp( $this->namespace, $this->base );
+        static::registerApp($this->namespace, $this->base);
     }
-    
+
     /**
-     * 
-     * @param unknown $app
-     * @param unknown $path
+     *
+     * @param unknown $app            
+     * @param unknown $path            
      * @return Ambigous <array, multitype:unknown >
      */
-    public static function registerApp( $app, $path ) 
+    public static function registerApp($app, $path)
     {
-        $apps = (array) \Base::instance()->get('dsc.apps' );
+        $apps = (array) \Base::instance()->get('dsc.apps');
         if (empty($apps) || !is_array($apps))
         {
             $apps = array();
@@ -102,10 +106,10 @@ abstract class Bootstrap extends \Dsc\Singleton
     {
         $f3 = \Base::instance();
         $router = "\\" . $this->namespace . "\\Routes";
-        if (! class_exists($router))
+        if (!class_exists($router))
         {
             $router = "\\" . $this->namespace . "\\" . $app . "\\Routes";
-            if (! class_exists($router))
+            if (!class_exists($router))
             {
                 $router = '';
             }
@@ -149,7 +153,6 @@ abstract class Bootstrap extends \Dsc\Singleton
         if (file_exists($this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/'))
         {
             \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/' . $app . '/Views/', $this->namespace . '/' . $app . '/Views');
-
         }
         else
         {
@@ -158,7 +161,7 @@ abstract class Bootstrap extends \Dsc\Singleton
                 \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
             }
         }
-
+        
         // register the app's shared views
         \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
     }
@@ -171,17 +174,18 @@ abstract class Bootstrap extends \Dsc\Singleton
      */
     protected function registerModules($app)
     {
-        if (!class_exists('\Modules\Factory')) {
-        	return;
+        if (!class_exists('\Modules\Factory'))
+        {
+            return;
         }
         
         // register the modules path, if you can
         $modules_path = $this->dir . "/src/" . $this->namespace . "/Modules/";
-        if (! file_exists($modules_path))
+        if (!file_exists($modules_path))
         {
             // let's try more specific route
             $modules_path = $this->dir . "/src/" . $this->namespace . '/' . $app . "/Modules/";
-            if (! file_exists($modules_path))
+            if (!file_exists($modules_path))
             { // not even here? maybe more luck next time
                 $modules_path = '';
             }
