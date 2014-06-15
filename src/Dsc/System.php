@@ -48,7 +48,7 @@ class System extends Singleton
      */
     public static function addMessage($message, $type='info') 
     {
-        $messages = \Base::instance()->get('SESSION.messages') ? \Base::instance()->get('SESSION.messages') : array();
+        $messages = \Dsc\System::instance()->session->get('system.messages') ? \Dsc\System::instance()->session->get('system.messages') : array();
         
         switch (strtolower($type)) {
             case "good":
@@ -72,17 +72,19 @@ class System extends Singleton
                 break;            
         }
         
-        $messages = array_merge( $messages, array( array('message'=>$message, 'type'=>$type) ) );
-        \Base::instance()->set('SESSION.messages', $messages);
+        $messages = array_merge( (array) $messages, array( array('message'=>$message, 'type'=>$type) ) );
+        \Dsc\System::instance()->session->set('system.messages', $messages);
     }
     
     public function getMessages($empty=true) 
     {
-        $messages = \Base::instance()->get('SESSION.messages') ? \Base::instance()->get('SESSION.messages') : array();
+        $messages = $this->session->get('system.messages') ? $this->session->get('system.messages') : array();
+        
         if ($empty) {
-            \Base::instance()->set('SESSION.messages', array());
+            $this->session->set('system.messages', array());
         }
-        return $messages;
+        
+        return (array) $messages;
     }
     
     public function renderMessages() 

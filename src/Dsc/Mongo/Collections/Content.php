@@ -16,6 +16,20 @@ class Content extends \Dsc\Mongo\Collections\Describable
             'metadata.created.time' => 1
         )
     );
+    
+    /**
+     * Method to auto-populate the model state.
+     *
+     */
+    public function populateState()
+    {
+        if ($this->getState('is.search')) 
+        {
+        	$this->setState('filter.published_today', true)->setState('filter.publication_status', 'published');
+        }
+        
+        return parent::populateState();
+    }
 
     protected function fetchConditions()
     {

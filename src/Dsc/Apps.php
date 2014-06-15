@@ -9,112 +9,67 @@ class Apps extends Singleton
      * @param unknown_type $app            
      * @return \Dsc\Apps
      */
-    public function bootstrap($app = null, $additional_paths = array())
+    public function bootstrap($app_name = null, $additional_paths = array())
     {
-        if (!empty($app))
+        $route = $this->app->hive()['PATH'];
+        
+        //\FB::error( $route );
+        //\FB::log('Before bootstrapping');
+        //\FB::warn(round(memory_get_usage(TRUE)/1e3,1) . ' KB');
+                
+        $bootstraps = array(); // array of all app bootstrap classes
+        $paths = array_merge( array(), array( $this->app->get('PATH_ROOT') . 'vendor/dioscouri/', $this->app->get('PATH_ROOT') . 'apps/' ), $additional_paths );
+        
+        if (strpos($route, '/asset/') === 0) 
         {
-            // bootstrap just a single app from the /apps folder
-            $path = $f3->get('PATH_ROOT') . 'apps/';
-            if (file_exists($path . $app . '/bootstrap.php'))
+            $app_name = 'f3-assets';
+        }
+        
+        // bootstrap a single app
+        if (!empty($app_name))
+        {
+            $app = null;
+            foreach ($paths as $path) 
             {
-                require_once $path . $app . '/bootstrap.php';
-                if (isset($app))
+                if (file_exists( $path . $app_name . '/bootstrap.php'))
                 {
-                    $apps[] = $app;
+                    require_once $path . $app_name . '/bootstrap.php';
+                    if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
+                    {
+                        $bootstraps[] = $app;
+                    }
                 }
             }
-            return $this;
+            
+            return $this->load($bootstraps);
         }
         
         // bootstrap all apps
-        // loop through each child folder (only 1st level) of the /apps folder
-        // if a bootstrap.php file exists, require it once
-        $f3 = \Base::instance();
         if (!defined('JPATH_ROOT'))
         {
-            define('JPATH_ROOT', $f3->get('PATH_ROOT'));
+            define('JPATH_ROOT', $this->app->get('PATH_ROOT'));
         }
         
-        $apps = array(); // array of all apps
-                         
-        // do the original apps first
-        $path = $f3->get('PATH_ROOT') . 'vendor/dioscouri/';
-        if ($folders = \Joomla\Filesystem\Folder::folders($path))
+        foreach ($paths as $path)
         {
-            foreach ($folders as $folder)
+            if ($folders = \Joomla\Filesystem\Folder::folders($path))
             {
-                if (file_exists($path . $folder . '/bootstrap.php'))
-                {
-                    require_once $path . $folder . '/bootstrap.php';
-                    if (!empty($app))
-                    {
-                        $apps[] = $app;
-                    }
-                }
-            }
-        }
-        
-        // then do the custom apps
-        $path = $f3->get('PATH_ROOT') . 'apps/';
-        $app = null;
-        if ($folders = \Joomla\Filesystem\Folder::folders($path))
-        {
-            foreach ($folders as $folder)
-            {
-                if (file_exists($path . $folder . '/bootstrap.php'))
-                {
-                    require_once $path . $folder . '/bootstrap.php';
-                    if (!empty($app))
-                    {
-                        $apps[] = $app;
-                    }
-                }
-            }
-        }
-        
-        // then do any additional paths
-        $app = null;
-        foreach ($additional_paths as $additional_path)
-        {
-            if ($folders = \Joomla\Filesystem\Folder::folders($additional_path))
-            {
-                
                 foreach ($folders as $folder)
                 {
-                    
-                    if (file_exists($additional_path . $folder . '/bootstrap.php'))
+                    $app = null;
+                    if (file_exists($path . $folder . '/bootstrap.php'))
                     {
-                        require_once $additional_path . $folder . '/bootstrap.php';
-                        if (!empty($app))
+                        require_once $path . $folder . '/bootstrap.php';
+                        if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
                         {
-                            $apps[] = $app;
+                            $bootstraps[] = $app;
                         }
                     }
                 }
-            }
+            }            
         }
         
-        // now let's run all the apps
-        if (count($apps) > 0)
-        {
-            $global_app_name = $f3->get('APP_NAME');
-            foreach ($apps as $app)
-            {
-                $app->command('pre', $global_app_name);
-            }
-            
-            foreach ($apps as $app)
-            {
-                $app->command('run', $global_app_name);
-            }
-            
-            foreach ($apps as $app)
-            {
-                $app->command('post', $global_app_name);
-            }
-        }
-        
-        return $this;
+        return $this->load($bootstraps);
     }
 
     /**
@@ -141,5 +96,41 @@ class Apps extends Singleton
         }
         
         return $paths;
+    }
+    
+    /**
+     * Loads an array of bootstap classes
+     * 
+     * @param array $bootstraps
+     * @return \Dsc\Apps
+     */
+    public function load(array $bootstraps) 
+    {
+        //\FB::log('After bootstrapping');
+        //\FB::warn(round(memory_get_usage(TRUE)/1e3,1) . ' KB');
+                
+        if (!empty($bootstraps))
+        {
+            $global_app_name = $this->app->get('APP_NAME');
+            foreach ($bootstraps as $bootstrap)
+            {
+                $bootstrap->command('pre', $global_app_name);
+            }
+        
+            foreach ($bootstraps as $bootstrap)
+            {
+                $bootstrap->command('run', $global_app_name);
+            }
+        
+            foreach ($bootstraps as $bootstrap)
+            {
+                $bootstrap->command('post', $global_app_name);
+            }
+        }
+        
+        //\FB::log('After loading all apps');
+        //\FB::warn(round(memory_get_usage(TRUE)/1e3,1) . ' KB');
+        
+        return $this;
     }
 }
