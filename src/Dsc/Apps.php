@@ -9,18 +9,21 @@ class Apps extends Singleton
      * @param unknown_type $app            
      * @return \Dsc\Apps
      */
-    public function bootstrap($app = null, $additional_paths = array())
+    public function bootstrap($app_name = null, $additional_paths = array())
     {
-        if (!empty($app))
+        $bootstraps = array(); // array of all app bootstrap classes
+        
+        if (!empty($app_name))
         {
+            $app = null;
             // bootstrap just a single app from the /apps folder
             $path = $f3->get('PATH_ROOT') . 'apps/';
-            if (file_exists($path . $app . '/bootstrap.php'))
+            if (file_exists($path . $app_name . '/bootstrap.php'))
             {
-                require_once $path . $app . '/bootstrap.php';
-                if (isset($app))
+                require_once $path . $app_name . '/bootstrap.php';
+                if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
                 {
-                    $apps[] = $app;
+                    $bootstraps[] = $app;
                 }
             }
             
@@ -35,8 +38,6 @@ class Apps extends Singleton
         {
             define('JPATH_ROOT', $f3->get('PATH_ROOT'));
         }
-        
-        $apps = array(); // array of all apps
                          
         // do the original apps first
         $path = $f3->get('PATH_ROOT') . 'vendor/dioscouri/';
@@ -48,9 +49,9 @@ class Apps extends Singleton
                 if (file_exists($path . $folder . '/bootstrap.php'))
                 {
                     require_once $path . $folder . '/bootstrap.php';
-                    if (!empty($app))
+                    if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
                     {
-                        $apps[] = $app;
+                        $bootstraps[] = $app;
                     }
                 }
             }
@@ -66,9 +67,9 @@ class Apps extends Singleton
                 if (file_exists($path . $folder . '/bootstrap.php'))
                 {
                     require_once $path . $folder . '/bootstrap.php';
-                    if (!empty($app))
+                    if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
                     {
-                        $apps[] = $app;
+                        $bootstraps[] = $app;
                     }
                 }
             }
@@ -82,37 +83,41 @@ class Apps extends Singleton
                 
                 foreach ($folders as $folder)
                 {
-                    $app = null;
-                    
+                    $app = null;                    
                     if (file_exists($additional_path . $folder . '/bootstrap.php'))
                     {
                         require_once $additional_path . $folder . '/bootstrap.php';
-                        if (!empty($app))
+                        if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
                         {
-                            $apps[] = $app;
+                            $bootstraps[] = $app;
                         }
                     }
                 }
             }
         }
         
+        //\FB::error( $this->app->hive()['PATH'] );
+        
         // now let's run all the apps
-        if (count($apps) > 0)
+        if (count($bootstraps) > 0)
         {
             $global_app_name = $f3->get('APP_NAME');
-            foreach ($apps as $app)
+            foreach ($bootstraps as $bootstrap)
             {
-                $app->command('pre', $global_app_name);
+                //\FB::log('APPS-PRE: ', $bootstrap->name() );
+                $bootstrap->command('pre', $global_app_name);
             }
             
-            foreach ($apps as $app)
+            foreach ($bootstraps as $bootstrap)
             {
-                $app->command('run', $global_app_name);
+                //\FB::log('APPS-RUN: ', $bootstrap->name() );
+                $bootstrap->command('run', $global_app_name);
             }
             
-            foreach ($apps as $app)
+            foreach ($bootstraps as $bootstrap)
             {
-                $app->command('post', $global_app_name);
+                //\FB::log('APPS-POST: ', $bootstrap->name() );
+                $bootstrap->command('post', $global_app_name);
             }
         }
         
