@@ -286,7 +286,7 @@ class Theme extends \View
             return $theme;
         }
         
-        throw new \Exception('You must set a theme.');
+        $this->registerTheme('SystemTheme', __DIR__ . 'Themes/SystemTheme/' );
     }
 
     /**
