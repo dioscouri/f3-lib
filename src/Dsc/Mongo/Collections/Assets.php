@@ -232,6 +232,73 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     }
     
     /**
+     * Creates an asset directly from an uploaded file
+     *
+     * @param array $file_upload, PHP array from $_FILES
+     * @param array $options
+     * 
+     * @throws \Exception
+     * @return \Dsc\Mongo\Collections\Assets
+     */
+    public static function createFromUpload( array $file_upload, $options=array() )
+    {
+        if (!isset($file_upload['error']) || is_array($file_upload['error'])) 
+        {
+            throw new \Exception('Invalid Upload');
+        }
+        
+        switch ($file_upload['error']) 
+        {
+        	case UPLOAD_ERR_OK:
+        	    break;
+        	case UPLOAD_ERR_NO_FILE:
+        	    throw new \Exception('No file sent.');
+        	case UPLOAD_ERR_INI_SIZE:
+        	case UPLOAD_ERR_FORM_SIZE:
+        	    throw new \Exception('Exceeded filesize limit.');
+        	default:
+        	    throw new \Exception('Unknown errors.');
+        }
+        
+        if (empty($file_upload['tmp_name']) || empty($file_upload['name']))
+        {
+            throw new \Exception('Invalid Upload Properties');
+        }
+
+        if (empty($file_upload['size']))
+        {
+            throw new \Exception('Invalid Upload Size');
+        }
+        
+        $app = \Base::instance();
+        $options = $options + array('width'=>460, 'height'=>308);
+        
+        // Do the upload        
+        $model = new static;
+        $grid = $model->getDb()->getGridFS( $model->collectionNameGridFS() );
+        $file_path = $model->inputFilter()->clean($file_upload['tmp_name']);
+        $name = $model->inputFilter()->clean($file_upload['name']);
+        
+        $values = array(
+            'type' => !empty($options['type']) ? $options['type'] : null,
+            'storage' => 'gridfs',
+            'md5' => md5_file( $file_path ),
+            'url' => null,
+            "title" => \Joomla\String\Normalise::toSpaceSeparated( $name ),
+        );
+        
+        if ($storedfile = $grid->storeFile( $file_path, $values ))
+        {
+            $model->load(array('_id'=>$storedfile));
+            $model->bind( $values );
+            $model->slug = $model->generateSlug();
+            $model->save();
+        }
+        
+        return $model;
+    }
+    
+    /**
      * Creates an asset directly from a URL
      *
      * @param unknown $url
