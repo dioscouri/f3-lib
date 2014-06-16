@@ -599,6 +599,41 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Finds items in the collection based on set conditions
+     *
+     * @param unknown $conditions
+     * @param unknown $fields
+     */
+    public static function findOne( $conditions=array(), $fields=array() )
+    {
+        $model = new static();
+    
+        $sort = $model->__config['default_sort'];
+        if (isset($conditions['sort'])) {
+            $sort = $conditions['sort'];
+            unset($conditions['sort']);
+        }
+        $model->setParam('sort', $sort);
+    
+        if (isset($conditions['limit'])) {
+            $limit = $conditions['limit'];
+            unset($conditions['limit']);
+            $model->setParam('limit', $limit);
+        }
+    
+        if (isset($conditions['skip'])) {
+            $skip = $conditions['skip'];
+            unset($conditions['skip']);
+            $model->setParam('skip', $skip);
+        }
+    
+        $model->setParam('conditions', $conditions);
+        $model->setParam('fields', $fields);
+    
+        return $model->getItem();
+    }    
+    
+    /**
      *	Return TRUE if field is defined
      *	@return bool
      *	@param $key string
