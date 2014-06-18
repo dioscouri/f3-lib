@@ -278,13 +278,22 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         $grid = $model->getDb()->getGridFS( $model->collectionNameGridFS() );
         $file_path = $model->inputFilter()->clean($file_upload['tmp_name']);
         $name = $model->inputFilter()->clean($file_upload['name']);
+		$buffer = file_get_contents($file_upload['tmp_name']);
         
+		$thumb = null;
+		if ( $thumb_binary_data = $model->getThumb( $buffer, null, $options )) {
+			$thumb = new \MongoBinData( $thumb_binary_data, 2 );
+		}
+		
         $values = array(
             'type' => !empty($options['type']) ? $options['type'] : null,
             'storage' => 'gridfs',
             'md5' => md5_file( $file_path ),
             'url' => null,
-            "title" => \Joomla\String\Normalise::toSpaceSeparated( $name ),
+        	'thumb' => $thumb,
+        	'filename' => $name,
+        	'contentType' => $model->getMimeType($buffer),
+            'title' => \Joomla\String\Normalise::toSpaceSeparated( $name ),
         );
         
         if ($storedfile = $grid->storeFile( $file_path, $values ))
