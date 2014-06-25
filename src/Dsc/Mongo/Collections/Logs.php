@@ -25,7 +25,7 @@ class Logs extends \Dsc\Mongo\Collection
         $model->category = $category;
         $model->message = $message;
         
-        $model->save();
+        $model->store();
         
         return $model;
     }

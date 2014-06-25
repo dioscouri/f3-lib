@@ -993,5 +993,46 @@ class Collection extends \Dsc\Models
         $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
         $event = (new \Joomla\Event\Event( 'afterDelete' . $eventNameSuffix ))->addArgument('model', $this);
         $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);    	
-    }    
+    }
+
+    /**
+     * Store the model document directly to the database 
+     * without firing plugin events
+     * 
+     * @param unknown $document
+     * @param unknown $options
+     * @return \Dsc\Mongo\Collection
+     */
+    public function store( $options=array() )
+    {
+        if ($this->_id) 
+        {
+            $this->__options = $options + array(
+                'upsert'=>true,
+                'multiple'=>false,
+                'w'=>0
+            );
+            
+            $this->__last_operation = $this->collection()->update(
+                array( '_id'=> new \MongoId( $this->get('id') ) ),
+                $this->cast(),
+                $this->__options
+            );        	
+        } 
+        else 
+        {
+            $this->set('_id', new \MongoId );
+                        
+            $this->__options = $options + array(
+                'w'=>0
+            );
+            
+            $this->__last_operation = $this->collection()->insert(
+                $this->cast(),
+                $this->__options
+            );        	
+        }
+    
+        return $this;
+    }
 }
