@@ -311,7 +311,8 @@ class Theme extends \View
      * Gets a theme's path by theme name
      */
     public function getThemePath($name)
-    {
+    {	
+    	
         return \Dsc\ArrayHelper::get($this->dsc_theme, 'themes.paths.' . $name);
     }
 
@@ -485,9 +486,19 @@ class Theme extends \View
         
         $paths[$view] = false;
         
+        
         // Overrides!
-        // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
-        $dir = \Dsc\Filesystem\Path::clean($this->getThemePath($this->getCurrentTheme()) . "Overrides/");
+        //If we are overriding the admin, lets look in an admin  folder. 
+        $currentTheme = $this->getCurrentTheme();
+		if($currentTheme === 'AdminTheme') {
+			$dir = $this->app->get('PATH_ROOT') . '/apps/';
+			$dir = \Dsc\Filesystem\Path::clean($dir);
+		}else {
+			//else lets look inside whatever theme we are in right now. 
+			// an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
+			$dir = \Dsc\Filesystem\Path::clean($this->getThemePath($this->getCurrentTheme()) . "Overrides/");
+		}
+        
         if ($dir = \Dsc\Filesystem\Path::real($dir))
         {
             if (count($pieces) > 1)
