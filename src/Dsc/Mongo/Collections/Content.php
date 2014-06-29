@@ -75,49 +75,7 @@ class Content extends \Dsc\Mongo\Collections\Describable
             $this->setCondition('copy', $key);
         }
         
-        $filter_published_today = $this->getState('filter.published_today');
-        if (strlen($filter_published_today))
-        {
-            // add $and conditions to the query stack
-            if (!$and = $this->getCondition('$and'))
-            {
-                $and = array();
-            }
-            
-            $and[] = array(
-                '$or' => array(
-                    array(
-                        'publication.start.time' => null
-                    ),
-                    array(
-                        'publication.start.time' => array(
-                            '$lte' => time()
-                        )
-                    )
-                )
-            );
-            
-            $and[] = array(
-                '$or' => array(
-                    array(
-                        'publication.end.time' => null
-                    ),
-                    array(
-                        'publication.end.time' => array(
-                            '$gt' => time()
-                        )
-                    )
-                )
-            );
-            
-            $this->setCondition('$and', $and);
-        }
-        
-        $filter_status = $this->getState('filter.publication_status');
-        if (strlen($filter_status))
-        {
-            $this->setCondition('publication.status', $filter_status);
-        }
+        $this->publishableFetchConditions();
         
         return $this;
     }
