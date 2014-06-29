@@ -1062,4 +1062,36 @@ class Collection extends \Dsc\Models
     
         return $this;
     }
+    
+    /**
+     * Preferably returns a \Search\Models\Item
+     * but just returns $this otherwise 
+     * 
+     * @return $this|\Search\Models\Item
+     */
+    public function toSearchItem()
+    {
+        if (class_exists('\Search\Models\Item')) 
+        {
+            return new \Search\Models\Item( $this->cast() );
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Preferably returns a \Search\Models\Item
+     * but just returns $this otherwise
+     *
+     * @return $this|\Search\Models\Item
+     */
+    public function toAdminSearchItem()
+    {
+        if (class_exists('\Search\Models\Item')) 
+        {
+            return new \Search\Models\Item( $this->cast() );
+        }
+        
+        return $this;
+    }    
 }
