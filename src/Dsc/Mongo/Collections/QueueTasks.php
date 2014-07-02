@@ -4,6 +4,7 @@ namespace Dsc\Mongo\Collections;
 class QueueTasks extends \Dsc\Mongo\Collection 
 {
     public $created;
+    public $title;                  // [optional] title of task, for display and search purposes
     public $task;                   // callable
     public $parameters;             // array
     public $when;                   // time() after which the queue should be executed
@@ -15,7 +16,7 @@ class QueueTasks extends \Dsc\Mongo\Collection
     protected $__collection_name = 'queue.tasks';
     protected $__config = array(
         'default_sort' => array(
-            'created.time' => -1
+            'when' => 1
         ),
     );
     
@@ -36,17 +37,35 @@ class QueueTasks extends \Dsc\Mongo\Collection
         return $this;
     }
     
-    public static function add( $task, $parameters, $when=null, $priority=0, $batch=null )
+    /**
+     * Adds an item to the queue
+     *
+     * Throws an Exception
+     * 
+     * @param unknown $task
+     * @param unknown $parameters
+     * @param unknown $options
+     * @return \Dsc\Mongo\Collections\QueueTasks
+     */
+    public static function add( $task, $parameters, $options=array() )
     {
+        $options = $options + array(
+            'title' => null,
+            'when' => null,
+            'priority' => 0,
+            'batch' => null
+        );
+        
         $model = new static;
 
         $model->created = \Dsc\Mongo\Metastamp::getDate( 'now' );
+        $model->title = $options['title'];
         $model->task = $task;
         $model->parameters = $parameters;
-        $model->when = $when ? (int) $when : time();
-        $model->priority = (int) $priority;
-        $model->batch = $batch;
-        $model->store();
+        $model->when = $options['when'] ? (int) $options['when'] : time();
+        $model->priority = (int) $options['priority'];
+        $model->batch = $options['batch'];
+        $model->validate()->store();
         
         return $model;
     }
@@ -67,6 +86,7 @@ class QueueTasks extends \Dsc\Mongo\Collection
             {
                 $where[] = array('_id'=>new \MongoId((string) $filter_keyword));
             }
+            $where[] = array('title'=>$key);
             $where[] = array('task'=>$key);
         
             $this->setCondition('$or', $where);
@@ -117,5 +137,19 @@ class QueueTasks extends \Dsc\Mongo\Collection
         sort($distinct);
     
         return $distinct;
+    }
+    
+    public function title()
+    {
+        return $this->title ? $this->title : $this->task;
+    }
+    
+    public function validate()
+    {
+        if (empty($this->task)) {
+            $this->setError('Task is required');
+        }
+        
+        return parent::validate();
     }
 }

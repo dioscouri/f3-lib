@@ -3,13 +3,29 @@ namespace Dsc;
 
 class Queue extends \Dsc\Singleton
 {
-
-    public static function task( $task, $parameters, $when=null, $priority=0, $batch=null )
+    /**
+     * Adds an item to the queue
+     *
+     * Throws an Exception
+     *
+     * @param unknown $task
+     * @param unknown $parameters
+     * @param unknown $options
+     * @return \Dsc\Mongo\Collections\QueueTasks
+     */
+    public static function task( $task, $parameters, $options=array() )
     {
+        $options = $options + array(
+            'title' => null,
+            'when' => null, 
+            'priority' => 0, 
+            'batch' => null
+        );
+        
         // if the cron job is enabled, queue $task and forget about it
         // otherwise, run it right away
         
-        \Dsc\Mongo\Collections\QueueTasks::add( $task, $parameters, $when, $priority, $batch );
+        \Dsc\Mongo\Collections\QueueTasks::add( $task, $parameters, $options );
     }
 
     /**

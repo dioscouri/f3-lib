@@ -4,6 +4,7 @@ namespace Dsc\Mongo\Collections;
 class QueueArchives extends \Dsc\Mongo\Collection 
 {
     public $created;
+    public $title;                  // [optional] title of task, for display and search purposes
     public $task;                   // callable
     public $parameters;             // array
     public $when;                   // time() after which the queue should be executed
@@ -14,7 +15,7 @@ class QueueArchives extends \Dsc\Mongo\Collection
     protected $__collection_name = 'queue.archives';
     protected $__config = array(
         'default_sort' => array(
-            'created.time' => -1
+            'completed.time' => -1
         ),
     );
     
@@ -34,6 +35,7 @@ class QueueArchives extends \Dsc\Mongo\Collection
             {
                 $where[] = array('_id'=>new \MongoId((string) $filter_keyword));
             }
+            $where[] = array('title'=>$key);
             $where[] = array('type'=>$key);
         
             $this->setCondition('$or', $where);
@@ -84,5 +86,10 @@ class QueueArchives extends \Dsc\Mongo\Collection
         sort($distinct);
     
         return $distinct;
+    }
+    
+    public function title()
+    {
+        return $this->title ? $this->title : $this->task; 
     }
 }
