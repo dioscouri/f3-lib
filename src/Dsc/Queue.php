@@ -46,8 +46,6 @@ class Queue extends \Dsc\Singleton
                 $__ids = \Dsc\Mongo\Collections\QueueTasks::collection()->distinct('_id', $conditions);
                 if (empty($__ids))
                 {
-                    $model->log('No IDs', 'INFO', $logCategory);
-                    
                     $cycles++;
                     if ($cycles > 30)
                     {
@@ -58,8 +56,6 @@ class Queue extends \Dsc\Singleton
                 }
                 else
                 {
-                    $model->log('found IDs', 'INFO', $logCategory);
-                    
                     $ids = array_slice($__ids, 0, $pageSize);
                     
                     $conditions = array(
