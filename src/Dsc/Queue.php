@@ -82,6 +82,7 @@ class Queue extends \Dsc\Singleton
                          * 
                          * TODO Create a file Cli/process_queue_task.php that accepts an input _id
                          * and trigger that here, sending $queue_task['_id']
+                         * with something like exec('/path/to/here/Cli/process_queue_task.php id=$queue_task['_id']')
                          * ***********************
                          */
                         
@@ -94,6 +95,14 @@ class Queue extends \Dsc\Singleton
                         catch (\Exception $e) 
                         {
                             $model->log($e->getMessage(), 'ERROR', $logCategory);
+                            
+                            // unlock this $queue_task
+                            // TODO or should we Push it to the archive with a failure message?
+                            \Dsc\Mongo\Collections\QueueTasks::collection()->update(
+                                array('_id' => $queue_task['_id']),
+                                array('$set' => array('locked_by' => null, 'locked_at' => 0)),
+                                array('multiple' => false)
+                            );                            
                         }
                     }
                 }
