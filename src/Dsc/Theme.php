@@ -491,8 +491,11 @@ class Theme extends \View
         //If we are overriding the admin, lets look in an admin  folder. 
         $currentTheme = $this->getCurrentTheme();
 		if($currentTheme === 'AdminTheme') {
-			$dir = $this->app->get('PATH_ROOT') . '/apps/';
-			$dir = \Dsc\Filesystem\Path::clean($dir);
+			if($adminPath = $this->app->get('admin_override')) {
+				$dir = $this->app->get('PATH_ROOT') . $adminPath;
+			} else {
+				$dir = $this->app->get('PATH_ROOT') . '/apps/Admin/Overrides/';
+			}
 		}else {
 			//else lets look inside whatever theme we are in right now. 
 			// an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
