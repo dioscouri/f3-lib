@@ -11,6 +11,8 @@ class QueueArchives extends \Dsc\Mongo\Collection
     public $priority = 0;           // int
     public $batch = null;           // string, for categorization only
     public $completed;
+    public $status = null;          // string, null/error
+    public $message;
     
     protected $__collection_name = 'queue.archives';
     protected $__config = array(

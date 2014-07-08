@@ -112,13 +112,17 @@ class Queue extends \Dsc\Singleton
                         {
                             $model->log($e->getMessage(), 'ERROR', $logCategory);
                             
-                            // unlock this $queue_task
-                            // TODO or should we Push it to the archive with a failure message?
+                            // Push this $queue_task to the archive with a failure message
+                            $task = (new \Dsc\Mongo\Collections\QueueTasks($queue_task))->error( $e->getMessage() );
+                            
+                            // or unlock this $queue_task
+                            /* 
                             \Dsc\Mongo\Collections\QueueTasks::collection()->update(
                                 array('_id' => $queue_task['_id']),
                                 array('$set' => array('locked_by' => null, 'locked_at' => 0)),
                                 array('multiple' => false)
-                            );                            
+                            );
+                            */                            
                         }
                     }
                 }
