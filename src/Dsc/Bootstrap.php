@@ -95,6 +95,11 @@ abstract class Bootstrap extends \Dsc\Singleton
     {
         $this->runBase('Site');
     }
+    
+    protected function runCli()
+    {
+        $this->runBase('Cli');
+    }    
 
     /**
      * This part is common for all running all parts of application (both Admin and Site)
