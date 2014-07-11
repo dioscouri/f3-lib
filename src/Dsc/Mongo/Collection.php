@@ -104,6 +104,17 @@ class Collection extends \Dsc\Models
     
         return $this;
     }
+
+    /**
+     *
+     * @param unknown $key
+     */
+    public function unsetCondition( $key )
+    {
+        unset( $this->__query_params['conditions'][$key] );
+    
+        return $this;
+    }    
     
     /**
      * Get a set condition in the query
