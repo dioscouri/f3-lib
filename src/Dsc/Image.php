@@ -42,5 +42,37 @@ class Image extends \Joomla\Image\Image
         $base64 = base64_encode($binary);
         return ('data:' . $mime . ';base64,' . $base64);
     }
+    
+    
+    public function section($imgInitW, $imgInitH,$imgW,$imgH,$imgX1, $imgY1, $cropW, $cropH) {
+    	
+    	// Make sure the resource handle is valid.
+    	if (!$this->isLoaded())
+    	{
+    		throw new \LogicException('No valid image was loaded.');
+    	}
+    	
+    	
+    	// Create the new truecolor image handle. to hold the section
+    	$resizedImage = imagecreatetruecolor($imgW, $imgH);
+    	imagecopyresampled($resizedImage, $this->handle, 0, 0, 0, 0, $imgW,
+    	$imgH, $imgInitW, $imgInitH);
+    	
+    	//place the data from the section in the newly created image
+    	$handle = imagecreatetruecolor($cropW, $cropH);
+    	imagecopyresampled($handle, $resizedImage, 0, 0, $imgX1, $imgY1, $cropW,
+    	$cropH, $cropW, $cropH);
+    	
+    	
+    	
+    	// @codeCoverageIgnoreStart
+    	$new = new static($handle);
+    	 
+    	return $new;
+    	
+      	
+    	
+    }
+    
 }
 ?>
