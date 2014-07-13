@@ -307,6 +307,98 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         return $model;
     }
     
+    public static function createFromBuffer( $buffer, $options=array() )
+    {
+    	
+    
+    	$app = \Base::instance();
+    	$options = $options + array('width'=>460, 'height'=>308);
+    
+    	// Do the upload
+    	$model = new static;
+    	$grid = $model->getDb()->getGridFS( $model->collectionNameGridFS() );
+    	$name = $model->inputFilter()->clean($options['name']);
+    	
+    	$thumb = null;
+    	if ( $thumb_binary_data = $model->getThumb( $buffer, null, $options )) {
+    		$thumb = new \MongoBinData( $thumb_binary_data, 2 );
+    	}
+    
+    	$values = array(
+    			'type' => !empty($options['type']) ? $options['type'] : null,
+    			'storage' => 'gridfs',
+    			'md5' => md5( $name ),
+    			'url' => null,
+    			'thumb' => $thumb,
+    			'filename' => $name,
+    			'contentType' => $model->getMimeType($buffer),
+    			'title' => \Joomla\String\Normalise::toSpaceSeparated( $name ),
+    	);
+    	
+    	if ($storedfile = $grid->storeBytes( $buffer, $values ))
+    	{
+    		$model->load(array('_id'=>$storedfile));
+    		$model->bind($values);
+    		$model->slug = $model->generateSlug();
+    		if ($model->save())
+    		{
+    	
+    		}
+    	}
+    	
+    
+    	return $model;
+    }
+    
+    /**
+     * replaces the Grid files for an asset by deleting and replaceting with bindata
+     *
+     * @param array $buffer, 
+     * @param array $options
+     *@param array $values
+     * @throws \Exception
+     * @return \Dsc\Mongo\Collections\Assets
+     */
+    public function replace( $buffer=null,$options=array(), $values=array())
+    {
+    
+    	if (empty($buffer))
+    	{
+    		throw new \Exception('Buffer is required');
+    	}
+    	
+    	//store the data from the original asset
+    	$oldData = $this->cast();
+    	unset($oldData['_id']);
+    	//override original values with sent values
+    	$values = array_merge($oldData, $values);
+    	//MD5 needs to change 
+    	$values['md5'] = md5($values['title'] . uniqid());
+    	//save grid data
+    	$grid = $this->getDb()->getGridFS( $this->collectionNameGridFS() );
+    	 
+    	if ($storedfile = $grid->storeBytes( $buffer, $values))
+    	{	
+ 
+    		$model = new static;
+    		$model->load(array('_id'=>$storedfile));
+    		$model->bind( $values );
+    		
+    		if($model->save()) {
+    			
+    			//make thumb
+    			$model->rebuildThumb();
+    			//remove the original asset
+    			$this->remove();
+    		}
+    		 
+    	}
+    	    
+    	return $model;
+    }
+    
+    
+    
     /**
      * Creates an asset directly from a URL
      *
