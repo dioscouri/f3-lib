@@ -463,9 +463,10 @@ class Collection extends \Dsc\Models
      *  
      * @return array
      */
-    public function fields()
+    public function fields($refresh=false)
     {
-        if (empty($this->__query_params['fields'])) {
+        if (empty($this->__query_params['fields']) || $refresh) 
+        {
             $this->fetchFields();
         }
     
@@ -494,9 +495,10 @@ class Collection extends \Dsc\Models
      * 
      * @return array
      */
-    public function conditions()
+    public function conditions($refresh=false)
     {
-        if (empty($this->__query_params['conditions'])) {
+        if (empty($this->__query_params['conditions']) || $refresh) 
+        {
             $this->fetchConditions();
         }
     
@@ -511,6 +513,7 @@ class Collection extends \Dsc\Models
     protected function fetchConditions()
     {
         $this->__query_params['conditions'] = array();
+        
         $filter_id = $this->getState('filter.id');
         if (!empty($filter_id))
         {
