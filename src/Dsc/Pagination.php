@@ -336,10 +336,10 @@ class Pagination
         {
             $route = $this->fw->get('PARAMS.0');
             $route = $this->checkRoute($route);
-            
+
             if ($this->fw->exists('PARAMS.' . $this->routeKey))
             {
-                $route = preg_replace("/" . $this->fw->get('PARAMS.' . $this->routeKey) . "$/", '', $route);
+                $route = str_replace("/" . $this->routeKeyPrefix . $this->fw->get('PARAMS.' . $this->routeKey), '', $route);
             }
             elseif (substr($route, - 1) != '/')
             {
