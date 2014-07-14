@@ -21,9 +21,8 @@ class Activities extends Singleton
                 if ($identity->email) 
                 {
                     \KM::identify( $identity->email );
-                }
-                
-                \KM::record($action, $properties);                                
+                    \KM::record($action, $properties);
+                }                
             }            
         }
     
