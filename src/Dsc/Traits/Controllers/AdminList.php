@@ -44,11 +44,11 @@ trait AdminList
                     {
                         if ($this->canDelete($item)) {
                             try {
-                                $model->delete($item);
+                                $item->remove();
                             } catch (\Exception $e) {
                                 $this->setError(true);
                                 \Dsc\System::instance()->addMessage('Delete failed with the following errors:', 'error');
-                                foreach ($model->getErrors() as $error)
+                                foreach ($item->getErrors() as $error)
                                 {
                                     \Dsc\System::instance()->addMessage($error, 'error');
                                 }
