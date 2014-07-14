@@ -21,8 +21,22 @@ class Activities extends Singleton
                 if ($identity->email) 
                 {
                     \KM::identify( $identity->email );
-                    \KM::record($action, $properties);
-                }                
+                } 
+                elseif (isset($_COOKIE['km_ni'])) 
+                {
+                    \KM::identify( $_COOKIE['km_ni'] );
+                }
+                elseif (isset($_COOKIE['km_ai'])) 
+                {
+                    \KM::identify( $_COOKIE['km_ai'] );                
+                }
+                else 
+                {
+                    $mongo_id = new \MongoId;
+                    \KM::identify( (string) $mongo_id );
+                }
+                
+                \KM::record($action, $properties);
             }            
         }
     
