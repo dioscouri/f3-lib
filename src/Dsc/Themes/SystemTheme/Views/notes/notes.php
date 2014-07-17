@@ -72,6 +72,5 @@
 $(function(){
 	Notes.setIndex( <?php echo $last_idx; ?> );
 	Notes.setUserName( '<?php echo $username; ?>' );
-	Notes.bindSaveButton( 'button[data-task="save-document"]' );
 });
 </script>
