@@ -63,6 +63,22 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
             $this->setCondition('is_root', array( '$ne' => true ) );
         }
         
+        $filter_tree_slug = $this->getState('filter.tree_slug');
+        if (strlen($filter_tree_slug))
+        {
+            $item = (new static)->setState('filter.slug', $filter_tree_slug)->getItem();
+            if (empty($item->id)) 
+            {
+                // filter by a fake tree ID so that no results are returned for an invalid tree_slug
+                $mongo_id = new \MongoId;
+            }
+            else 
+            {
+                $mongo_id = $item->id;
+            }
+            $this->setState('filter.tree', $mongo_id);
+        }
+        
         $filter_tree = $this->getState('filter.tree');
         if (!empty($filter_tree)) {
             $this->setCondition('tree', new \MongoId((string) $filter_tree ));
