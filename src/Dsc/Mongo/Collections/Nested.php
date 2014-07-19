@@ -441,8 +441,10 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         return parent::afterUpdate();
     }
     
-    public function remove() 
+    public function remove($options=array()) 
     {
+        $this->__options = $options;
+        
         $this->beforeDelete();
         
         // DELETE FROM nested_category WHERE lft BETWEEN @myLeft AND @myRight; 
