@@ -875,8 +875,10 @@ class Collection extends \Dsc\Models
     /**
      * 
      */
-    public function remove()
+    public function remove($options=array())
     {
+        $this->__options = $options;
+        
         $this->beforeDelete();
         
         $this->__last_operation = $this->collection()->remove(
