@@ -56,7 +56,7 @@ class Models extends \Dsc\Magic
      * @param string $priority
      * @param string $category
      */
-    public function log( $message, $priority='INFO', $category='General' )
+    public static function log( $message, $priority='INFO', $category='General' )
     {
         \Dsc\Mongo\Collections\Logs::add( $message, $priority, $category );
         
