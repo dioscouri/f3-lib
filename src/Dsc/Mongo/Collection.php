@@ -1109,5 +1109,22 @@ class Collection extends \Dsc\Models
         }
         
         return $this;
-    }    
+    }
+
+    /**
+     * Determines if a string is a valid MongoId
+     * 
+     * @param unknown $string
+     * @return boolean
+     */
+    public static function isValidId( $string )
+    {
+        $regex = '/^[0-9a-z]{24}$/';
+        if (preg_match($regex, (string) $string))
+        {
+            return true;
+        }        
+        
+        return false;
+    }
 }
