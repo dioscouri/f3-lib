@@ -1117,7 +1117,7 @@ class Collection extends \Dsc\Models
      * @param unknown $string
      * @return boolean
      */
-    public function isValidId( $string )
+    public static function isValidId( $string )
     {
         $regex = '/^[0-9a-z]{24}$/';
         if (preg_match($regex, (string) $string))
