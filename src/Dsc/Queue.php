@@ -25,7 +25,7 @@ class Queue extends \Dsc\Singleton
         // if the cron job is enabled, queue $task and forget about it
         // otherwise, run it right away
         
-        \Dsc\Mongo\Collections\QueueTasks::add( $task, $parameters, $options );
+        return \Dsc\Mongo\Collections\QueueTasks::add( $task, $parameters, $options );
     }
 
     /**
