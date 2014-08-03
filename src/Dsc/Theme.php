@@ -21,6 +21,7 @@ class Theme extends \View
 
     public function __construct($config = array())
     {
+        $this->registerThemePath(__DIR__ . '/Themes/SystemTheme/', 'SystemTheme');
         $this->registerViewPath( __DIR__ . '/Themes/SystemTheme/Views/', 'SystemTheme/Views');
     }
 
