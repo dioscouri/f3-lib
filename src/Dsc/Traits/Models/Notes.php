@@ -45,6 +45,12 @@ trait Notes
 				unset( $notes[(int)$toDelete[$i]] );
 			}
 		}
+		
+		// no note added so just dont do anything
+		if( empty( $notes ) && $empty( $old_notes ) ){
+			return;
+		}
+		
 		// in case user will try to manually delete some notes
 		$last_idx = end( ( array_keys( $notes ) ) );
 		$modified = array(); // array with modified notes
@@ -60,6 +66,9 @@ trait Notes
 				$old_note = $old_notes[$i];
 			}
 
+			if( !empty( $notes[$i]) ){
+				
+			}
 			$notes[$i]['title'] = trim( $notes[$i]['title'] );
 			$notes[$i]['description'] = trim( $notes[$i]['description'] );
 			if( $i < $last_idx_old ){
