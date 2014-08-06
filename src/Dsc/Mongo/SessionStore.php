@@ -1,31 +1,10 @@
 <?php
 namespace Dsc\Mongo;
 
-class SessionStore extends \Dsc\Mongo\Collection
+class SessionStore extends \Dsc\Mongo\Collections\Sessions
 {
-    protected $__collection_name = 'sessions';
-
-    public $session_id;
-
-    public $data;
-
-    public $ip;
-
-    public $csrf;
-
-    public $agent;
-
-    public $timestamp;
-
     protected $__session_id;
 
-    /**
-     * Instantiate class
-     * 
-     * @param $db object            
-     * @param $table string            
-     *
-     */
     public function __construct($source = array(), $options = array())
     {
         session_set_save_handler(
@@ -54,7 +33,7 @@ class SessionStore extends \Dsc\Mongo\Collection
         $csrf = $fw->hash($fw->get('ROOT') . $fw->get('BASE')) . '.' . $fw->hash(mt_rand());
         
         $sessionData = static::collection()->findOne(array(
-            '_id' => $this->__session_id = session_id()
+            'session_id' => $this->__session_id = session_id()
         ));
         
         if (isset($sessionData['_id']))
@@ -101,7 +80,7 @@ class SessionStore extends \Dsc\Mongo\Collection
         if ($id != $this->__session_id)
         {
             $sessionData = static::collection()->findOne(array(
-                '_id' => $this->__session_id = $id
+                'session_id' => $this->__session_id = $id
             ));
             
             if (isset($sessionData['_id']))
@@ -130,7 +109,7 @@ class SessionStore extends \Dsc\Mongo\Collection
         if ($id != $this->__session_id) 
         {
             $sessionData = static::collection()->findOne(array(
-                '_id' => $this->__session_id = $id
+                'session_id' => $this->__session_id = $id
             ));
             
             if (isset($sessionData['_id']))
