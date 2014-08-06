@@ -23,6 +23,56 @@ class Sessions extends \Dsc\Mongo\Collection
     
     public $site_id;
     
+    protected function fetchConditions()
+    {
+        parent::fetchConditions();
+            
+        $filter_user = $this->getState('filter.user');
+        if (strlen($filter_user))
+        {
+            if (static::isValidId($filter_user))
+            {
+                $this->setCondition('user_id', new \MongoId( (string) $filter_user ));
+            }            
+        }
+        
+        $filter_site = $this->getState('filter.site');
+        if (strlen($filter_site))
+        {
+            $this->setCondition('site_id', $filter_site);
+        }        
+        
+        $filter_session = $this->getState('filter.session');
+        if (strlen($filter_session))
+        {
+            $this->setCondition('session_id', $filter_session);
+        }        
+        
+        $filter_active_after = $this->getState('filter.active_after');
+        if (strlen($filter_active_after))
+        {
+            $this->setCondition( '$and', array( 'timestamp' => array ( '$gt' => $filter_active_after ) ), 'append' );
+        }
+        
+        $filter_active_before = $this->getState('filter.active_before');
+        if (strlen($filter_active_before))
+        {
+            $this->setCondition( '$and', array( 'timestamp' => array ( '$lt' => $filter_active_before ) ), 'append' );
+        }
+        
+        $filter_is_user = $this->getState('filter.is_user');
+        if (is_bool($filter_is_user) && !empty($filter_is_user))
+        {
+            $this->setCondition('user_id', array('$exists' => true, '$nin' => array( '', null ) ));
+        }
+        else if (is_bool($filter_is_user) && empty($filter_is_user))
+        {
+            $this->setCondition('user_id', array('$in' => array( '', null ) ));
+        }
+    
+        return $this;
+    }
+    
     /**
      * Force save() to use store()
      * so there is no performance impact when tracking sessions
@@ -163,5 +213,55 @@ class Sessions extends \Dsc\Mongo\Collection
         }
     
         return "$difference $periods[$j] ago";
-    }    
+    }
+    
+    /**
+     *
+     * @param string $after
+     * @param string $before
+     * @return unknown
+     */
+    public static function fetchActiveVisitors( $after=null, $site_id='site' )
+    {
+        if (is_null($after))
+        {
+            $last_active = 5; // TODO fetch from a setting  // 5 minutes ago
+            $after = time() - ($last_active * 60);
+        }
+    
+        $items = (new static)->setState('filter.active_after', $after)->setState('filter.site', $site_id)->getitems();
+    
+        return $items;
+    }
+    
+    /**
+     *
+     * @param string $after
+     * @param string $before
+     * @return unknown
+     */
+    public static function fetchActiveUsers( $after=null, $site_id='site' )
+    {
+        if (is_null($after))
+        {
+            $last_active = 5; // TODO fetch from a setting  // 5 minutes ago
+            $after = time() - ($last_active * 60);
+        }
+    
+        $items = (new static)->setState('filter.active_after', $after)->setState('filter.is_user', true)->setState('filter.site', $site_id)->getitems();
+    
+        return $items;
+    }
+
+    /**
+     * Gets the associated user object
+     *
+     * @return unknown
+     */
+    public function user()
+    {
+        $user = (new \Users\Models\Users)->load(array('_id'=>$this->user_id));
+    
+        return $user;
+    }
 }
