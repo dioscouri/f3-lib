@@ -44,6 +44,8 @@ class Apps extends Singleton
             return $this->load($bootstraps);
         }
         
+        //\FB::log('Bootstrapping ALL apps');
+        
         // bootstrap all apps
         if (!defined('JPATH_ROOT'))
         {
