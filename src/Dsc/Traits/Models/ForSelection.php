@@ -34,14 +34,7 @@ trait ForSelection
      */
     public static function forSelection(array $query = array())
     {
-        if (empty($this))
-        {
-            $model = new static();
-        }
-        else
-        {
-            $model = clone $this;
-        }
+        $model = new static();
         
         $cursor = $model->collection()->find($query, array(
             $model->__select2_fields['text'] => 1
