@@ -291,7 +291,7 @@ class Models extends \Dsc\Magic
     /**
      * Gets the input filter object
      */
-    public function inputFilter()
+    public static function inputFilter()
     {
         return \Dsc\System::instance()->get('inputfilter');
     }
@@ -299,7 +299,7 @@ class Models extends \Dsc\Magic
     /**
      * Gets the output filter object
      */
-    public function outputFilter()
+    public static function outputFilter()
     {
         return \Dsc\System::instance()->get('outputfilter');
     }
