@@ -495,7 +495,7 @@ class Theme extends \View
 			if($adminPath = $this->app->get('admin_override')) {
 				$dir = $this->app->get('PATH_ROOT') . $adminPath;
 			} else {
-				$dir = $this->app->get('PATH_ROOT') . '/apps/Admin/Overrides/';
+				$dir = $this->app->get('PATH_ROOT') . 'apps/Admin/Overrides/';
 			}
 		}else {
 			//else lets look inside whatever theme we are in right now. 
