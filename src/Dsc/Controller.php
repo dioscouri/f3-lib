@@ -58,7 +58,7 @@ class Controller extends Singleton
      * @param array $data
      * @return \stdClass
      */
-    protected function getJsonResponse( array $data=null ) 
+    protected function getJsonResponse( array $data=array() ) 
     {
         $response = new \stdClass();
         
@@ -68,24 +68,9 @@ class Controller extends Singleton
         $response->redirect = null;
         $response->result = null;
         
-        if (isset($data['code'])) {
-            $response->code = $data['code'];
-        }
-        
-        if (isset($data['message'])) {
-            $response->message = $data['message'];
-        }
-        
-        if (isset($data['error'])) {
-            $response->error = $data['error'];
-        }
-        
-        if (isset($data['redirect'])) {
-            $response->redirect = $data['redirect'];
-        }
-        
-        if (isset($data['result'])) {
-            $response->result = $data['result'];
+        foreach ($data as $key=>$value) 
+        {
+            $response->$key = $value;
         }
         
         return $response;
