@@ -23,6 +23,8 @@ class Sessions extends \Dsc\Mongo\Collection
     
     public $site_id;
     
+    public $path;
+    
     protected function fetchConditions()
     {
         parent::fetchConditions();
@@ -132,6 +134,8 @@ class Sessions extends \Dsc\Mongo\Collection
         $fw = \Base::instance();
         $headers = $fw->get('HEADERS');
                 
+        $this->path = $fw->hive()['PATH'];
+        
         $this->ip = $fw->get('IP');
         $this->agent = isset($headers['User-Agent']) ? $headers['User-Agent'] : null;
         
