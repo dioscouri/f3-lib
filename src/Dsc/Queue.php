@@ -13,7 +13,7 @@ class Queue extends \Dsc\Singleton
      * @param unknown $options
      * @return \Dsc\Mongo\Collections\QueueTasks
      */
-    public static function task( $task, $parameters, $options=array() )
+    public static function task( $task, $parameters=array(), $options=array() )
     {
         $options = $options + array(
             'title' => null,

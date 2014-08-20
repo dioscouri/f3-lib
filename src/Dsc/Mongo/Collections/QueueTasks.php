@@ -6,7 +6,7 @@ class QueueTasks extends \Dsc\Mongo\Collection
     public $created;
     public $title;                  // [optional] title of task, for display and search purposes
     public $task;                   // callable
-    public $parameters;             // array
+    public $parameters = array();   // array
     public $when;                   // time() after which the queue should be executed
     public $priority = 0;           // int
     public $batch = null;           // string, for categorization only
@@ -67,7 +67,7 @@ class QueueTasks extends \Dsc\Mongo\Collection
      * @param unknown $options
      * @return \Dsc\Mongo\Collections\QueueTasks
      */
-    public static function add( $task, $parameters, $options=array() )
+    public static function add( $task, $parameters=array(), $options=array() )
     {
         $options = $options + array(
             'title' => null,
