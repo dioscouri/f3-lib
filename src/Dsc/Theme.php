@@ -23,6 +23,8 @@ class Theme extends \View
     {
         $this->registerThemePath(__DIR__ . '/Themes/SystemTheme/', 'SystemTheme');
         $this->registerViewPath( __DIR__ . '/Themes/SystemTheme/Views/', 'SystemTheme/Views');
+        
+        $this->session->set('loaded_views', null);
     }
 
     public function __get($key)
@@ -195,10 +197,13 @@ class Theme extends \View
      */
     private function trackLoadedView($view)
     {
-        $loaded_views = (array) $this->session->get('loaded_views');
-        $loaded_views[] = realpath( $view );
-        
-        $this->session->set('loaded_views', $loaded_views);
+        if (\Dsc\System::instance()->app->get('DEBUG')) 
+        {
+            $loaded_views = (array) $this->session->get('loaded_views');
+            $loaded_views[] = realpath( $view );
+            
+            $this->session->set('loaded_views', $loaded_views);
+        }
         
         return $this;
     }
