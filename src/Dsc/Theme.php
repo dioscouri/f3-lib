@@ -94,12 +94,12 @@ class Theme extends \View
             'ttl' => 0
         );
         
-        // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error
+        // Render the view.  Happens before the Theme so that app view files can set values in \Base::instance that get used later by the Theme (e.g. the head) 
+        $view_string = $this->renderView($view, $params);
+
+        // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error        
         // Render the theme
         $theme = $this->loadFile($this->getThemePath($this->getCurrentTheme()) . $this->getCurrentVariant());
-        
-        // Render the view
-        $view_string = $this->renderView($view, $params);
         
         // render the system messages
         $messages = \Dsc\System::instance()->renderMessages();
