@@ -15,7 +15,7 @@ class Collection extends \Dsc\Models
         
     protected $__default_config = array(
         'cache_enabled' => true,
-        'cache_lifetime' => 0,
+        'cache_lifetime' => 900,
         'track_states' => true,
         'context' => null,
         'default_sort' => array(
