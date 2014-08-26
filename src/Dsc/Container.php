@@ -39,6 +39,12 @@ class Container extends \Joomla\DI\Container
             } );
         }
         
+        //$store = new \DB\Mongo\Session($this->get('mongo'));
+        $store = null;
+        $this->share( 'session', function() use($store) {
+            return new \Dsc\Session($store);
+        });
+        
         $this->share( 'theme', function() {
             return new \Dsc\Theme;
         } );                    
@@ -53,12 +59,6 @@ class Container extends \Joomla\DI\Container
         
         $this->share( 'auth', function() {
             return new \Users\Lib\Auth;
-        });
-        
-        //$store = new \DB\Mongo\Session($this->get('mongo'));
-        $store = null;
-        $this->share( 'session', function() use($store) {
-            return new \Dsc\Session($store);
         });
         
         $this->share( 'mailer', function() {

@@ -206,23 +206,41 @@ abstract class Bootstrap extends \Dsc\Singleton
     {
         // handle other types of application, if no specific function defined
     }
+    
+    protected function preBase($app)
+    {
+    	// common code for all actions before the app is run
+    }
 
     protected function preAdmin()
-    {}
+    {
+    	$this->preBase( 'Admin' );
+    }
 
     protected function preSite()
-    {}
+    {
+    	$this->preBase( 'Site' );
+    }
 
     protected function post($app)
     {
         // handle other types of application, if no specific function defined
     }
 
+    protected function postBase($app)
+    {
+        // handle other types of application, if no specific function defined
+    }
+    
     protected function postAdmin()
-    {}
+    {
+    	$this->postBase( 'Admin' );
+    }
 
     protected function postSite()
-    {}
+    {
+    	$this->postBase( 'Site' );
+    }
     
     /**
      * What's the name of this app?

@@ -47,7 +47,7 @@ trait Notes
 		}
 		
 		// no note added so just dont do anything
-		if( empty( $notes ) && $empty( $old_notes ) ){
+		if( empty( $notes ) && empty( $old_notes ) ){
 			return;
 		}
 		

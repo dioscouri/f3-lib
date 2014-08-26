@@ -23,6 +23,8 @@ class Theme extends \View
     {
         $this->registerThemePath(__DIR__ . '/Themes/SystemTheme/', 'SystemTheme');
         $this->registerViewPath( __DIR__ . '/Themes/SystemTheme/Views/', 'SystemTheme/Views');
+        
+        $this->session->set('loaded_views', null);
     }
 
     public function __get($key)
@@ -94,12 +96,12 @@ class Theme extends \View
             'ttl' => 0
         );
         
-        // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error
+        // Render the view.  Happens before the Theme so that app view files can set values in \Base::instance that get used later by the Theme (e.g. the head) 
+        $view_string = $this->renderView($view, $params);
+
+        // TODO Before loading the variant file, ensure it exists. If not, load index.php or throw a 500 error        
         // Render the theme
         $theme = $this->loadFile($this->getThemePath($this->getCurrentTheme()) . $this->getCurrentVariant());
-        
-        // Render the view
-        $view_string = $this->renderView($view, $params);
         
         // render the system messages
         $messages = \Dsc\System::instance()->renderMessages();
@@ -195,10 +197,13 @@ class Theme extends \View
      */
     private function trackLoadedView($view)
     {
-        $loaded_views = (array) $this->session->get('loaded_views');
-        $loaded_views[] = realpath( $view );
-        
-        $this->session->set('loaded_views', $loaded_views);
+        if (\Dsc\System::instance()->app->get('DEBUG')) 
+        {
+            $loaded_views = (array) $this->session->get('loaded_views');
+            $loaded_views[] = realpath( $view );
+            
+            $this->session->set('loaded_views', $loaded_views);
+        }
         
         return $this;
     }
