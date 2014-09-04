@@ -14,6 +14,10 @@ class Select extends \Dsc\Singleton
             return '';
         }
         
+        if (!is_array($selected)) {
+            $selected = array($selected);
+        }
+        
         if (is_array($options[0]))
         {
             foreach ($options as $option)
@@ -21,7 +25,7 @@ class Select extends \Dsc\Singleton
                 $html .= '<option value="';
                 $html .= $option['value'];
                 $html .= '"';
-                if ($option['value'] == $selected)
+                if (in_array($option['value'], $selected))
                 {
                     $html .= ' selected="selected" ';
                 }
@@ -42,7 +46,7 @@ class Select extends \Dsc\Singleton
                 $html .= '<option value="';
                 $html .= $value;
                 $html .= '"';
-                if ($value == $selected)
+                if (in_array($value, $selected))
                 {
                     $html .= ' selected="selected" ';
                 }
