@@ -301,6 +301,9 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             $model->load(array('_id'=>$storedfile));
             $model->bind( $values );
             $model->slug = $model->generateSlug();
+            if(!empty($options['tags'])){
+            	$model->set('tags', $options['tags']);
+            }
             $model->save();
         }
         
@@ -340,6 +343,9 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     		$model->load(array('_id'=>$storedfile));
     		$model->bind($values);
     		$model->slug = $model->generateSlug();
+    		if(!empty($options['tags'])){
+    			$model->set('tags', $options['tags']);
+    		}
     		if ($model->save())
     		{
     	
@@ -457,6 +463,9 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             {
                 $model->load(array('_id'=>$storedfile));
                 $model->bind($values);
+                if(!empty($options['tags'])){
+                	$model->set('tags', $options['tags']);
+                }
                 if ($model->save()) 
                 {
                     
