@@ -268,4 +268,37 @@ class Crontab
 
         return $this;
     }
+    
+    /**
+     * Remove a specified job in the current crontab
+     *
+     * @param string $hash
+     *
+     * @return Crontab
+     */
+    public function getJobByHash($hash)
+    {
+        if (!isset($this->jobs[$hash])) 
+        {
+            throw new \Exception('Invalid Job Hash');
+        }
+    
+        return $this->jobs[$hash];
+    }
+
+    /**
+     * Remove a specified job in the current crontab
+     *
+     * @param string $hash
+     *
+     * @return Crontab
+     */
+    public function disableJobByHash($hash)
+    {
+        if (isset($this->jobs[$hash])) {
+            $this->jobs[$hash]->setActive(false);
+        }
+    
+        return $this;
+    }
 }

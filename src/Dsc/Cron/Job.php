@@ -21,6 +21,31 @@ class Job extends BaseJob
             return '# '.$e;
         }
     }
+    
+    /**
+     * Returns an associative array of object's public properties
+     * removing any that begin with a double-underscore (__)
+     *
+     * @param boolean $public
+     *            If true, returns only the public properties.
+     *            
+     * @return array
+     */
+    public function cast( $public = true )
+    {
+        $vars = get_object_vars( $this );
+        if ($public)
+        {
+            foreach ( $vars as $key => $value )
+            {
+                if (substr( $key, 0, 2 ) == '__')
+                {
+                    unset( $vars[$key] );
+                }
+            }
+        }
+        return $vars;
+    }
 
     /**
      * Parse crontab line into Job object
@@ -322,6 +347,53 @@ class Job extends BaseJob
     }
     
     /**
+     * Set this job's schedule using one of the special cron shortcut commands
+     *  
+     * @param unknown $shortcut
+     * @return \Dsc\Cron\Job
+     */
+    public function setSimple( $shortcut )
+    {
+        $parts = array();
+        
+        switch ($shortcut)
+        {
+            case "@reboot":
+                $this->setReboot();
+                break;
+            case "@yearly":
+            case "@annually":
+                array_unshift($parts, "0", "0", "1", "1", "*");
+                break;
+            case "@monthly":
+                array_unshift($parts, "0", "0", "1", "*", "*");
+                break;
+            case "@weekly":
+                array_unshift($parts, "0", "0", "*", "*", "0");
+                break;
+            case "@daily":
+            case "@midnight":
+                array_unshift($parts, "0", "0", "*", "*", "*");
+                break;
+            case "@hourly":
+                array_unshift($parts, "0", "*", "*", "*", "*");
+                break;            
+        }
+
+        if (!empty($parts)) 
+        {
+            $this
+            ->setMinute($parts[0])
+            ->setHour($parts[1])
+            ->setDayOfMonth($parts[2])
+            ->setMonth($parts[3])
+            ->setDayOfWeek($parts[4]);            
+        }
+        
+        return $this;
+    }    
+    
+    /**
      * Set this Job to use the special @reboot command
      * 
      * @return Job
@@ -329,6 +401,10 @@ class Job extends BaseJob
     public function setReboot()
     {
         $this->minute = '@reboot';
+        $this->hour = null;
+        $this->dayOfMonth = null;
+        $this->month = null;
+        $this->dayOfWeek = null;
         
         return $this->generateHash();
     }
