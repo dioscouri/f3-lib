@@ -287,7 +287,23 @@ class Crontab
     }
 
     /**
-     * Remove a specified job in the current crontab
+     * Enable a specified job in the current crontab
+     *
+     * @param string $hash
+     *
+     * @return Crontab
+     */
+    public function enableJobByHash($hash)
+    {
+        if (isset($this->jobs[$hash])) {
+            $this->jobs[$hash]->setActive(true);
+        }
+    
+        return $this;
+    }
+    
+    /**
+     * Disable a specified job in the current crontab
      *
      * @param string $hash
      *
