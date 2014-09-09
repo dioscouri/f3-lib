@@ -18,4 +18,16 @@ class Url extends Singleton
         
         return $base;
     }
+    
+    public static function isSecure()
+    {
+        $url = static::instance();
+        
+        if ($url->app->get('SCHEME') == 'https') 
+        {
+            return true;
+        }
+        
+        return false;
+    }
 }

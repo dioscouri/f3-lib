@@ -68,6 +68,10 @@ class Container extends \Joomla\DI\Container
         $this->share( 'flash', function() {
             return new \Dsc\Flash;
         } );
+        
+        $this->share( 'cookie', function() {
+            return \Dsc\Cookie::instance();
+        } );        
     }
 }
 ?>
