@@ -176,6 +176,7 @@ trait Publishable
     {
         switch ($this->{'publication.status'}) 
         {
+            case "inactive":
         	case "unpublished":
         	    $label_class = 'label-danger';
         	    break;
