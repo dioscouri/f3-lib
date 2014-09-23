@@ -90,6 +90,10 @@ class Theme extends \View
      */
     public function renderTheme($view, array $params = array(), $theme_name = null)
     {
+        if (\Base::instance()->get('VERB') == 'HEAD') {
+            return;
+        }
+        
         $params = $params + array(
             'mime' => 'text/html',
             'hive' => null,
@@ -173,6 +177,10 @@ class Theme extends \View
      */
     public function renderView($view, array $params = array())
     {
+        if (\Base::instance()->get('VERB') == 'HEAD') {
+            return;
+        }
+                
         $params = $params + array(
             'mime' => 'text/html',
             'hive' => null,
