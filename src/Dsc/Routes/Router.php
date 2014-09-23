@@ -48,7 +48,6 @@ class Router extends \Dsc\Singleton
     {
         if (count( $this->groups ))
         {
-            $f3 = \Base::instance();
             foreach ( $this->groups as $group_list )
             {
                 foreach ( $group_list as $group )
@@ -59,11 +58,33 @@ class Router extends \Dsc\Singleton
                     {
                         foreach ( $routes as $route )
                         {
-                            $f3->route( $route->pattern, $route->handler, $route->ttl, $route->kbps );
+                            static::route( $route->pattern, $route->handler, $route->ttl, $route->kbps );
                         }
                     }
                 }
             }
         }
+    }
+    
+    /**
+     * 
+     * @param unknown $pattern
+     * @param unknown $handler
+     * @param number $ttl
+     * @param number $kbps
+     */
+    public static function route($pattern, $handler, $ttl=0, $kbps=0) 
+    {
+        if (strpos($pattern, 'GET') !== false && strpos($pattern, '[ajax]') === false)
+        {
+            $patterns = explode('|', $pattern);
+            if (!in_array('HEAD', $patterns)) {
+                array_unshift($patterns, 'HEAD');
+            }
+            $pattern = implode('|', $patterns);
+        }
+        
+        $f3 = \Base::instance();
+        $f3->route( $pattern, $handler, $ttl, $kbps );
     }
 }
