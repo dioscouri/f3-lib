@@ -11,7 +11,8 @@ class Nodes extends \Dsc\Mongo\Collection
     public $metadata = array(
     	'creator'=>null,
         'created'=>null,
-        'last_modified'=>null
+        'last_modified'=>null,
+        'last_modified_by'=>null
     );
     
     protected $__collection_name = 'common.content';
@@ -160,9 +161,9 @@ class Nodes extends \Dsc\Mongo\Collection
     
     protected function beforeValidate()
     {
+        $identity = \Dsc\System::instance()->get('auth')->getIdentity();
         if (!$this->get('metadata.creator')) 
         {
-            $identity = \Dsc\System::instance()->get('auth')->getIdentity();
             if (!empty($identity->id)) 
             {
             	$this->set('metadata.creator', array(
@@ -185,6 +186,21 @@ class Nodes extends \Dsc\Mongo\Collection
         }
         
         $this->set('metadata.last_modified', \Dsc\Mongo\Metastamp::getDate('now') );
+        
+        if (!empty($identity->id))
+        {
+            $this->set('metadata.last_modified_by', array(
+                'id' => $identity->id,
+                'name' => $identity->fullName()
+            ));
+        }
+        else
+        {
+            $this->set('metadata.last_modified_by', array(
+                'id' => new \MongoId(),
+                'name' => 'Unicorn Egg Eater'
+            ));
+        }
         
         if (empty($this->type))
         {
