@@ -128,7 +128,7 @@ class Sessions extends \Dsc\Mongo\Collection
         if (!empty($identity->id)) 
         {
             $this->user_id = $identity->id;
-            $this->identity = $identity->email; 
+            $this->identity = $identity->email(true); 
         }
         
         $fw = \Base::instance();
