@@ -29,7 +29,7 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
         $filter_slug = $this->getState('filter.slug');
         if (strlen($filter_slug))
         {
-            $this->setCondition('slug', $filter_slug);
+            $this->setCondition('slug', strtolower($filter_slug));
         }
     
         $filter_title = $this->getState('filter.title');
