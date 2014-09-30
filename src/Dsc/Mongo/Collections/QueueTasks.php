@@ -85,6 +85,14 @@ class QueueTasks extends \Dsc\Mongo\Collection
         $model->when = $options['when'] ? (int) $options['when'] : time();
         $model->priority = (int) $options['priority'];
         $model->batch = $options['batch'];
+        
+        $sparse_options = $options;
+        unset($sparse_options['title']);
+        unset($sparse_options['when']);
+        unset($sparse_options['priority']);
+        unset($sparse_options['batch']);
+        
+        $model->options = $sparse_options;
         $model->validate()->store();
         
         return $model;
