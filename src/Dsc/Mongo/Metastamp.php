@@ -40,7 +40,7 @@ class Metastamp
         }
         
         $array = array(
-                'time' => $strtotime, 
+                'time' => (int)$strtotime, 
                 'local' => date('Y-m-d H:i:s', $strtotime),
                 'utc' => gmdate('Y-m-d H:i:s', $strtotime),
                 'offset' => date('P', $strtotime)
