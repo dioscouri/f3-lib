@@ -136,7 +136,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         $height = !empty($options['height']) ? (int) $options['height'] : 308;
         $quality = !empty($options['quality']) ? (int) $options['quality'] : 75;
         
-        $imagick->setImageFormat("jpeg");
+        $imagick->setImageFormat("png");
         $imagick->setImageCompressionQuality($quality);
         $imagick->thumbnailImage($width, $height, true);
         return $imagick->getImageBlob();
