@@ -30,4 +30,18 @@ class Url extends Singleton
         
         return false;
     }
+    
+     /**
+     * Returns the full URL for the request
+     *
+     * @return string
+     */
+    public static function full()
+    {
+    	$url = static::instance();
+    
+    	$full = $url->app->get('SCHEME') . "://" . $url->app->get('HOST') . $url->app->get('BASE') .  $_SERVER['REQUEST_URI'];
+    
+    	return $full;
+    }
 }
