@@ -70,6 +70,17 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Manually set a query params
+     *
+     */
+    public function setParams( $params )
+    {
+        $this->__query_params = $params;
+    
+        return $this;
+    }
+    
+    /**
      * Set a condition in the query
      *
      */

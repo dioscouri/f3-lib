@@ -29,6 +29,8 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     protected function fetchConditions()
     {   
         parent::fetchConditions();
+        
+        $this->ancestorsFetchConditions();
     
         $filter_keyword = $this->getState('filter.keyword');
         if ($filter_keyword && is_string($filter_keyword))
