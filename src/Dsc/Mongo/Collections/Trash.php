@@ -79,4 +79,12 @@ class Trash extends \Dsc\Mongo\Collections\Nodes
     	$this->remove();
     }
     
+    public function title() {
+    	if(!empty($this->{'document.title'})) {
+    		return $this->{'document.title'};
+    	} else {
+    		return 'Untitled';
+    	}
+    }
+    
 }
