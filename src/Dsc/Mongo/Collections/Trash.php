@@ -80,11 +80,20 @@ class Trash extends \Dsc\Mongo\Collections\Nodes
     }
     
     public function title() {
+    	$title = 'Untitled';
+    	
     	if(!empty($this->{'document.title'})) {
-    		return $this->{'document.title'};
-    	} else {
-    		return 'Untitled';
+    		$title =  $this->{'document.title'};
+    	} 
+    	
+    	//Support F3 Users
+    	if($this->instanceof == 'Users\Models\Users') {
+    		$title = $this->{'document.first_name'} . ' ' . $this->{'document.last_name'};
     	}
+    	
+    	return $title;
+    	
+    	
     }
     
 }
