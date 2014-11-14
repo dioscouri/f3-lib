@@ -1004,7 +1004,11 @@ class Collection extends \Dsc\Models
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
             }            
-        }        
+        }
+                
+        if(!empty($this->__enable_trash)) {
+        	\Dsc\Mongo\Collections\Trash::trash($this);
+        }
         
         return $this->checkErrors();
     }
