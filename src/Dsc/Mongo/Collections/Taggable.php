@@ -13,7 +13,7 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
     {
         parent::fetchConditions();
         
-        $filter_tag = $this->getState('filter.tag');
+        $filter_tag = trim($this->getState('filter.tag'));
         if (strlen($filter_tag))
         {
             $this->setCondition('tags', $filter_tag);
