@@ -29,5 +29,25 @@ class DscBootstrap extends \Dsc\Bootstrap
             \Dsc\Models::log( $message, $priority, $category );
         }        
     }
+    
+    protected function runAdmin()
+    {
+        $this->checkSymlink();
+    }
+    
+    protected function runSite()
+    {
+        $this->checkSymlink();
+    }
+    
+    protected function checkSymlink()
+    {
+        if (!is_dir($this->app->get('PATH_ROOT') . 'public/DscAssets'))
+        {
+            $target = $this->app->get('PATH_ROOT') . 'public/DscAssets';
+            $source = realpath( $this->app->get('PATH_ROOT') . 'vendor/dioscouri/f3-lib/src/Dsc/Assets' );
+            $res = symlink($source, $target);
+        }
+    }
 }
 $app = new DscBootstrap();
