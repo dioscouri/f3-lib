@@ -137,6 +137,11 @@ abstract class Group extends \Dsc\Singleton
                 'request' => 'GET',
                 'route' => '/edit/@id' 
             ),
+        	'editinline' => array(
+        				'action' => 'editInline',
+        				'request' => 'POST',
+        				'route' => '/edit/inline'
+        	),
             'update' => array(
                 array(
                     'action' => 'update',

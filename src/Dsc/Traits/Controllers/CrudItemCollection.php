@@ -401,4 +401,49 @@ trait CrudItemCollection
         
         return $this;
     }
+    
+    
+    public function editInline() {
+    	
+    	
+    	try {
+    	
+    		
+    		
+    		$id = $this->inputfilter->clean( $this->app->get('POST.pk'), 'alnum' );
+    		$name = $this->inputfilter->clean( $this->app->get('POST.name'), 'string' );
+    		$value = $this->inputfilter->clean( $this->app->get('POST.value'), 'string' );
+    		
+    		if(empty($id) || empty($name) || empty($value) ) {
+    			throw new \Exception('One of your values is empty');
+    		}
+    		
+    		if (!$this->canUpdate(array('id' => $id, 'name' => $name, 'value' => $value), $this->getItemKey())) {
+    			throw new \Exception('Not allowed to edit record');
+    		}
+    		
+    
+    		
+    		$mongoItem = $model = $this->getModel()
+    		->setState('filter.id', $id)->getItem();;
+    		
+
+    		$mongoItem->set($name, $value);
+    		$mongoItem->save();
+    		
+    		echo json_encode(array('success' => true));
+    		
+    		 
+    		
+    	} catch (\Exception $e) {
+    		$this->app->error(404);
+    		echo json_encode(array('success' => flase, 'msg'=>$e->getMessage() ));
+    	}
+    	
+    	
+    	
+    	
+    	
+    	
+    }
 }
