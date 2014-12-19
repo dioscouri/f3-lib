@@ -64,6 +64,59 @@ class Navigation extends \Dsc\Mongo\Collections\Nested
     }
     
     /**
+     * Clone an item.  Data from $values takes precedence of data from cloned object.
+     *
+     * @param unknown_type $mapper
+     * @param unknown_type $values
+     * @param unknown_type $options
+     */
+    public function saveAs( $document=array(), $options=array() )
+    {	
+    	
+    	
+    	$item_data = $this->cast();
+    	// preserve any key=>values from the original item that are not in the new document array
+    	$new_values = array_merge( $document, array_diff_key( $item_data, $document ) );
+    	unset($new_values[$this->getItemKey()]);
+   
+    	
+    	if ($existing = $this->pathExists( $this->path ))
+    	{
+    		if($new_values['title'] == $existing->title) {
+    			//THEY CHANGED THE TITLE SO lets unset slug and path and regenerate
+    			unset($new_values['slug']);
+    			unset($new_values['path']);
+    		} else {
+    			//Set path to something like string/string-2
+    			$i = 2;
+    			do {
+    				$new_values['slug'] = $new_values['slug'] .'-'.$i;
+    				$new_values['path'] =  $this->path . '-'.$i;
+    				
+    				if( $this->pathExists( $new_values['path'] )) {
+    					$i++;
+    				} else {
+    					$i = false;
+    				}
+				
+				} while ($i);
+    		}
+    		
+    		if($new_values['details']['url'] == $existing->{'details.url'}) {
+    			//TODO I am not sure if we should append this as well or just alert them, I assume they would clone it to make a simliar URL so adding text to it could be annoying
+    			\Dsc\System::instance()->addMessage('Item shares a URL with another menu Item be sure to change it', 'warning');
+    			 
+    		}
+    	}
+    	
+    	
+    	
+    	$item = new static( $new_values );
+    
+    	return $item->insert(array(), $options);
+    }
+    
+    /**
      *
      * @return array
      */

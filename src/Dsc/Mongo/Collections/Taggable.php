@@ -13,7 +13,7 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
     {
         parent::fetchConditions();
         
-        $filter_tag = $this->getState('filter.tag');
+        $filter_tag = trim($this->getState('filter.tag'));
         if (strlen($filter_tag))
         {
             $this->setCondition('tags', $filter_tag);
@@ -72,10 +72,11 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
      */
     public static function distinctTags($query=array())
     {
-        $model = new static();    
-        $distinct = $model->collection()->distinct("tags", $query);
-        $distinct = array_values( array_filter( $distinct ) );
+    	$model = new static();
+    	$distinct = $model->collection()->distinct("tags", $query);
+    	$distinct = array_values( array_filter( $distinct ) );
     
-        return $distinct;
+    	return $distinct;
     }
+   
 }

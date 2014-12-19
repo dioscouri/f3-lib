@@ -70,6 +70,10 @@ trait CrudItemCollection
         
         $model = $this->getModel();
         $item = $this->getItem();
+        if( $item == null ){
+        	\Dsc\System::instance()->addMessage( 'This record does not exist', 'error' );
+        	$f3->reroute( $this->list_route );
+        }
         
         $f3->set('model', $model);
         $f3->set('item', $item);
@@ -103,6 +107,10 @@ trait CrudItemCollection
         
         $model = $this->getModel();
         $item = $this->getItem();
+        if( $item == null ){
+        	\Dsc\System::instance()->addMessage( 'This record does not exist', 'error' );
+        	$f3->reroute( $this->list_route );
+        }
         
         $f3->set('model', $model);
         $f3->set('item', $item);
@@ -257,6 +265,10 @@ trait CrudItemCollection
         $flash = \Dsc\Flash::instance();
         $model = $this->getModel();
         $this->item = $this->getItem();
+        if( $this->item == null ){
+        	\Dsc\System::instance()->addMessage( 'This record does not exist', 'error' );
+        	$f3->reroute( $this->list_route );
+        }
         
         // save
         $save_as = false;
@@ -278,6 +290,7 @@ trait CrudItemCollection
         }
         catch (\Exception $e)
         {
+        	
             \Dsc\System::instance()->addMessage('Save failed with the following errors:', 'error');
             \Dsc\System::instance()->addMessage($e->getMessage(), 'error');
             if (\Base::instance()->get('DEBUG'))
@@ -364,6 +377,10 @@ trait CrudItemCollection
         $f3 = \Base::instance();
         $model = $this->getModel();
         $this->item = $this->getItem();
+        if( $this->item == null ){
+        	\Dsc\System::instance()->addMessage( 'This record does not exist', 'error' );
+        	$f3->reroute( $this->list_route );
+        }
         
         try
         {

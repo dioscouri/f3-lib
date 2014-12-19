@@ -136,7 +136,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         $height = !empty($options['height']) ? (int) $options['height'] : 308;
         $quality = !empty($options['quality']) ? (int) $options['quality'] : 75;
         
-        $imagick->setImageFormat("jpeg");
+        $imagick->setImageFormat("png");
         $imagick->setImageCompressionQuality($quality);
         $imagick->thumbnailImage($width, $height, true);
         return $imagick->getImageBlob();
@@ -360,12 +360,11 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      * replaces the Grid files for an asset by deleting and replaceting with bindata
      *
      * @param array $buffer, 
-     * @param array $options
-     *@param array $values
+     * @param array $values
      * @throws \Exception
      * @return \Dsc\Mongo\Collections\Assets
      */
-    public function replace( $buffer=null,$options=array(), $values=array())
+    public function replace( $buffer, $values=array())
     {
     
     	if (empty($buffer))

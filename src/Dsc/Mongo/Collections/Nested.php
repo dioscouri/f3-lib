@@ -66,7 +66,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         $filter_tree_slug = $this->getState('filter.tree_slug');
         if (strlen($filter_tree_slug))
         {
-            $item = (new static)->setState('filter.slug', $filter_tree_slug)->getItem();
+            $item = (new static)->setState('filter.slug', $filter_tree_slug)->setState('filter.type', true)->getItem();
             if (empty($item->id)) 
             {
                 // filter by a fake tree ID so that no results are returned for an invalid tree_slug

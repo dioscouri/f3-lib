@@ -70,6 +70,17 @@ class Collection extends \Dsc\Models
     }
     
     /**
+     * Manually set a query params
+     *
+     */
+    public function setParams( $params )
+    {
+        $this->__query_params = $params;
+    
+        return $this;
+    }
+    
+    /**
      * Set a condition in the query
      *
      */
@@ -993,7 +1004,11 @@ class Collection extends \Dsc\Models
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
             }            
-        }        
+        }
+                
+        if(!empty($this->__enable_trash)) {
+        	\Dsc\Mongo\Collections\Trash::trash($this);
+        }
         
         return $this->checkErrors();
     }
