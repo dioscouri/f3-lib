@@ -98,7 +98,7 @@ class Controller extends Singleton
      * @throws \Exception
      * @return \Dsc\Controller
      */
-    public function requireIdentity()
+    public function requireIdentity($message = 'Please login')
     {
         $f3 = \Base::instance();
         $identity = $this->getIdentity();
@@ -114,12 +114,12 @@ class Controller extends Singleton
             switch ($global_app_name) 
             {
             	case "admin":
-            	    \Dsc\System::addMessage( 'Please login' );
+            	    \Dsc\System::addMessage( $message );
             	    \Dsc\System::instance()->get('session')->set('admin.login.redirect', $path);
             	    $f3->reroute('/admin/login');            	    
             	    break;
             	case "site":
-            	    \Dsc\System::addMessage( 'Please login' );
+            	    \Dsc\System::addMessage( $message );
             	    \Dsc\System::instance()->get('session')->set('site.login.redirect', $path);
             	    $f3->reroute('/login');            	    
             	    break;
