@@ -232,7 +232,7 @@ trait CrudItemCollection
         }
         
         $custom_redirect = \Dsc\System::instance()->get('session')->get('create.redirect');
-        //$route = $custom_redirect ? $custom_redirect : $route;
+        $route = $custom_redirect ? $custom_redirect : $route;
         
         $this->setRedirect($route);
         
@@ -356,7 +356,7 @@ trait CrudItemCollection
         }
         
         $custom_redirect = \Dsc\System::instance()->get('session')->get('update.redirect');
-        //$route = $custom_redirect ? $custom_redirect : $route;
+        $route = $custom_redirect ? $custom_redirect : $route;
         
         $this->setRedirect($route);
         
@@ -372,7 +372,7 @@ trait CrudItemCollection
         
         $custom_redirect = \Dsc\System::instance()->get('session')->get('delete.redirect');
         $redirect = $custom_redirect ? $custom_redirect : $this->list_route;
-        $redirect = $this->list_route;
+       
         
         $f3 = \Base::instance();
         $model = $this->getModel();
