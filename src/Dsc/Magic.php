@@ -41,7 +41,7 @@ abstract class Magic implements \ArrayAccess {
 	*	@return mixed
 	*	@param $key string
 	**/
-	abstract function get($key);
+	abstract function get($key, $default = null);
 
 	/**
 	*	Unset key

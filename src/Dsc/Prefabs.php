@@ -1,7 +1,7 @@
 <?php 
 namespace Dsc;
 
-abstract class Prefabs extends \Magic
+abstract class Prefabs extends \Dsc\Magic
 {
     protected $document = array();
     protected $options = array();    
@@ -124,7 +124,7 @@ abstract class Prefabs extends \Magic
      *	@return scalar|FALSE
      *	@param $key string
      **/
-    function get($key, $default=null) {
+    function get($key, $default = null) {
         return \Dsc\ArrayHelper::get( $this->document, $key, $default );
     }
     

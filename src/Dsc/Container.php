@@ -30,7 +30,9 @@ class Container extends \Joomla\DI\Container
         
         $db_name = \Base::instance()->get('db.mongo.database');
         $db_server = \Base::instance()->get('db.mongo.server');
+       
         if ($db_name && $db_server) {
+        	
             $this->share( 'mongo', function() use ($db_server, $db_name) {
           return new \MongoDB( new \MongoClient($db_server), $db_name);
                 // see this bug: https://jira.mongodb.org/browse/PHP-928
