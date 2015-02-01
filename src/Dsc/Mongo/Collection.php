@@ -309,7 +309,7 @@ class Collection extends \Dsc\Models
     protected function fetchItem()
     {
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
-        
+                
         if ($this->getParam('sort')) {
             $this->__cursor->sort($this->getParam('sort'));
         }
@@ -317,8 +317,9 @@ class Collection extends \Dsc\Models
         $this->__cursor->skip(0);
         
         $item = null;
-        if ($this->__cursor->hasNext()) {
-            $item = new static( $this->__cursor->getNext() );
+        if ($next = $this->__cursor->next()) 
+        {
+            $item = new static( $next );
         }
         
         return $item;
