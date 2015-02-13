@@ -302,24 +302,27 @@ class Collection extends \Dsc\Models
         return $this->fetchItem();
     }
     
-    /**
+  /**
      * 
      * @return \Dsc\Mongo\Collection
      */
     protected function fetchItem()
     {
-        $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
-                
+      
         if ($this->getParam('sort')) {
+        	$this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
             $this->__cursor->sort($this->getParam('sort'));
+            $this->__cursor->limit(1);
+            $this->__cursor->skip(0);
+            $doc = $this->__cursor->next();
+        } else {
+        	$doc = $this->collection()->findOne($this->conditions(), $this->fields());
         }
-        $this->__cursor->limit(1);
-        $this->__cursor->skip(0);
         
         $item = null;
-        if ($next = $this->__cursor->next()) 
+        if ($doc) 
         {
-            $item = new static( $next );
+            $item = new static( $doc );
         }
         
         return $item;
