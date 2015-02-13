@@ -10,12 +10,18 @@ trait OrderableCollection
      * 
      * @return \Dsc\Traits\Models\OrderableCollection
      */
-    public function moveUp()
+    public function moveUp($filters=array())
     {
+        if (!empty($this->__type)) {
+            $filters = $filters + array(
+                'type' => $this->__type
+            );
+        }
+        
         $this->ordering = $this->ordering - 1;
         
         $this->collection()->update(
-            array( 'ordering' => $this->ordering ),
+            array( 'ordering' => $this->ordering ) + $filters,
             array( '$inc' => array( 'ordering' => 1 ) ),
             array( 'multiple' => false )
         );
@@ -28,12 +34,18 @@ trait OrderableCollection
      *
      * @return \Dsc\Traits\Models\OrderableCollection
      */
-    public function moveDown()
+    public function moveDown($filters=array())
     {
+        if (!empty($this->__type)) {
+            $filters = $filters + array(
+                'type' => $this->__type
+            );
+        }
+                
         $this->ordering = $this->ordering + 1;
         
         $this->collection()->update(
-            array( 'ordering' => $this->ordering ),
+            array( 'ordering' => $this->ordering ) + $filters,
             array( '$inc' => array( 'ordering' => -1 ) ),
             array( 'multiple' => false )
         );
@@ -47,6 +59,12 @@ trait OrderableCollection
      */
     public function compressOrdering($filters=array())
     {
+        if (!empty($this->__type)) {
+            $filters = $filters + array(
+                'type' => $this->__type
+            );
+        }
+                
         $this->__cursor = $this->collection()->find($filters);
         $this->__cursor->sort(array('ordering' => 1));
                 
@@ -76,9 +94,16 @@ trait OrderableCollection
      * 
      * @return number
      */
-    public function nextOrdering()
+    public function nextOrdering($filters=array())
     {
+        if (!empty($this->__type)) {
+            $filters = $filters + array(
+                'type' => $this->__type
+            );
+        }
+                
         $result = $this->collection()->aggregate(array(
+            $filters,
             array( '$group' => array( '_id' => 0, 'maxOrdering' => array( '$max' => '$ordering' ) ) )
         ) );
         
@@ -90,10 +115,10 @@ trait OrderableCollection
         return $return;
     }
     
-    protected function orderingBeforeSave() 
+    protected function orderingBeforeSave($filters=array()) 
     {
         if (empty($this->ordering)) {
-            $this->ordering = $this->nextOrdering();
+            $this->ordering = $this->nextOrdering($filters);
         }
         $this->ordering = (int) $this->ordering;
         
