@@ -437,7 +437,7 @@ trait CrudItemCollection
     		
     	} catch (\Exception $e) {
     		$this->app->error(404);
-    		echo json_encode(array('success' => flase, 'msg'=>$e->getMessage() ));
+    		echo json_encode(array('success' => false, 'msg'=>$e->getMessage() ));
     	}
     	
     	

@@ -45,9 +45,9 @@ trait OrderableCollection
      * Add this to your model's afterSave method
      * to compress ordering values after each save [optional]
      */
-    public function compressOrdering()
+    public function compressOrdering($filters=array())
     {
-        $this->__cursor = $this->collection()->find();
+        $this->__cursor = $this->collection()->find($filters);
         $this->__cursor->sort(array('ordering' => 1));
                 
         $count=1;
@@ -88,5 +88,15 @@ trait OrderableCollection
         }
         
         return $return;
+    }
+    
+    protected function orderingBeforeSave() 
+    {
+        if (empty($this->ordering)) {
+            $this->ordering = $this->nextOrdering();
+        }
+        $this->ordering = (int) $this->ordering;
+        
+        return $this;
     }
 }
