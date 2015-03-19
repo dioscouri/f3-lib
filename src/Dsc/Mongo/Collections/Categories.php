@@ -78,6 +78,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         return $this;
     }
     
+    
     protected function beforeValidate()
     {
         if (empty($this->slug) && !empty($this->title))
@@ -315,4 +316,15 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         
         return $return;
     }
+    
+    /**
+     * Gets the child categories
+     *
+     * @return array
+     */
+    public function getChildCategories()
+    {
+    	return (new static)->setState('filter.parent',$this->id)->getList();
+    }
+    
 }

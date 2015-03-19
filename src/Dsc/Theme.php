@@ -600,19 +600,23 @@ class Theme extends \View
         $pieces = explode('/', $view);
         
         $themes = (array) \Base::instance()->get('dsc.themes.' . $site);
+     
         foreach ($themes as $theme => $theme_path)
         {
             // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
             $dir = \Dsc\Filesystem\Path::clean($theme_path . "Overrides/");
             
+           
             if ($dir = \Dsc\Filesystem\Path::real($dir))
             {
+            	
                 $path = \Dsc\Filesystem\Path::clean($dir . "/" . $view);
-                
+             
                 if ($path = \Dsc\Filesystem\Path::real($path))
                 {
                     $files = \Joomla\Filesystem\Folder::files($path);
                     
+              
                     if ($files)
                     {
                         $return = \Dsc\ArrayHelper::set($return, $theme, $files);
