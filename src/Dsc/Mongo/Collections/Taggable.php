@@ -74,7 +74,7 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
     {
     	$model = new static();
     	$distinct = $model->collection()->distinct("tags", $query);
-    	$distinct = array_values( array_filter( $distinct ) );
+    	$distinct = array_values( array_filter( (array) $distinct ) );
     
     	return $distinct;
     }
