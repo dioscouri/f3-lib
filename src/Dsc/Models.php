@@ -312,8 +312,10 @@ class Models extends \Dsc\Magic
     {
         if ($filters = $this->getUserStateFromRequest($this->context() . '.filter', 'filter', array(), 'array'))
         {
+
+        	
             $filters = \Dsc\ArrayHelper::dot( $filters );
-            
+           
             foreach ($filters as $name => $value)
             {
                 $this->setState('filter.' . $name, $value);
