@@ -179,9 +179,8 @@ trait CrudItemCollection
             \Dsc\System::instance()->setUserState('use_flash.' . $this->create_item_route, true);
             $flash->store($data);
             
-            $custom_redirect = \Dsc\System::instance()->get('session')->get('create.redirect');
+            $custom_redirect = !empty($data['__return']) ? base64_decode($data['__return']) : null;
             $route = $custom_redirect ? $custom_redirect : $this->create_item_route;
-            $route = $this->create_item_route;
             
             $this->setRedirect($route);
             
@@ -223,7 +222,7 @@ trait CrudItemCollection
                 break;
         }
         
-        $custom_redirect = \Dsc\System::instance()->get('session')->get('create.redirect');
+        $custom_redirect = !empty($data['__return']) ? base64_decode($data['__return']) : null;
         $route = $custom_redirect ? $custom_redirect : $route;
         
         $this->setRedirect($route);
@@ -300,7 +299,7 @@ trait CrudItemCollection
             $id = $this->item->get($this->getItemKey());
             $route = str_replace('{id}', $id, $this->edit_item_route);
             
-            $custom_redirect = \Dsc\System::instance()->get('session')->get('update.redirect');
+            $custom_redirect = !empty($data['__return']) ? base64_decode($data['__return']) : null;
             $route = $custom_redirect ? $custom_redirect : $route;
             
             $this->setRedirect($route);
@@ -342,7 +341,7 @@ trait CrudItemCollection
                 break;
         }
         
-        $custom_redirect = \Dsc\System::instance()->get('session')->get('update.redirect');
+        $custom_redirect = !empty($data['__return']) ? base64_decode($data['__return']) : null;
         $route = $custom_redirect ? $custom_redirect : $route;
         
         $this->setRedirect($route);
@@ -357,7 +356,7 @@ trait CrudItemCollection
             throw new \Exception('Must define a route for listing the items');
         }
         
-        $custom_redirect = \Dsc\System::instance()->get('session')->get('delete.redirect');
+        $custom_redirect = !empty($data['__return']) ? base64_decode($data['__return']) : null;
         $redirect = $custom_redirect ? $custom_redirect : $this->list_route;     
        
         $f3 = \Base::instance();
