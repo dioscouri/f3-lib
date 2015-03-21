@@ -76,7 +76,7 @@ class Logs extends \Dsc\Mongo\Collection
     public static function distinctCategories($query=array())
     {
         $model = new static();
-        $distinct = $model->collection()->distinct("category", $query);
+        $distinct = $model->collection()->distinct("category", $query ? $query : null);
         $distinct = array_values( array_filter( $distinct ) );
         
         sort($distinct);
@@ -92,7 +92,7 @@ class Logs extends \Dsc\Mongo\Collection
     public static function distinctPriorities($query=array())
     {
         $model = new static();
-        $distinct = $model->collection()->distinct("priority", $query);
+        $distinct = $model->collection()->distinct("priority", $query ? $query : null);
         $distinct = array_values( array_filter( $distinct ) );
     
         sort($distinct);
