@@ -105,5 +105,24 @@ trait Settings
     
     	return;
     }
+    
+    protected function basics()
+    {
+        switch ($this->app->get('VERB')) {
+            case "POST":
+            case "post":
+                // do the save and redirect to $this->settings_route
+                return $this->save();
+                break;
+        }
+        
+        $flash = \Dsc\Flash::instance();
+        $this->app->set('flash', $flash );
+        
+        $settings = $this->getModel()->fetch();
+        $flash->store( $settings->cast() );
+        
+        $this->app->set('meta.title', 'Configuration | Settings');
+    }
 }
 ?>
