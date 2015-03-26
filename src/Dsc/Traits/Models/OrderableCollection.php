@@ -103,7 +103,7 @@ trait OrderableCollection
         }
                 
         $result = $this->collection()->aggregate(array(
-            $filters,
+            array( '$match' => $filters ),
             array( '$group' => array( '_id' => 0, 'maxOrdering' => array( '$max' => '$ordering' ) ) )
         ) );
         
