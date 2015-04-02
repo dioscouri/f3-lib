@@ -608,7 +608,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      * @param array $types
      * @return unknown
      */
-    public static function distinctTypes($query=array())
+    public static function distinctTypes($query=null)
     {
         $model = new static();
         $distinct = $model->collection()->distinct("type", $query);
@@ -622,7 +622,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      * @param array $types
      * @return unknown
      */
-    public static function distinctStores($query=array())
+    public static function distinctStores($query=null)
     {
         $model = new static();
         $distinct = $model->collection()->distinct("storage", $query);

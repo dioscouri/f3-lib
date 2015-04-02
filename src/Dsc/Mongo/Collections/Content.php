@@ -130,7 +130,7 @@ class Content extends \Dsc\Mongo\Collections\Describable
      * If all else fails, return the copy.
      * 
      */
-    public function getAbstract()
+    public function getAbstract(array $options=array())
     {
         $abstract = $this->description;
     
@@ -143,6 +143,12 @@ class Content extends \Dsc\Mongo\Collections\Describable
             {
                 $abstract = $regs[1];
             }
+        }
+        
+        if (!empty($options['strip_tags'])) 
+        {
+            $allowable_tags = !empty($options['allowable_tags']) ? $options['allowable_tags'] : '<p><b><i><u>';
+            $abstract = strip_tags($abstract, $allowable_tags);            
         }
     
         return $abstract;
