@@ -36,12 +36,17 @@ class Url extends Singleton
      *
      * @return string
      */
-    public static function full()
+    public static function full($get = true)
     {
     	$url = static::instance();
     
-    	$full = $url->app->get('SCHEME') . "://" . $url->app->get('HOST') . $url->app->get('BASE') .  $_SERVER['REQUEST_URI'];
-    
+    	if($get) {
+    		$string = $_SERVER['REQUEST_URI'];	
+    	} else {
+    		$string =explode('?', $_SERVER['REQUEST_URI'])[0];
+    	}
+    	$full = $url->app->get('SCHEME') . "://" . $url->app->get('HOST') . $url->app->get('BASE')  . $string;
+    	
     	return $full;
     }
 }

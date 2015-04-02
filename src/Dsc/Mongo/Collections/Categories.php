@@ -192,6 +192,11 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         parent::afterUpdate();
     }
     
+ 
+
+
+    
+    
     public function generatePath( $slug, $parent_id=null )
     {
         $path = null;
@@ -316,6 +321,75 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         
         return $return;
     }
+    
+    /**
+     * Gets items from a collection with a query
+     * that uses the model's state
+     * and implements caching (if enabled)
+     */
+    public function getNestedItems($refresh=false)
+    {
+    	if (is_null($this->getState('list.sort')))
+    	{
+    		if (!empty($this->getParam('sort'))) {
+    			$this->setState('list.sort', $this->getParam('sort'));
+    		} else {
+    			$this->setState('list.sort', $this->__config['default_sort']);
+    		}
+    	}
+    	$this->setParam('sort', $this->getState('list.sort'));
+    
+    	if ($this->getState('list.limit'))
+    	{
+    		$this->setParam('limit', $this->getState('list.limit'));
+    	}
+    
+    	$this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
+        
+        if ($this->getParam('sort')) {
+            $this->__cursor->sort($this->getParam('sort'));
+        }
+        if ($this->getParam('limit')) {
+            $this->__cursor->limit($this->getParam('limit'));
+        }
+        if ($this->getParam('skip')) {
+            $this->__cursor->skip($this->getParam('skip'));
+        }
+        
+        $items = array();
+        $paths = array();
+        foreach ($this->__cursor as $doc) {
+        	$parts = array_values(array_filter(explode('/',$doc['path']))); 
+        	foreach ($parts as $part) {
+        		$paths[$part] = $part;
+        	}
+        	
+        }           
+
+        $this->setCondition('slug', array('$in' => array_values($paths)));
+        $this->unsetCondition('_id');
+        
+      	$this->__cursor =  $this->collection()->find($this->conditions(), $this->fields());
+      	
+      	if ($this->getParam('sort')) {
+      		$this->__cursor->sort($this->getParam('sort'));
+      	}
+      	if ($this->getParam('limit')) {
+      		$this->__cursor->limit($this->getParam('limit'));
+      	}
+      	if ($this->getParam('skip')) {
+      		$this->__cursor->skip($this->getParam('skip'));
+      	}
+      	foreach ($this->__cursor as $doc) {
+      		
+      		$items[] = $doc;
+      		 
+      	}
+
+        
+        return $items;
+    }
+    
     
     /**
      * Gets the child categories
