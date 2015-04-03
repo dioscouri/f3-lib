@@ -12,10 +12,15 @@ class Language extends \Dsc\Singleton
     public function get($key, $default=null)
     {
         $slug = \Web::instance()->slug( $key );
-        
+        \FB::log($slug);
         if ($this->model->exists('strings.' . $slug)) 
         {
             return $this->model->{'strings.' . $slug};
+        }
+        
+        if (!(new \Dsc\Mongo\Collections\Translations\Keys)->slugExists($slug)) 
+        {
+            (new \Dsc\Mongo\Collections\Translations\Keys)->set('title', $key)->set('slug', $slug)->save();
         }
         
         return !empty($default) ? $default : $key;
