@@ -1,20 +1,16 @@
 <?php 
-namespace Dsc\Mongo\Collections;
+namespace Dsc\Mongo\Collections\Translations;
 
-class Describable extends \Dsc\Mongo\Collections\Taggable 
+class Keys extends \Dsc\Mongo\Collection 
 {
-    use \Dsc\Traits\Models\Seo;
-    use \Dsc\Traits\Models\Translatable;
+    protected $__collection_name = 'translations.keys';
     
     public $title; // string INDEX
     public $slug; // string INDEX
-    public $description; // text
-    
+
     protected function fetchConditions()
     {
         parent::fetchConditions();
-        
-        $this->translatableFetchConditions();
     
         $filter_keyword = $this->getState('filter.keyword');
         if ($filter_keyword && is_string($filter_keyword))
@@ -24,7 +20,6 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
             $where = array();
             $where[] = array('title'=>$key);
             $where[] = array('slug'=>$key);
-            $where[] = array('description'=>$key);
     
             $this->setCondition('$or', $where);
         }
@@ -54,6 +49,16 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
         return parent::beforeValidate();
     }
     
+    protected function beforeCreate()
+    {
+        if (empty($this->slug) || $this->slugExists($this->slug))
+        {
+            $this->setError('Slug already exists');
+        }
+    
+        return parent::beforeCreate();
+    }
+    
     public function validate()
     {
         if (empty($this->title)) {
@@ -64,32 +69,32 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     }
     
     /**
-     * 
+     *
      * @param string $unique
      * @return string
      */
     public function generateSlug( $unique=true )
     {
-    	if (empty($this->title)) {
-    		$this->setError('A title is required for generating the slug');
-    		return $this->checkErrors();
-    	}
+        if (empty($this->title)) {
+            $this->setError('A title is required for generating the slug');
+            return $this->checkErrors();
+        }
     
-    	$slug = \Web::instance()->slug( $this->title );
+        $slug = \Web::instance()->slug( $this->title );
     
-    	if ($unique)
-    	{
-    		$base_slug = $slug;
-    		$n = 1;
-
-    		while ($this->slugExists($slug))
-    		{
-    			$slug = $base_slug . '-' . $n;
-    			$n++;
-    		}
-    	}
+        if ($unique)
+        {
+            $base_slug = $slug;
+            $n = 1;
     
-    	return $slug;
+            while ($this->slugExists($slug))
+            {
+                $slug = $base_slug . '-' . $n;
+                $n++;
+            }
+        }
+    
+        return $slug;
     }
     
     /**
@@ -100,12 +105,12 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
      */
     public function slugExists( $slug )
     {
-   		$clone = (new static)->load(array('slug'=>$slug, 'type'=>$this->type()));
+        $clone = (new static)->load(array('slug'=>$slug));
     
-    	if (!empty($clone->id)) {
-    		return $clone;
-    	}
+        if (!empty($clone->id)) {
+            return $clone;
+        }
     
-    	return false;
+        return false;
     }
 }

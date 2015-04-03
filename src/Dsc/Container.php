@@ -73,7 +73,11 @@ class Container extends \Joomla\DI\Container
         
         $this->share( 'cookie', function() {
             return \Dsc\Cookie::instance();
-        } );        
+        } );
+        
+        $this->share( 'lang', function() {
+            return \Dsc\Language::instance();
+        } );
     }
 }
 ?>

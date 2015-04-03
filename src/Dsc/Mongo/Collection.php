@@ -299,24 +299,24 @@ class Collection extends \Dsc\Models
     {
         // TODO Store the state
         // TODO Implement caching
-        return $this->fetchItem();
+        return $this->fetchItem($refresh);
     }
     
   /**
      * 
      * @return \Dsc\Mongo\Collection
      */
-    protected function fetchItem()
+    protected function fetchItem($refresh=false)
     {
       
         if ($this->getParam('sort')) {
-        	$this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
+        	$this->__cursor = $this->collection()->find($this->conditions($refresh), $this->fields($refresh));
             $this->__cursor->sort($this->getParam('sort'));
             $this->__cursor->limit(1);
             $this->__cursor->skip(0);
             $doc = $this->__cursor->next();
         } else {
-        	$doc = $this->collection()->findOne($this->conditions(), $this->fields());
+        	$doc = $this->collection()->findOne($this->conditions($refresh), $this->fields($refresh));
         }
         
         $item = null;
@@ -453,7 +453,7 @@ class Collection extends \Dsc\Models
         $this->setParam('limit', $size);
         $this->setParam('skip', $offset * $size);
         
-        $total = $this->collection()->count( $this->conditions() );
+        $total = $this->collection()->count( $this->conditions($refresh) );
         $result = new \Dsc\Pagination( $total, $size );
         $result->items = $this->getItems($refresh);
     

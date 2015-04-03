@@ -500,6 +500,19 @@ class Theme extends \View
         
         $paths[$view] = false;
         
+        // 1st. Check if the requested $view has *.{lang}.php format
+        $lang = $this->app->get('lang');
+        $period_pieces = explode(".", $view);
+        
+        // if not, and there is a set LANGUAGE, try to find that view
+        if (count($period_pieces) == 2 && !empty($lang)) {
+            $lang_view = $period_pieces[0] . "." . $lang . "." . $period_pieces[1];
+            if ($lang_view_found = static::findViewFile($lang_view)) 
+            {
+                return $lang_view_found;
+            }
+        }
+        // otherwise, continue doing the *.php format
         
         // Overrides!
         //If we are overriding the admin, lets look in an admin  folder. 
