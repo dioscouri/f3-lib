@@ -12,7 +12,7 @@ class Language extends \Dsc\Singleton
     public function get($key, $default=null)
     {
         $slug = \Web::instance()->slug( $key );
-        \FB::log($slug);
+
         if ($this->model->exists('strings.' . $slug)) 
         {
             return $this->model->{'strings.' . $slug};
