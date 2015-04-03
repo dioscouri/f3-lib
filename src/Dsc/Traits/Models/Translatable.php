@@ -45,14 +45,7 @@ trait Translatable
             return $this;
         }
         
-        $this->__original_type = $this->__type;
-        
-        $this->__type = $lang . '.' . $this->type();
-        
-        $this->conditions(true); // refresh the conditions        
-        $item = parent::getItem();
-        
-        $this->__type = $this->__original_type;
+        $item = (new static)->load(array('type'=>$lang . '.' . $this->type(), 'slug' => $this->slug));
         
         if (empty($item->id))
         {
