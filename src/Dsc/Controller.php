@@ -90,6 +90,40 @@ class Controller extends Singleton
         return null;
     }
     
+    
+    
+    /**
+     * Requires an identity for the current user,
+     * and either redirects to login screen (if global_app can be determined)
+     * or throws an exception
+     *
+     * @throws \Exception
+     * @return \Dsc\Controller
+     */
+    public function confirmIdentity($message = 'Please confirm password before moving forward')
+    {
+    	$f3 = \Base::instance();
+    	    
+    		$path = $this->inputfilter->clean( $f3->hive()['PATH'], 'string' );
+    		if ($query = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY ))
+    		{
+    			$path .= '?' . $query;
+    		}
+   	
+    		if(!empty($message)) {
+    			\Dsc\System::addMessage( $message );
+    		}
+    		 
+    		\Dsc\System::instance()->get('session')->set('site.confirm.redirect', $path);
+    		$f3->reroute('/confirm/identity');
+    		
+    		
+    
+    		return false;
+    
+    	return $this;
+    }
+    
     /**
      * Requires an identity for the current user,
      * and either redirects to login screen (if global_app can be determined)
