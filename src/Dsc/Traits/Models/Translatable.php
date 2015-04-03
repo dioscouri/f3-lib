@@ -31,6 +31,12 @@ trait Translatable
         return $this->__type;
     }
     
+    /**
+     * Does a translation exist for this item?
+     * 
+     * @param unknown $lang
+     * @return \Dsc\Traits\Models\Translatable|boolean|unknown
+     */
     public function translationExists( $lang )
     {
         $default_lang = 'en';
@@ -54,6 +60,31 @@ trait Translatable
         }
         
         return $item;
+    }
+    
+    /**
+     * Get the original item
+     * 
+     * @return \Dsc\Traits\Models\Translatable|unknown
+     */
+    public function translationSource()
+    {
+        $default_lang = 'en';
+        if (empty($this->language) || $this->language == $default_lang) {
+            return $this;
+        }
+        
+        $item = (new static)->load(array('type'=>$this->__type, 'slug' => $this->slug));        
+        
+        return $item;
+    }
+    
+    /**
+     * Get the translations available for this item
+     */
+    public function translations()
+    {
+        // SELECT ->language where slug = X and type = Y
     }
     
     public function getItem($refresh=false)
