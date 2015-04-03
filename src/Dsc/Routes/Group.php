@@ -138,9 +138,9 @@ abstract class Group extends \Dsc\Singleton
                 'route' => '/edit/@id' 
             ),
         	'editinline' => array(
-        				'action' => 'editInline',
-        				'request' => 'POST',
-        				'route' => '/edit/inline'
+				'action' => 'editInline',
+				'request' => 'POST',
+				'route' => '/edit/inline'
         	),
             'update' => array(
                 array(
@@ -158,7 +158,12 @@ abstract class Group extends \Dsc\Singleton
                     ),
                     'route' => '/delete/@id' 
                 ) 
-            ) 
+            ),
+            'translate' => array(
+                'action' => 'translate',
+                'request' => 'GET',
+                'route' => '/translate/@id/@code'
+            ),
         );
         if ((bool) $params['rest_actions'])
         {

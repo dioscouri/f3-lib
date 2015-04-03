@@ -30,7 +30,7 @@ class Nodes extends \Dsc\Mongo\Collection
         $filter_type = $this->getState('filter.type');
         if ($filter_type) {
             if (is_bool($filter_type) && $filter_type) {
-                $this->setCondition('type', $this->__type );
+                $this->setCondition('type', $this->type() );
             } elseif (strlen($filter_type)) {
                 $this->setCondition('type', $filter_type );
             }
@@ -204,7 +204,7 @@ class Nodes extends \Dsc\Mongo\Collection
         
         if (empty($this->type))
         {
-            $this->type = $this->__type;
+            $this->type = $this->type();
         }
         
         return parent::beforeValidate();

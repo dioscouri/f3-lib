@@ -6,7 +6,7 @@ namespace Dsc\Traits\Controllers;
  */
 trait CrudItemCollection
 {
-    use\Dsc\Traits\Controllers\Crud;
+    use \Dsc\Traits\Controllers\Crud;
 
     /**
      * These MUST be defined in your controller.
@@ -357,8 +357,8 @@ trait CrudItemCollection
         }
         
         $custom_redirect = !empty($data['__return']) ? base64_decode($data['__return']) : null;
-        $redirect = $custom_redirect ? $custom_redirect : $this->list_route;     
-       
+        $redirect = $custom_redirect ? $custom_redirect : $this->list_route;
+        
         $f3 = \Base::instance();
         $model = $this->getModel();
         $this->item = $this->getItem();
@@ -399,50 +399,80 @@ trait CrudItemCollection
         
         return $this;
     }
+
+    public function editInline()
+    {
+        try
+        {
+            $id = $this->inputfilter->clean($this->app->get('POST.pk'), 'alnum');
+            $name = $this->inputfilter->clean($this->app->get('POST.name'), 'string');
+            $value = $this->inputfilter->clean($this->app->get('POST.value'), 'string');
+            
+            if (empty($id) || empty($name) || empty($value))
+            {
+                throw new \Exception('One of your values is empty');
+            }
+            
+            if (!$this->canUpdate(array(
+                'id' => $id,
+                'name' => $name,
+                'value' => $value
+            ), $this->getItemKey()))
+            {
+                throw new \Exception('Not allowed to edit record');
+            }
+            
+            $mongoItem = $model = $this->getModel()
+                ->setState('filter.id', $id)
+                ->getItem();
+            
+            $original = $mongoItem->get($name);
+            $mongoItem->set($name, $value);
+            $mongoItem->save();
+            header("Content-type: application/json; charset=utf-8");
+            
+            echo json_encode(array(
+                'success' => true,
+                'original' => $original
+            ));
+            
+            exit();
+        }
+        catch (\Exception $e)
+        {
+            $this->app->error(404);
+            echo json_encode(array(
+                'success' => false,
+                'msg' => $e->getMessage()
+            ));
+        }
+    }
     
-    
-    public function editInline() {
-    	
-    	
-    	try {
-    	
-    		
-    		
-    		$id = $this->inputfilter->clean( $this->app->get('POST.pk'), 'alnum' );
-    		$name = $this->inputfilter->clean( $this->app->get('POST.name'), 'string' );
-    		$value = $this->inputfilter->clean( $this->app->get('POST.value'), 'string' );
-    		
-    		if(empty($id) || empty($name) || empty($value) ) {
-    			throw new \Exception('One of your values is empty');
-    		}
-    		
-    		if (!$this->canUpdate(array('id' => $id, 'name' => $name, 'value' => $value), $this->getItemKey())) {
-    			throw new \Exception('Not allowed to edit record');
-    		}
-    		
-    
-    		
-    		$mongoItem = $model = $this->getModel()
-    		->setState('filter.id', $id)->getItem();;
-    		
-    		$original = $mongoItem->get($name);
-    		$mongoItem->set($name, $value);
-    		$mongoItem->save();
-    		header("Content-type: application/json; charset=utf-8");
-    		
-    		echo json_encode(array('success' => true, 'original' => $original));
-    		
-    		exit;
-    		
-    	} catch (\Exception $e) {
-    		$this->app->error(404);
-    		echo json_encode(array('success' => false, 'msg'=>$e->getMessage() ));
-    	}
-    	
-    	
-    	
-    	
-    	
-    	
+    public function translate()
+    {
+        // using $id and $code, create a clone of the object in the new language
+        $id = $this->app->get('PARAMS.id');
+        $code = $this->app->get('PARAMS.code');
+        
+        try {
+            $item = $model = $this->getModel()->setState('filter.id', $id)->getItem();
+            $clone = $item->set('id', null)->set('_id', null)->setLang( $code )->set('type', $item->type() )->save();
+            
+            \Dsc\System::addMessage('Translation created.  You are now editing the translation.');
+            
+            $new_id = $clone->get($this->getItemKey());
+            $route = str_replace('{id}', $new_id, $this->edit_item_route);
+            
+            $this->app->reroute( $route );
+            
+        }
+        catch (\Exception $e)
+        {
+            \Dsc\System::addMessage('Translation failed with the following errors:', 'error');
+            \Dsc\System::addMessage($e->getMessage(), 'error');            
+            $route = str_replace('{id}', $id, $this->edit_item_route);
+            $this->app->reroute( $route );
+        }        
+        
     }
 }

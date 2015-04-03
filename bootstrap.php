@@ -9,6 +9,8 @@ class DscBootstrap extends \Dsc\Bootstrap
     {
         parent::preAdmin();
         
+        $this->setLang();
+        
         $this->app->route('POST /admin/log [ajax]', '\DscBootstrap->log');
     }
     
@@ -16,6 +18,8 @@ class DscBootstrap extends \Dsc\Bootstrap
     {
         parent::preSite();
     
+        $this->setLang();
+        
         $this->app->route('POST /log [ajax]', '\DscBootstrap->log');
     }
     
@@ -47,6 +51,34 @@ class DscBootstrap extends \Dsc\Bootstrap
             $target = $this->app->get('PATH_ROOT') . 'public/DscAssets';
             $source = realpath( $this->app->get('PATH_ROOT') . 'vendor/dioscouri/f3-lib/src/Dsc/Assets' );
             $res = symlink($source, $target);
+        }
+    }
+    
+    protected function setLang()
+    {
+        //$this->app->set('FALLBACK','en'); // this would set english as the fallback language
+        $this->app->set('lang', 'en'); // set from config
+        $this->app->set('PREFIX', '_');
+    
+        $domain = strtolower($this->app->get('HOST'));
+        $pieces = explode(".", $domain);
+        // does the first piece match any of the installed/enabled languages?
+        $langs = array('es'); // TODO get from installed langs
+        if (in_array($pieces[0], $langs))
+        {
+            $this->app->set('LANGUAGE', $pieces[0]);
+            $this->app->set('lang', $pieces[0]);
+            // TODO Load the fallback's translation key/value pairs
+            // TODO Load this language's translation key/value pairs
+            /*
+             $model = new \Translations\Models\Strings;
+            $model = $model->load(array('language_code' => $pieces[0]));
+            $strings = array();
+            if (!empty($model->strings)) {
+            $strings = $model->strings;
+            }
+            $this->app->mset($strings, '_');
+            */
         }
     }
 }
