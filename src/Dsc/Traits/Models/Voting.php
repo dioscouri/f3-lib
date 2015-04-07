@@ -37,6 +37,7 @@ trait Voting
        return $votes;
     	
     }
+    
     //TODO this
     public function votingRemoveVote($vote, $user = null)
     {

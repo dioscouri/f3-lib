@@ -46,21 +46,33 @@ trait Voting
 		}
 		
 		
-		$document->votingAcceptVote($vote, $user);
+		$votes = $document->votingAcceptVote($vote, $user);
 			
+		$this->app->set('votes', $votes);
 		
+		$this->votingDisplayResult();
 		
 		} catch (\Exception $e) {
 			
 			
 		}
-		
-		
-		
-		
-		
+
 	}
 	
+	/*
+	 * THIS WOULD BE THE METHOD YOU WOULD OVERRIDE IN YOUR CONTROLLER FOR DISPLAY
+	 */
+	protected function votingDisplayResult() {
+		
+			if ($this->app->get( 'AJAX' ))
+            {
+                return $this->outputJson( $this->getJsonResponse( array(
+                    'result'=>true,
+                	'votes' => $this->app->get('votes')
+                ) ) );                
+            }
+         		
+	}
 	
 	
 	
