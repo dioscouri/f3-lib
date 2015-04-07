@@ -59,7 +59,15 @@ class Queue extends \Dsc\Singleton
                     'when' => array( '$lte' => time() ),
                 );
                 
+                if($batch) {
+                	$conditions['batch'] = $batch;
+                } else {
+                	$conditions['batch'] = array('$exists' => false);
+                }
+                
                 $__ids = \Dsc\Mongo\Collections\QueueTasks::collection()->distinct('_id', $conditions);
+
+                
                 if (empty($__ids))
                 {
                     $cycles++;
