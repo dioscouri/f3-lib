@@ -5,6 +5,12 @@ class Keys extends \Dsc\Mongo\Collection
 {
     protected $__collection_name = 'translations.keys';
     
+    protected $__config = array(
+        'default_sort' => array(
+            'title' => 1
+        ),
+    );
+    
     public $title; // string INDEX
     public $slug; // string INDEX
 
