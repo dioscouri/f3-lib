@@ -123,7 +123,7 @@ class Navigation extends \Dsc\Mongo\Collections\Nested
     public function getRoots()
     {
         $return = array();
-        $return = $this->emptyState()->setState('filter.root', true)->getList();
+        $return = $this->emptyState()->setState('filter.root', true)->setState('list.sort', array( 'title'=> 1 ))->getList();
     
         return $return;
     }
