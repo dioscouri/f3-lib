@@ -33,6 +33,14 @@ class Theme extends \View
     }
 
     /**
+     * 
+     */
+    public function getIdentity()
+    {
+        return $this->auth->getIdentity();
+    }
+
+    /**
      * Register the path for a theme
      *
      * @param unknown $path            
