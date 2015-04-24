@@ -37,11 +37,13 @@ class DscBootstrap extends \Dsc\Bootstrap
     protected function runAdmin()
     {
         $this->checkSymlink();
+        $this->checkPaths();
     }
     
     protected function runSite()
     {
         $this->checkSymlink();
+        $this->checkPaths();
     }
     
     protected function checkSymlink()
@@ -51,6 +53,27 @@ class DscBootstrap extends \Dsc\Bootstrap
             $target = $this->app->get('PATH_ROOT') . 'public/DscAssets';
             $source = realpath( $this->app->get('PATH_ROOT') . 'vendor/dioscouri/f3-lib/src/Dsc/Assets' );
             $res = symlink($source, $target);
+        }
+    }
+    
+    protected function checkPaths()
+    {
+        if (!is_dir($this->app->get('PATH_ROOT') . 'logs'))
+        {
+            $target = $this->app->get('PATH_ROOT') . 'logs';
+            mkdir($target, 0755);
+        }
+        
+        if (!is_dir($this->app->get('PATH_ROOT') . 'tmp'))
+        {
+            $target = $this->app->get('PATH_ROOT') . 'tmp';
+            mkdir($target, 0755);
+        }
+        
+        if (!is_dir($this->app->get('PATH_ROOT') . 'cache'))
+        {
+            $target = $this->app->get('PATH_ROOT') . 'cache';
+            mkdir($target, 0755);
         }
     }
     
