@@ -565,7 +565,14 @@ class Collection extends \Dsc\Models
      */
     public function getDb()
     {
-        return \Dsc\System::instance()->get('mongo');
+        $mongo = \Dsc\System::instance()->get('mongo');
+        if (is_a($mongo, '\MongoDB')) {
+            return $mongo;
+        } else if (is_a($mongo, '\DB\Mongo')) {
+            return $mongo->db();
+        }
+        
+        return $mongo;
     }
     
     /**
