@@ -4,7 +4,7 @@ namespace Dsc\Traits\Controllers;
 trait Voting
 {
     
-	//var $votingRequireLogin = false;
+	//var $votingRequireLogin = true;
 	//var $acceptableVotes = array();
 	
 	
@@ -24,7 +24,7 @@ trait Voting
 		$user = null;
 		try {
 			
-		if(!empty($this->votingRequireLogin)) {
+		if($this->votingRequireLogin) {
 			$this->requireIdentity('Please Login to register vote.');
 			$user = $this->getIdentity();
 		}
@@ -50,7 +50,7 @@ trait Voting
 			
 		$this->app->set('votes', $votes);
 		
-		$this->votingDisplayResult();
+		echo $this->votingDisplayResult();
 		
 		} catch (\Exception $e) {
 			

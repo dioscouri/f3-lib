@@ -858,7 +858,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     public static function roots()
     {
         $model = new static;
-        $return = $model->setState('filter.root', true)->setState('filter.type', $model->type() )->getItems();
+        $return = $model->setState('filter.root', true)->setState('filter.type', $model->type() )->setState('list.sort', array( 'title'=> 1 ))->getItems();
     
         return $return;
     }
