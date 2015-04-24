@@ -43,10 +43,33 @@ class Url extends Singleton
     	if($get) {
     		$string = $_SERVER['REQUEST_URI'];	
     	} else {
-    		$string =explode('?', $_SERVER['REQUEST_URI'])[0];
+    		$string = explode('?', $_SERVER['REQUEST_URI'])[0];
     	}
     	$full = $url->app->get('SCHEME') . "://" . $url->app->get('HOST') . $url->app->get('BASE')  . $string;
     	
     	return $full;
+    }
+    
+    /**
+     * 
+     * @return string
+     */
+    public static function domain()
+    {
+        $url = static::instance();
+        
+        if ($domain = $url->app->get('DOMAIN')) 
+        {
+            return $domain;
+        }
+    
+        $pieces = parse_url($url::base());
+        $domain = isset($pieces['host']) ? $pieces['host'] : '';
+        if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) 
+        {
+            return $regs['domain'];
+        }
+        
+        return $url->app->get('HOST');        
     }
 }
