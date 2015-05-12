@@ -62,7 +62,7 @@ class Queue extends \Dsc\Singleton
                 if($batch) {
                 	$conditions['batch'] = $batch;
                 } else {
-                	$conditions['batch'] = array('$exists' => false);
+                	$conditions['batch'] = null;
                 }
                 
                 $__ids = \Dsc\Mongo\Collections\QueueTasks::collection()->distinct('_id', $conditions);
