@@ -925,4 +925,59 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         
         return $this->set( 'thumb', $thumb )->save();
     }
+    
+    
+	protected function beforeDelete()
+    {
+    	
+    
+    	
+        if (empty($this->__options['skip_listeners']))
+        {
+            $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
+            $event = (new \Joomla\Event\Event( 'beforeDelete' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
+            if ($event->isStopped()) {
+                $this->setError( $event->getArgument('error') );
+            }            
+        }
+                
+      	if(empty($this->getErrors())) {
+      		\Dsc\Mongo\Collections\Trash::trash($this);
+      	}
+
+        
+        return $this->checkErrors();
+    }
+    
+    
+    protected function afterDelete()
+    {
+	     
+    	try {
+    		if($this->storage == 'gridfs') {
+    			$collChunkName = $this->collectionNameGridFS() . ".chunks";
+    			$collChunks = $this->getDb()->{$collChunkName};
+    			$collChunks->remove(['files_id'=> $this->_id]);
+    		}
+	     	
+	     	
+	     	$doc = (new \Dsc\Mongo\Collections\Trash)->setCondition('document._id', $this->_id)->getItem();
+	     	$doc->remove();
+	     } catch (\Exception $e) {
+	     	//restore item from trash
+	     	$doc = (new \Dsc\Mongo\Collections\Trash)->setCondition('document._id', $this->_id)->getItem();
+	     	if(!empty($doc)) {
+	     		$doc->restore();
+	     	}
+	     	
+	     }
+    	
+    	
+    	
+    	
+    	parent::afterDelete();
+    }
+    
+    
 }
