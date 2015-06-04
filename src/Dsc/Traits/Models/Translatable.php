@@ -129,4 +129,27 @@ trait Translatable
         
         return $item;
     }
+    
+    public function getItems($refresh=false) 
+    {
+        $items = parent::getItems($refresh);
+        
+        if (!empty($items)) 
+        {
+            foreach ($items as $key=>$item) 
+            {
+                // does a translation exist?
+                // if so, use it
+                $model = (new static)->setState('filter.slug', $item->slug);
+                if ($translated = $model->getItem($refresh)) 
+                {
+                    if ($translated->id != $item->id) {
+                        $items[$key] = $translated;
+                    }
+                }
+            }
+        }
+        
+        return $items;
+    }
 }
