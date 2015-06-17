@@ -208,7 +208,7 @@ class Collection extends \Dsc\Models
     protected function fetchItems()
     {
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
-        
+        \FB::log($this->conditions());
         if ($this->getParam('sort')) {
             $this->__cursor->sort($this->getParam('sort'));
         }
@@ -732,11 +732,11 @@ class Collection extends \Dsc\Models
      * @param array $sort
      * @return \Dsc\Mongo\Collection
      */
-    public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
+    public function load(array $conditions=array(), array $fields=array() )
     {
-    	if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
-        {
-        	$this->bind( $item );
+        $doc = $this->collection()->findOne($conditions, $fields);
+        if ($doc) {
+            $this->bind( $doc );
         }
         
         return $this;

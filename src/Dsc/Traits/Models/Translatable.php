@@ -9,7 +9,16 @@ trait Translatable
     
     protected function translatableFetchConditions()
     {
-        
+        $filter_language = $this->getState('filter.language');
+        if (is_bool($filter_language) && $filter_language) 
+        {
+            $default_lang = 'en';
+            $this->setCondition('language', array('$in' => array( "", null, $default_lang )));
+        } 
+        elseif (strlen($filter_language))
+        {
+            $this->setCondition('language', $filter_language);
+        }
     }
     
     public function lang()
@@ -69,7 +78,7 @@ trait Translatable
             return $this;
         }
         
-        $item = (new static)->load(array('type'=>$lang . '.' . $this->type(), 'slug' => $this->slug));
+        $item = (new static)->load(array('type'=>$lang . '.' . $this->originalType(), 'slug' => $this->slug));
         
         if (empty($item->id))
         {
@@ -126,11 +135,11 @@ trait Translatable
             $lang = \Base::instance()->get('lang');            
         }
 
-        $default_lang = 'en';
+        $default_lang = 'en'; // TODO get from a config
         if ($lang && $lang != $default_lang)
         {
             //\FB::log( $lang . '.' . $this->type());
-            $this->__type = $lang . '.' . $this->type();
+            $this->__type = $lang . '.' . $this->originalType();
             
             $item = parent::getItem($refresh);
             if (empty($item->id)) 
@@ -157,6 +166,13 @@ trait Translatable
     public function getItems($refresh=false) 
     {
         $items = parent::getItems($refresh);
+        
+        /**
+         * Allow a model that extends \Content to skip the extra work
+         */
+        if (!empty($this->__skip_translatable)) {
+            return $items;
+        }
         
         if (!empty($items)) 
         {
