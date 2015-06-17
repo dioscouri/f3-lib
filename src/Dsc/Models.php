@@ -47,6 +47,16 @@ class Models extends \Dsc\Magic
         {
             $this->bind( $source, $this->__config );
         }
+        
+        $this->init();
+    }
+    
+    /**
+     * Overridable, chainable init function
+     */
+    public function init()
+    {
+        return $this;
     }
     
     /**

@@ -72,4 +72,18 @@ class Url extends Singleton
         
         return $url->app->get('HOST');        
     }
+    
+    /**
+     * Returns the base URL for the site, including the trailing slash
+     *
+     * @return string
+     */
+    public static function path()
+    {
+        $url = static::instance();
+    
+        $path = $url->app->get('PATH');
+    
+        return $path;
+    }
 }
