@@ -45,7 +45,7 @@ trait Translatable
     
     public function originalType()
     {
-        $type = $this->type();
+        $type = $this->__type;
         
         if ($lang = $this->lang()) 
         {
