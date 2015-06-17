@@ -9,7 +9,20 @@ trait Translatable
     
     protected function translatableFetchConditions()
     {
-
+        
+    }
+    
+    public function lang()
+    {
+        $lang = null;
+        
+        if ($this->__lang) {
+            $lang = $this->__lang;
+        } else if ($this->language) {
+            $lang = $this->language;
+        }
+        
+        return $lang;
     }
     
     public function setLang( $code ) 
@@ -22,13 +35,24 @@ trait Translatable
     
     public function type()
     {
-        if ($this->__lang) {
-            $this->__type = $this->__lang . '.' . $this->__type;
-        } else if ($this->language) {
-            $this->__type = $this->language . '.' . $this->__type;
+        if ($lang = $this->lang()) 
+        {
+            $this->__type = $lang . '.' . $this->__type;
         }
         
         return $this->__type;
+    }
+    
+    public function originalType()
+    {
+        $type = $this->type();
+        
+        if ($lang = $this->lang()) 
+        {
+            $type = str_replace($lang.'.', '', $type);
+        }
+    
+        return $type;
     }
     
     /**
