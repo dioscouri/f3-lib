@@ -22,17 +22,20 @@ class QueueTasks extends \Dsc\Mongo\Collection
     
     public function complete($message=null)
     {
-        $model = new \Dsc\Mongo\Collections\QueueArchives( $this->cast() );
-        $model->completed = \Dsc\Mongo\Metastamp::getDate( 'now' );
-        $model->message = $message;
-        
+
         try {
-            $model->save();
+        	if($this->archive) {
+	        	$model = new \Dsc\Mongo\Collections\QueueArchives( $this->cast() );
+	        	$model->completed = \Dsc\Mongo\Metastamp::getDate( 'now' );
+	        	$model->message = $message;
+	            $model->save();
+        	}
+        	
             $this->remove();
         }
         catch (\Exception $e) 
         {
-            
+            throw new \Exception($e->getMessage());
         }
         
         return $this;
