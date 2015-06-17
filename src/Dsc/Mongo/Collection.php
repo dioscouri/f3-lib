@@ -208,7 +208,7 @@ class Collection extends \Dsc\Models
     protected function fetchItems()
     {
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
-        \FB::log($this->conditions());
+
         if ($this->getParam('sort')) {
             $this->__cursor->sort($this->getParam('sort'));
         }
