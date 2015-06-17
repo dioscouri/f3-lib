@@ -24,6 +24,9 @@ class QueueTasks extends \Dsc\Mongo\Collection
     {
 
         try {
+        	//remove the task from the queue
+        	$this->remove();
+        	//move to archive 
         	if($this->archive) {
 	        	$model = new \Dsc\Mongo\Collections\QueueArchives( $this->cast() );
 	        	$model->completed = \Dsc\Mongo\Metastamp::getDate( 'now' );
@@ -31,7 +34,7 @@ class QueueTasks extends \Dsc\Mongo\Collection
 	            $model->save();
         	}
         	
-            $this->remove();
+            
         }
         catch (\Exception $e) 
         {
