@@ -5,7 +5,7 @@ trait Translatable
 {
     protected $__lang;
     protected $__fallback_translatable = true;
-    protected $__skip_translatable = false;
+    protected $__translatable = false;
     
     protected function translatableFetchConditions()
     {
@@ -118,7 +118,7 @@ trait Translatable
         /**
          * Allow a model that extends \Content to skip the extra query
          */
-        if (!empty($this->__skip_translatable)) {
+        if (!$this->__translatable) {
             return parent::getItem($refresh);
         }
         
@@ -132,7 +132,8 @@ trait Translatable
         // if not, then use the default from the \Base                
         else 
         {
-            $lang = \Base::instance()->get('lang');            
+            $lang = \Base::instance()->get('lang');    
+           
         }
 
         $default_lang = 'en'; // TODO get from a config
@@ -158,6 +159,7 @@ trait Translatable
         else 
         {
             $item = parent::getItem($refresh);
+            
         }
         
         return $item;
@@ -170,7 +172,7 @@ trait Translatable
         /**
          * Allow a model that extends \Content to skip the extra work
          */
-        if (!empty($this->__skip_translatable)) {
+        if (!$this->__translatable) {
             return $items;
         }
         
@@ -180,10 +182,17 @@ trait Translatable
             {
                 // does a translation exist?
                 // if so, use it
+                
+            	
                 $model = (new static)->setState('filter.slug', $item->slug);
                 if ($translated = $model->getItem($refresh)) 
                 {
+                	echo $translated->title;
+                	echo $item->title;
+                	 die();
+                	
                     if ($translated->id != $item->id) {
+                    	
                         $items[$key] = $translated;
                     }
                 }
