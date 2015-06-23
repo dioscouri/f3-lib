@@ -25,6 +25,12 @@ class Sessions extends \Dsc\Mongo\Collection
     
     public $path;
     
+    public $__indexes = array(
+    		['user_id' => 1],
+    		['session_id' => 1]
+    
+    );
+    
     protected function fetchConditions()
     {
         parent::fetchConditions();
@@ -268,4 +274,6 @@ class Sessions extends \Dsc\Mongo\Collection
     
         return $user;
     }
+    
+   
 }

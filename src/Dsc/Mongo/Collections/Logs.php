@@ -15,6 +15,10 @@ class Logs extends \Dsc\Mongo\Collection
         ),
     );
     
+    public static $__indexes = array(
+    		['created.microtime' => -1]
+    );
+    
     public static function add( $message, $priority='INFO', $category='General' )
     {
         $model = new static;
@@ -99,4 +103,6 @@ class Logs extends \Dsc\Mongo\Collection
     
         return $distinct;
     }
+    
+   
 }

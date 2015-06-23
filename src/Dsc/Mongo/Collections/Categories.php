@@ -26,6 +26,10 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
         ),
     );
     
+    public static $__indexes = array(
+    		['path' => 1]
+    );
+    
     protected function fetchConditions()
     {   
         parent::fetchConditions();
@@ -400,5 +404,7 @@ class Categories extends \Dsc\Mongo\Collections\Nodes
     {
     	return (new static)->setState('filter.parent',$this->id)->getList();
     }
+    
+    
     
 }

@@ -242,6 +242,11 @@ abstract class Bootstrap extends \Dsc\Singleton
     	$this->postBase( 'Site' );
     }
     
+    public function createIndexes()
+    {
+    
+    }
+    
     /**
      * What's the name of this app?
      */

@@ -20,6 +20,10 @@ class QueueTasks extends \Dsc\Mongo\Collection
         ),
     );
     
+    public static $__indexes = array(
+    		['when' => 1]    
+    );
+    
     public function complete($message=null)
     {
 
@@ -186,4 +190,6 @@ class QueueTasks extends \Dsc\Mongo\Collection
         
         return parent::validate();
     }
+    
+   
 }

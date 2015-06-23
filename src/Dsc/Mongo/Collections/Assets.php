@@ -21,6 +21,10 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         ),
     );
 
+    public static $__indexes = array(
+    		['metadata.created.time' => 1],
+    		['slug' => 1]
+    );
     /**
      * This is static so you can do
      * YourModel::collection()->find() or anything else with the MongoCollection object

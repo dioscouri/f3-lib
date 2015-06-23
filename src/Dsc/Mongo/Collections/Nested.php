@@ -25,6 +25,11 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         ),
     );
     
+    public static $__indexes = array(
+    		['tree' => 1],
+    		['lft' => 1]
+    );
+    
     protected function fetchConditions()
     {
         parent::fetchConditions();
@@ -862,5 +867,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
     
         return $return;
     }
+    
+  
 }
 ?>
