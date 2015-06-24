@@ -99,7 +99,7 @@ abstract class Bootstrap extends \Dsc\Singleton
     {
     	//build Mongo Indexes for all Apps Models
     	
-    	$this->registerModels();
+    	$this->registerModelsIndexes();
     }
     
     protected function runCli()
@@ -177,7 +177,7 @@ abstract class Bootstrap extends \Dsc\Singleton
         \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
     }
     
-    protected function registerModels() {
+    protected function registerModelsIndexes() {
     	$f3 = \Base::instance();
     	
     	// register this app's view files with the theme
@@ -188,14 +188,32 @@ abstract class Bootstrap extends \Dsc\Singleton
     		
     		foreach ($iterator as $fileinfo) {
     			if ($fileinfo->isFile()) {
-    				require_once $dir.'/'. $fileinfo->getFilename();
+    				if ($fileinfo->getExtension() == 'php') {
+    					//require_once $dir.'/'. $fileinfo->getFilename();  					
+    					$name = ucfirst(str_replace('.php','',$fileinfo->getFilename()));
+    					$class = '\\'.$this->namespace .'\Models\\'.$name;
+    					if(class_exists ($class)) {
+    						
+    							$model = (new $class);
+    						
+    							if(method_exists($model, 'DscAppCreateIndexes') && $model instanceof \Dsc\Mongo\Collection) {
+	    								try {
+	    									$model->DscAppCreateIndexes();
+
+	    								} catch (\Exception $e) {
+	    									\Dsc\System::addMessage( $e->getMessage(), 'error');
+	    								}
+    							}	
+    					}
+    				}
+    				
+    				
+    				
+    				
     			}
     		}
  
     	}
-    	
-    	
-    	
     }
 
     /**
