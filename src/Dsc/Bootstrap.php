@@ -178,9 +178,7 @@ abstract class Bootstrap extends \Dsc\Singleton
     }
     
     protected function registerModelsIndexes() {
-    	$f3 = \Base::instance();
-    	
-    	// register this app's view files with the theme
+
     	$dir = $this->dir . '/src/' . $this->namespace . '/Models';
     	if (file_exists($dir))
     	{
