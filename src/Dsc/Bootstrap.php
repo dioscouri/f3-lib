@@ -95,6 +95,12 @@ abstract class Bootstrap extends \Dsc\Singleton
     {
         $this->runBase('Site');
     }
+    protected function runDaignostic()
+    {
+    	//build Mongo Indexes for all Apps Models
+    	
+    	$this->registerModels();
+    }
     
     protected function runCli()
     {
@@ -169,6 +175,27 @@ abstract class Bootstrap extends \Dsc\Singleton
         
         // register the app's shared views
         \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
+    }
+    
+    protected function registerModels() {
+    	$f3 = \Base::instance();
+    	
+    	// register this app's view files with the theme
+    	$dir = $this->dir . '/src/' . $this->namespace . '/Models';
+    	if (file_exists($dir))
+    	{
+    		$iterator = new \DirectoryIterator($dir);
+    		
+    		foreach ($iterator as $fileinfo) {
+    			if ($fileinfo->isFile()) {
+    				require_once $dir.'/'. $fileinfo->getFilename();
+    			}
+    		}
+ 
+    	}
+    	
+    	
+    	
     }
 
     /**

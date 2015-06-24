@@ -14,6 +14,16 @@ trait Publishable
         'end' => null
     );
 
+    
+    
+    public function DscAppCreateIndexes() {
+    	$this->collection()->createIndex(['publication.status'=> 1]);
+    	
+    	parent::DscAppCreateIndexes();
+    
+    }
+    
+    
     /**
      * Checks if the model is published as of today
      *
