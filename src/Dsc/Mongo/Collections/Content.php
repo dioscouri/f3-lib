@@ -154,4 +154,9 @@ class Content extends \Dsc\Mongo\Collections\Describable
         return $abstract;
     }
     
+    public function createIndexes($indexes = null) {
+    	$this->publishableCreateIndexes();
+    	parent::createIndexes();
+    }
+    
 }

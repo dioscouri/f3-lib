@@ -55,20 +55,20 @@ class Collection extends \Dsc\Models
         return $this->__config['default_sort'];
     }
     
-    public function createIndexes() {
-    	
-    	if(!empty(static::$__indexes)) {
-    		$indexes = static::$__indexes;
-  	    	
-	    	if(!empty($indexes) && is_array($indexes)) {
-	    		foreach($indexes as $index) {
-	    			$this->collection()->createIndex($index);
-	    			
-	    		}	
-	    	}
-    	}
-
-    }
+	public function createIndexes($indexes = null) {
+		if (empty ( $indexes )) {
+			if (! empty ( static::$__indexes )) {
+				$indexes = static::$__indexes;
+			}
+		}
+		
+		if (! empty ( $indexes ) && is_array ( $indexes )) {
+			foreach ( $indexes as $index ) {
+				$this->collection ()->createIndex ( $index );
+			}
+		}
+	}
+	
     /**
      * Manually set a query param without using setState()
      *

@@ -194,7 +194,7 @@ abstract class Bootstrap extends \Dsc\Singleton
     						$model = (new $class);
     						if(method_exists($model, 'createIndexes') && $model instanceof \Dsc\Mongo\Collection) {
 	    						try {
-	    							$model->DscAppCreateIndexes();
+	    							$model->createIndexes();
 
 	    						} catch (\Exception $e) {
 	    									\Dsc\System::addMessage( $e->getMessage(), 'error');

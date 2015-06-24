@@ -16,10 +16,12 @@ trait Publishable
 
     
     
-    public function DscAppCreateIndexes() {
-    	$this->collection()->createIndex(['publication.status'=> 1]);
+    public function publishableCreateIndexes() {
     	
-    	parent::DscAppCreateIndexes();
+    	$indexes = [];
+    	$indexes[] = ['publication.status'=> 1];
+    	    	
+    	parent::createIndexes($indexes);
     
     }
     
