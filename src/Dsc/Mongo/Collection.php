@@ -55,7 +55,7 @@ class Collection extends \Dsc\Models
         return $this->__config['default_sort'];
     }
     
-    public function DscAppCreateIndexes() {
+    public function createIndexes() {
     	
     	if(!empty(static::$__indexes)) {
     		$indexes = static::$__indexes;

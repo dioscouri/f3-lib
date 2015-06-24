@@ -193,26 +193,19 @@ abstract class Bootstrap extends \Dsc\Singleton
     					$name = ucfirst(str_replace('.php','',$fileinfo->getFilename()));
     					$class = '\\'.$this->namespace .'\Models\\'.$name;
     					if(class_exists ($class)) {
-    						
-    							$model = (new $class);
-    						
-    							if(method_exists($model, 'DscAppCreateIndexes') && $model instanceof \Dsc\Mongo\Collection) {
-	    								try {
-	    									$model->DscAppCreateIndexes();
+    						$model = (new $class);
+    						if(method_exists($model, 'createIndexes') && $model instanceof \Dsc\Mongo\Collection) {
+	    						try {
+	    							$model->DscAppCreateIndexes();
 
-	    								} catch (\Exception $e) {
+	    						} catch (\Exception $e) {
 	    									\Dsc\System::addMessage( $e->getMessage(), 'error');
-	    								}
-    							}	
+	    						}
+    						}	
     					}
     				}
-    				
-    				
-    				
-    				
     			}
     		}
- 
     	}
     }
 
