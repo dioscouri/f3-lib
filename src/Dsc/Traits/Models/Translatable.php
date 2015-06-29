@@ -182,17 +182,10 @@ trait Translatable
             {
                 // does a translation exist?
                 // if so, use it
-                
-            	
                 $model = (new static)->setState('filter.slug', $item->slug);
                 if ($translated = $model->getItem($refresh)) 
                 {
-                	echo $translated->title;
-                	echo $item->title;
-                	 die();
-                	
                     if ($translated->id != $item->id) {
-                    	
                         $items[$key] = $translated;
                     }
                 }

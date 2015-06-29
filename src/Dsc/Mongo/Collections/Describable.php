@@ -14,6 +14,16 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     		['slug' => -1]
     );
     
+    /**
+     * Overridable, chainable init function
+     */
+    public function init()
+    {
+        $this->__translatable = true;
+        
+        return parent::init();
+    }
+    
     protected function fetchConditions()
     {
         parent::fetchConditions();
