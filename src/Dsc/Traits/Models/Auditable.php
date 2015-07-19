@@ -7,4 +7,9 @@ trait Auditable
     {
         
     }
+    
+    public function auditableDiff() 
+    {
+        
+    }
 }

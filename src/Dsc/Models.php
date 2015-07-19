@@ -481,7 +481,7 @@ class Models extends \Dsc\Magic
      */
     public function initTraits()
     {
-        $uses = static::class_uses_deep( get_class( $this ) );
+        $uses = static::usedTraits( get_class( $this ) );
     
         foreach ($uses as $traitName) {
             $initMethod = null;
@@ -506,7 +506,7 @@ class Models extends \Dsc\Magic
      * @param unknown $class
      * @param string $autoload
      */
-    public static function class_uses_deep($class, $autoload = true)
+    public static function usedTraits($class, $autoload = true)
     {
         $traits = [];
     
