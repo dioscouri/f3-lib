@@ -43,6 +43,8 @@ class Models extends \Dsc\Magic
         
         $this->setConfig( $options );
         
+        $this->initTraits();
+        
         if (! empty( $source ))
         {
             $this->bind( $source, $this->__config );
@@ -462,5 +464,59 @@ class Models extends \Dsc\Magic
     public function getItemKey()
     {
         return $this->__config['crud_item_key'];
+    }
+    
+    /**
+     * Initialize all traits conditionall (if they have a {traitName}Init() method)
+     */
+    public function initTraits()
+    {
+        $uses = static::class_uses_deep( get_class( $this ) );
+    
+        foreach ($uses as $traitName) {
+            $initMethod = null;
+            // get the expected initMethodName from the traitName
+            // extract the last part of the trait name
+            $exploded = explode('\\', $traitName);
+            $last = end($exploded);
+            // lowercase it, and add Init to the end, so that \Dsc\Traits\Translatable results in translatableInit
+            if ($last) {
+                $initMethod = strtolower($last).'Init';
+            }
+    
+            if ($initMethod && method_exists($this, $initMethod)) {
+                $this->$initMethod();
+            }
+        }
+    }
+    
+    /**
+     * Get all the traits used by this class, including traits from parents
+     * 
+     * @param unknown $class
+     * @param string $autoload
+     */
+    public static function class_uses_deep($class, $autoload = true)
+    {
+        $traits = [];
+    
+        // Get traits of all parent classes
+        do {
+            $traits = array_merge(class_uses($class, $autoload), $traits);
+        } while ($class = get_parent_class($class));
+    
+        // Get traits of all parent traits
+        $traitsToSearch = $traits;
+        while (!empty($traitsToSearch)) {
+            $newTraits = class_uses(array_pop($traitsToSearch), $autoload);
+            $traits = array_merge($newTraits, $traits);
+            $traitsToSearch = array_merge($newTraits, $traitsToSearch);
+        };
+    
+        foreach ($traits as $trait => $same) {
+            $traits = array_merge(class_uses($trait, $autoload), $traits);
+        }
+    
+        return array_unique($traits);
     }
 }

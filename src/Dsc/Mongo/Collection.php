@@ -50,6 +50,20 @@ class Collection extends \Dsc\Models
     
     protected $__last_operation = null;
     
+    protected $__hooks = array(
+        'fetchConditions' => array(),
+        'beforeValidate' => array(),
+        'beforeSave' => array(),
+        'beforeCreate' => array(),
+        'beforeUpdate' => array(),
+        'beforeDelete' => array(),
+        'afterValidate' => array(),
+        'afterSave' => array(),
+        'afterCreate' => array(),
+        'afterUpdate' => array(),
+        'afterDelete' => array()
+    );
+    
     public function defaultSort()
     {
         return $this->__config['default_sort'];
@@ -529,6 +543,8 @@ class Collection extends \Dsc\Models
     {
         $this->__query_params['conditions'] = array();
         
+        $this->triggerHooks(__FUNCTION__);
+        
         $filter_id = $this->getState('filter.id');
         if (!empty($filter_id))
         {
@@ -947,6 +963,8 @@ class Collection extends \Dsc\Models
     
     protected function beforeValidate()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners'])) 
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -962,6 +980,8 @@ class Collection extends \Dsc\Models
     
     protected function beforeSave()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners'])) 
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -977,6 +997,8 @@ class Collection extends \Dsc\Models
     
     protected function beforeCreate()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -985,13 +1007,15 @@ class Collection extends \Dsc\Models
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
             }
-        }        
+        }
                 
         return $this->checkErrors();
     }
     
     protected function beforeUpdate()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -1000,13 +1024,15 @@ class Collection extends \Dsc\Models
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
             }            
-        }        
+        }      
         
         return $this->checkErrors();
     }
     
     protected function beforeDelete()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -1026,6 +1052,8 @@ class Collection extends \Dsc\Models
 
     protected function afterSave()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -1036,6 +1064,8 @@ class Collection extends \Dsc\Models
     
     protected function afterCreate()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -1046,6 +1076,8 @@ class Collection extends \Dsc\Models
     
     protected function afterUpdate()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -1056,6 +1088,8 @@ class Collection extends \Dsc\Models
     
     protected function afterDelete()
     {
+        $this->triggerHooks(__FUNCTION__);
+        
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
@@ -1153,4 +1187,48 @@ class Collection extends \Dsc\Models
         
         return false;
     }
+
+    /**
+     * Registers a custom method in one of the pre/post hooks
+     *  
+     * @param string $eventName
+     * @param string $methodName
+     * 
+     * @return boolean
+     */
+    public function registerHook( $eventName, $methodName ) 
+    {
+        if (array_key_exists($eventName, $this->__hooks)) 
+        {
+            if (!in_array($methodName, $this->__hooks[$eventName])) 
+            {
+                $this->__hooks[$eventName][] = $methodName;
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Triggers hooks for the specified $eventName
+     * 
+     * @param string $eventName
+     */
+    public function triggerHooks( $eventName ) 
+    {
+        if (!empty($this->__hooks[$eventName]))
+        {
+            foreach ($this->__hooks[$eventName] as $methodName)
+            {
+                if (method_exists($this, $methodName))
+                {
+                    $this->$methodName();
+                }
+            }
+        }
+    }
+    
+    
 }
