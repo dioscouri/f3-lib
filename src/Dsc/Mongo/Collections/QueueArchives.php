@@ -21,6 +21,10 @@ class QueueArchives extends \Dsc\Mongo\Collection
         ),
     );
     
+    public static $__indexes = array(
+    		['completed.time' => 1]
+    );
+    
     protected function fetchConditions()
     {
         parent::fetchConditions();
@@ -94,4 +98,6 @@ class QueueArchives extends \Dsc\Mongo\Collection
     {
         return $this->title ? $this->title : $this->task; 
     }
+    
+   
 }

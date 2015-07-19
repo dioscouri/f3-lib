@@ -6,7 +6,7 @@ class Select extends \Dsc\Singleton
     /*
      * $option = array( array('text' => display_text, 'value' => 'value', 'data' => array( 'key'=>value ) ) );
      */
-    public static function options($options, $selected)
+    public static function options($options, $selected = null)
     {
         $html = '';
         if (empty($options))

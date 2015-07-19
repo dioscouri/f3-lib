@@ -14,6 +14,18 @@ trait Publishable
         'end' => null
     );
 
+    
+    
+    public function publishableCreateIndexes() {
+    	
+    	$indexes = [];
+    	$indexes[] = ['publication.status'=> 1];
+    	    	
+    	parent::createIndexes($indexes);
+    
+    }
+    
+    
     /**
      * Checks if the model is published as of today
      *

@@ -95,6 +95,12 @@ abstract class Bootstrap extends \Dsc\Singleton
     {
         $this->runBase('Site');
     }
+    protected function runDaignostic()
+    {
+    	//build Mongo Indexes for all Apps Models
+    	
+    	$this->registerModelsIndexes();
+    }
     
     protected function runCli()
     {
@@ -170,6 +176,36 @@ abstract class Bootstrap extends \Dsc\Singleton
         // register the app's shared views
         \Dsc\System::instance()->get('theme')->registerViewPath($this->dir . '/src/' . $this->namespace . '/Views/', $this->namespace . '/Views');
     }
+    
+    protected function registerModelsIndexes() {
+
+    	$dir = $this->dir . '/src/' . $this->namespace . '/Models';
+    	if (file_exists($dir))
+    	{
+    		$iterator = new \DirectoryIterator($dir);
+    		
+    		foreach ($iterator as $fileinfo) {
+    			if ($fileinfo->isFile()) {
+    				if ($fileinfo->getExtension() == 'php') {
+    					//require_once $dir.'/'. $fileinfo->getFilename();  					
+    					$name = ucfirst(str_replace('.php','',$fileinfo->getFilename()));
+    					$class = '\\'.$this->namespace .'\Models\\'.$name;
+    					if(class_exists ($class)) {
+    						$model = (new $class);
+    						if(method_exists($model, 'createIndexes') && $model instanceof \Dsc\Mongo\Collection) {
+	    						try {
+	    							$model->createIndexes();
+
+	    						} catch (\Exception $e) {
+	    									\Dsc\System::addMessage( $e->getMessage(), 'error');
+	    						}
+    						}	
+    					}
+    				}
+    			}
+    		}
+    	}
+    }
 
     /**
      * This method takesccase of registration all modules
@@ -240,6 +276,11 @@ abstract class Bootstrap extends \Dsc\Singleton
     protected function postSite()
     {
     	$this->postBase( 'Site' );
+    }
+    
+    public function createIndexes()
+    {
+    
     }
     
     /**

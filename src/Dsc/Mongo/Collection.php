@@ -69,6 +69,20 @@ class Collection extends \Dsc\Models
         return $this->__config['default_sort'];
     }
     
+	public function createIndexes($indexes = null) {
+		if (empty ( $indexes )) {
+			if (! empty ( static::$__indexes )) {
+				$indexes = static::$__indexes;
+			}
+		}
+		
+		if (! empty ( $indexes ) && is_array ( $indexes )) {
+			foreach ( $indexes as $index ) {
+				$this->collection ()->createIndex ( $index );
+			}
+		}
+	}
+	
     /**
      * Manually set a query param without using setState()
      *
@@ -222,7 +236,7 @@ class Collection extends \Dsc\Models
     protected function fetchItems()
     {
         $this->__cursor = $this->collection()->find($this->conditions(), $this->fields());
-        
+
         if ($this->getParam('sort')) {
             $this->__cursor->sort($this->getParam('sort'));
         }
@@ -748,11 +762,11 @@ class Collection extends \Dsc\Models
      * @param array $sort
      * @return \Dsc\Mongo\Collection
      */
-    public function load(array $conditions=array(), array $fields=array(), array $sort=array() )
+    public function load(array $conditions=array(), array $fields=array() )
     {
-    	if ($item = $this->setParam( 'conditions', $conditions )->setParam( 'fields', $fields )->setParam( 'sort', $sort )->getItem()) 
-        {
-        	$this->bind( $item );
+        $doc = $this->collection()->findOne($conditions, $fields);
+        if ($doc) {
+            $this->bind( $doc );
         }
         
         return $this;

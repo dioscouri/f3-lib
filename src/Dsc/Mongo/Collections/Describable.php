@@ -10,6 +10,20 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     public $slug; // string INDEX
     public $description; // text
     
+    public static $__indexes = array(
+    		['slug' => -1]
+    );
+    
+    /**
+     * Overridable, chainable init function
+     */
+    public function init()
+    {
+        $this->__translatable = true;
+        
+        return parent::init();
+    }
+    
     protected function fetchConditions()
     {
         parent::fetchConditions();
@@ -108,4 +122,6 @@ class Describable extends \Dsc\Mongo\Collections\Taggable
     
     	return false;
     }
+    
+ 
 }

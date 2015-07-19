@@ -20,19 +20,29 @@ class QueueTasks extends \Dsc\Mongo\Collection
         ),
     );
     
+    public static $__indexes = array(
+    		['when' => 1]    
+    );
+    
     public function complete($message=null)
     {
-        $model = new \Dsc\Mongo\Collections\QueueArchives( $this->cast() );
-        $model->completed = \Dsc\Mongo\Metastamp::getDate( 'now' );
-        $model->message = $message;
-        
+
         try {
-            $model->save();
-            $this->remove();
+        	//remove the task from the queue
+        	$this->remove();
+        	//move to archive 
+        	if($this->archive) {
+	        	$model = new \Dsc\Mongo\Collections\QueueArchives( $this->cast() );
+	        	$model->completed = \Dsc\Mongo\Metastamp::getDate( 'now' );
+	        	$model->message = $message;
+	            $model->save();
+        	}
+        	
+            
         }
         catch (\Exception $e) 
         {
-            
+            throw new \Exception($e->getMessage());
         }
         
         return $this;
@@ -180,4 +190,6 @@ class QueueTasks extends \Dsc\Mongo\Collection
         
         return parent::validate();
     }
+    
+   
 }

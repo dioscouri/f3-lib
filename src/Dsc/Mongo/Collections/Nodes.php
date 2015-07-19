@@ -15,6 +15,12 @@ class Nodes extends \Dsc\Mongo\Collection
         'last_modified_by'=>null
     );
     
+    public static $__indexes = array(
+    		['metadata.created.time' => 1]
+    		
+    );
+    
+    
     protected $__collection_name = 'common.content';
     protected $__type = 'common.content';
     protected $__config = array(
@@ -243,4 +249,6 @@ class Nodes extends \Dsc\Mongo\Collection
         
         return $this->get('metadata.last_modified');    
     }
+    
+  
 }
