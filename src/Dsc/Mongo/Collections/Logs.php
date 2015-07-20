@@ -16,7 +16,10 @@ class Logs extends \Dsc\Mongo\Collection
     );
     
     public static $__indexes = array(
-    		['created.microtime' => -1]
+    	['created.microtime' => -1],
+        ['message' => 1],
+        ['priority' => 1],
+        ['category' => 1],
     );
     
     public static function add( $message, $priority='INFO', $category='General' )
@@ -104,5 +107,16 @@ class Logs extends \Dsc\Mongo\Collection
         return $distinct;
     }
     
-   
+    protected function beforeSave()
+    {
+        if (empty($this->created)) {
+            $this->created = \Dsc\Mongo\Metastamp::getDate( 'now' );
+        }
+        
+        if (empty($this->{'created.microtime'})) {
+            $this->set('created.microtime', microtime( true ) );
+        }
+                
+        return parent::beforeSave();
+    }
 }
