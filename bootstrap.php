@@ -42,6 +42,9 @@ class DscBootstrap extends \Dsc\Bootstrap
     
     protected function runSite()
     {
+
+    	\Base::instance()->route('GET /sitemap','\Dsc\Sitemap->generate');
+    	
         $this->checkSymlink();
         $this->checkPaths();
     }

@@ -266,6 +266,7 @@ class Models extends \Dsc\Magic
      */
     protected function isPublic( $key )
     {
+    	
         if (property_exists( $this, $key ))
         {
             try
