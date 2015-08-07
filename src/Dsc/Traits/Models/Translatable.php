@@ -172,25 +172,25 @@ trait Translatable
         /**
          * Allow a model that extends \Content to skip the extra work
          */
-        if (!$this->__translatable) {
-            return $items;
+        if ($this->__translatable) {
+	        if (!empty($items)) 
+	        {
+	            foreach ($items as $key=>$item) 
+	            {
+	                // does a translation exist?
+	                // if so, use it
+	                $model = (new static)->setState('filter.slug', $item->slug);
+	                if ($translated = $model->getItem($refresh)) 
+	                {
+	                    if ($translated->id != $item->id) {
+	                        $items[$key] = $translated;
+	                    }
+	                }
+	            }
+	        }
         }
         
-        if (!empty($items)) 
-        {
-            foreach ($items as $key=>$item) 
-            {
-                // does a translation exist?
-                // if so, use it
-                $model = (new static)->setState('filter.slug', $item->slug);
-                if ($translated = $model->getItem($refresh)) 
-                {
-                    if ($translated->id != $item->id) {
-                        $items[$key] = $translated;
-                    }
-                }
-            }
-        }
+        
         
         return $items;
     }
