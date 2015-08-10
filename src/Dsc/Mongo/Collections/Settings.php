@@ -15,11 +15,22 @@ class Settings extends \Dsc\Mongo\Collection
      */
     public static function fetch($type=null)
     {
+    	
         $item = new static;
         if (empty($type)) {
             $type = $item->type();
         }
-        $item->load(array('type' => $type));
+        
+        $name = strtolower(str_replace('\\','.', get_class($item) ).'.'.$type);
+        
+        $loaded = \Base::instance()->get('settings.'.$name);
+        if($loaded) {
+      	 $item = $loaded;
+        } else {
+        	$item->load(array('type' => $type));
+        	\Base::instance()->set('settings.'.$name, $item);
+        }
+        
         return $item;
     }
     
