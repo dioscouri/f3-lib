@@ -407,8 +407,8 @@ trait CrudItemCollection
             $id = $this->inputfilter->clean($this->app->get('POST.pk'), 'alnum');
             $name = $this->inputfilter->clean($this->app->get('POST.name'), 'string');
             $value = $this->inputfilter->clean($this->app->get('POST.value'), 'string');
-            
-            if (empty($id) || empty($name) || empty($value))
+                        
+            if (empty($id) || empty($name))
             {
                 throw new \Exception('One of your values is empty');
             }
