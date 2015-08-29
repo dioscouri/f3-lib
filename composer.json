@@ -14,8 +14,7 @@
         }
     ],    
     "require": {
-        "php": ">=5.4.0",
-        "joomla/framework": ">=1.0"
+        "php": ">=5.4.0"
     },
     "autoload": {
         "psr-0": {
