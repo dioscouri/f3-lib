@@ -297,7 +297,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         	'thumb' => $thumb,
         	'filename' => $name,
         	'contentType' => $model->getMimeType($buffer),
-            'title' => \Joomla\String\Normalise::toSpaceSeparated( $name ),
+            'title' => \Dsc\String::toSpaceSeparated( $name ),
         );
         
         if ($storedfile = $grid->storeFile( $file_path, $values ))
@@ -339,7 +339,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
     			'thumb' => $thumb,
     			'filename' => $name,
     			'contentType' => $model->getMimeType($buffer),
-    			'title' => \Joomla\String\Normalise::toSpaceSeparated( $name ),
+    			'title' => \Dsc\String::toSpaceSeparated( $name ),
     	);
     	
     	if ($storedfile = $grid->storeBytes( $buffer, $values ))
@@ -443,7 +443,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
                 $thumb = new \MongoBinData( $thumb_binary_data, 2 );
             }
 
-            $title = \Joomla\String\Normalise::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) );
+            $title = \Dsc\String::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) );
             
             $values = array(
                 'storage' => 'gridfs',
@@ -541,7 +541,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             $thumb = new \MongoBinData( $thumb_binary_data, 2 );
         }
         
-        $title = \Joomla\String\Normalise::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) );
+        $title = \Dsc\String::toSpaceSeparated( $model->inputFilter()->clean( $originalname ) );
         
         $values = array(
             'storage' => 's3',
@@ -939,7 +939,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'beforeDelete' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'beforeDelete' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );

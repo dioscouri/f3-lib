@@ -982,7 +982,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners'])) 
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'beforeValidate' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'beforeValidate' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
@@ -999,7 +999,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners'])) 
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'beforeSave' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'beforeSave' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
@@ -1016,7 +1016,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'beforeCreate' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'beforeCreate' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
@@ -1033,7 +1033,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'beforeUpdate' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'beforeUpdate' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
@@ -1050,7 +1050,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'beforeDelete' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'beforeDelete' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
             if ($event->isStopped()) {
                 $this->setError( $event->getArgument('error') );
@@ -1071,7 +1071,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'afterSave' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'afterSave' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
         }        
     }
@@ -1083,7 +1083,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'afterCreate' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'afterCreate' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);            
         }	
     }
@@ -1095,7 +1095,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'afterUpdate' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'afterUpdate' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
         }
     }
@@ -1107,7 +1107,7 @@ class Collection extends \Dsc\Models
         if (empty($this->__options['skip_listeners']))
         {
             $eventNameSuffix = $this->inputFilter()->clean(get_class($this), 'ALNUM');
-            $event = (new \Joomla\Event\Event( 'afterDelete' . $eventNameSuffix ))->addArgument('model', $this);
+            $event = (new \Dsc\Event\Event( 'afterDelete' . $eventNameSuffix ))->addArgument('model', $this);
             $event = \Dsc\System::instance()->getDispatcher()->triggerEvent($event);
         }
     }

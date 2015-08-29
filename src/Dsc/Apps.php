@@ -43,9 +43,7 @@ class Apps extends Singleton
             
             return $this->load($bootstraps);
         }
-        
-        //\FB::log('Bootstrapping ALL apps');
-        
+               
         // bootstrap all apps
         if (!defined('JPATH_ROOT'))
         {
@@ -54,14 +52,16 @@ class Apps extends Singleton
         
         foreach ($paths as $path)
         {
-            if ($folders = \Joomla\Filesystem\Folder::folders($path))
+   
+            if ($folders = new \DirectoryIterator($path))
             {
                 foreach ($folders as $folder)
                 {
+                	if($folder->isDot()) continue;
                     $app = null;
-                    if (file_exists($path . $folder . '/bootstrap.php'))
+                    if (file_exists($folder->getPathname() . '/bootstrap.php'))
                     {
-                        require_once $path . $folder . '/bootstrap.php';
+                        require_once $folder->getPathname() . '/bootstrap.php';
                         if (!empty($app) && is_a($app, '\Dsc\Bootstrap'))
                         {
                             $bootstraps[] = $app;

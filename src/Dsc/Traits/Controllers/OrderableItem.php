@@ -13,7 +13,7 @@ trait OrderableItem
     
     public function moveUp()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
         
         if (!$this->canUpdate($data, $this->getItemKey())) {
@@ -31,7 +31,7 @@ trait OrderableItem
     
     public function moveDown()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
         
         if (!$this->canUpdate($data, $this->getItemKey())) {

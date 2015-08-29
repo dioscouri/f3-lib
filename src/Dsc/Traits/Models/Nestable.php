@@ -697,7 +697,7 @@ trait Nestable
         // Get the primary keys of descendant nodes, including this node's
         if ($descendants = $this->nestableGetDescendants())
         {
-            $ids = \Joomla\Utilities\ArrayHelper::getColumn($descendants, '_id');
+            $ids = \DscArrayHelper::getColumn($descendants, '_id');
         }
         
         $width = (int) ($this->rgt - $this->lft + 1);
@@ -767,7 +767,7 @@ trait Nestable
         // Get the primary keys of descendant nodes, including this node's
         if ($descendants = $this->nestableGetDescendants())
         {
-            $ids = \Joomla\Utilities\ArrayHelper::getColumn($descendants, '_id');
+            $ids = \DscArrayHelper::getColumn($descendants, '_id');
         }
         
         $width = (int) ($this->rgt - $this->lft + 1);

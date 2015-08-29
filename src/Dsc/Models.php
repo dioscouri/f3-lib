@@ -388,7 +388,7 @@ class Models extends \Dsc\Magic
      * @param   string   $key        The key of the user state variable.
      * @param   string   $request    The name of the variable passed in a request.
      * @param   string   $default    The default value for the variable if not found. Optional.
-     * @param   string   $type       Filter for the variable, for valid values see {@link \Joomla\Input\Input::clean()}. Optional.
+     * @param   string   $type       Filter for the variable, for valid values see {@link \Dsc\Input\Input::clean()}. Optional.
      * @param   boolean  $resetPage  If true, the offset in request is set to zero
      *
      * @return  The request user state.
@@ -444,10 +444,10 @@ class Models extends \Dsc\Magic
      */
     public function setState($property, $value = null)
     {
-        if ($property instanceof \Joomla\Registry\Registry) {
+        if ($property instanceof \Dsc\Registry\Registry) {
             $this->__model_state = $property;
-        } elseif (! $this->__model_state instanceof \Joomla\Registry\Registry) {
-            $this->__model_state = new \Joomla\Registry\Registry;
+        } elseif (! $this->__model_state instanceof \Dsc\Registry\Registry) {
+            $this->__model_state = new \Dsc\Registry\Registry;
             $this->__model_state->set($property, $value);
         } else {
             $this->__model_state->set($property, $value);
@@ -463,7 +463,7 @@ class Models extends \Dsc\Magic
      */
     public function emptyState()
     {
-        $blank = new \Joomla\Registry\Registry;
+        $blank = new \Dsc\Registry\Registry;
         $this->setState( $blank );
     
         return $this;

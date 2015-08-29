@@ -75,7 +75,7 @@ trait CrudItem
             if (method_exists($item, 'cast')) {
                 $item_data = $item->cast();
             } elseif (is_object($item)) {
-                $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
+                $item_data = \DscArrayHelper::fromObject($item);
             }
             $flash->store($item_data);
         }
@@ -101,7 +101,7 @@ trait CrudItem
         if (method_exists($item, 'cast')) {
             $item_data = $item->cast();
         } elseif (is_object($item)) {
-            $item_data = \Joomla\Utilities\ArrayHelper::fromObject($item);
+            $item_data = \DscArrayHelper::fromObject($item);
         }
         $flash->store($item_data);
     
@@ -170,7 +170,7 @@ trait CrudItem
         if (method_exists($this->item, 'cast')) {
             $this->item_data = $this->item->cast();
         } else {
-            $this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
+            $this->item_data = \DscArrayHelper::fromObject($this->item);
         }
         
         if ($f3->get('AJAX')) {
@@ -272,7 +272,7 @@ trait CrudItem
         if (method_exists($this->item, 'cast')) {
             $this->item_data = $this->item->cast();
         } else {
-            $this->item_data = \Joomla\Utilities\ArrayHelper::fromObject($this->item);
+            $this->item_data = \DscArrayHelper::fromObject($this->item);
         }
         
         if ($f3->get('AJAX')) {

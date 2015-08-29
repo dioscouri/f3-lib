@@ -8,7 +8,7 @@ trait Crud
      */
     public function create() 
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
         
         if (!$this->canCreate($data)) {
@@ -29,7 +29,7 @@ trait Crud
      */
     public function read()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
         
         if (!$this->canRead($data, $this->getItemKey())) {
@@ -50,7 +50,7 @@ trait Crud
      */
     public function update()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
         
         if (!$this->canUpdate($data, $this->getItemKey())) {
@@ -71,7 +71,7 @@ trait Crud
      */
     public function delete()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
         
         if (!$this->canDelete($data, $this->getItemKey())) {
@@ -92,7 +92,7 @@ trait Crud
      */
     public function add()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
     
         if (!$this->canCreate($data)) {
@@ -113,7 +113,7 @@ trait Crud
      */
     public function edit()
     {
-        $inputfilter = new \Joomla\Filter\InputFilter;
+        $inputfilter = new \Dsc\Filter\InputFilter;
         $data = \Base::instance()->get('REQUEST');
     
         if (!$this->canUpdate($data, $this->getItemKey())) {

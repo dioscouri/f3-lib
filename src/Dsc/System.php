@@ -137,14 +137,14 @@ class System extends Singleton
     
     /**
      * 
-     * @return \Joomla\Registry\Registry
+     * @return \Dsc\Registry\Registry
      */
     public function getSessionRegistry()
     {
         $global_app_name = \Base::instance()->get('APP_NAME');
         $registry = \Base::instance()->get('SESSION.' . $global_app_name . '.system.registry');
-        if (empty($registry) || !$registry instanceof \Joomla\Registry\Registry) {
-            $registry = new \Joomla\Registry\Registry;
+        if (empty($registry) || !$registry instanceof \Dsc\Registry\Registry) {
+            $registry = new \Dsc\Registry\Registry;
             \Base::instance()->set('SESSION.' . $global_app_name . '.system.registry', $registry);
         }
         
@@ -177,7 +177,7 @@ class System extends Singleton
      * @param   string  $key      The key of the user state variable.
      * @param   string  $request  The name of the variable passed in a request.
      * @param   string  $default  The default value for the variable if not found. Optional.
-     * @param   string  $type     Filter for the variable, for valid values see {@link \Joomla\Filter\InputFilter::clean()}. Optional.
+     * @param   string  $type     Filter for the variable, for valid values see {@link \Dsc\Filter\InputFilter::clean()}. Optional.
      *
      * @return  object  The request user state.
      */
@@ -211,7 +211,7 @@ class System extends Singleton
     {
         $registry = $this->getSessionRegistry();
         
-        if (!empty($registry) && $registry instanceof \Joomla\Registry\Registry)
+        if (!empty($registry) && $registry instanceof \Dsc\Registry\Registry)
         {
             return $registry->set($key, $value);
         }
@@ -225,7 +225,7 @@ class System extends Singleton
     public function getDispatcher()
     {
         if (empty($this->dispatcher)) {
-            $this->dispatcher = new \Joomla\Event\Dispatcher;
+            $this->dispatcher = new \Dsc\Event\Dispatcher;
         }
         
         return $this->dispatcher;
@@ -239,7 +239,7 @@ class System extends Singleton
      */
     public function trigger( $eventName, $arguments=array() )
     {
-        $event = new \Joomla\Event\Event( $eventName );
+        $event = new \Dsc\Event\Event( $eventName );
         foreach ($arguments as $key => $value )
         {
             $event->addArgument( $key, $value );

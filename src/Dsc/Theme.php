@@ -471,7 +471,7 @@ class Theme extends \View
      */
     public function trigger($eventName, $arguments = array())
     {
-        $event = new \Joomla\Event\Event($eventName);
+        $event = new \Dsc\Event\Event($eventName);
         foreach ($arguments as $key => $value)
         {
             $event->addArgument($key, $value);
@@ -635,7 +635,7 @@ class Theme extends \View
              
                 if ($path = \Dsc\Filesystem\Path::real($path))
                 {
-                    $files = \Joomla\Filesystem\Folder::files($path);
+                    $files = \Dsc\Filesystem\Folder::files($path);
                     
               
                     if ($files)
@@ -661,7 +661,7 @@ class Theme extends \View
                 
                 if ($path = \Dsc\Filesystem\Path::real($path))
                 {
-                    $files = \Joomla\Filesystem\Folder::files($path);
+                    $files = \Dsc\Filesystem\Folder::files($path);
                     
                     if ($files)
                     {
