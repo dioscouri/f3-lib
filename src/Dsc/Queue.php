@@ -113,13 +113,8 @@ class Queue extends \Dsc\Singleton
                         
                      try 
                         {
-                        	\Dsc\Mongo\Collections\Logs::add('BEFORE CALLING TASK',  'SYNCING', 'SYNCING');
-                        
-                      
                             $singleton->app->call( $queue_task['task'], $queue_task['parameters'] );
-                            \Dsc\Mongo\Collections\Logs::add('CALLING COMPLETE',  'SYNCING', 'SYNCING');
                             $task = (new \Dsc\Mongo\Collections\QueueTasks($queue_task))->complete();
-                            \Dsc\Mongo\Collections\Logs::add('AFTER CALLING COMPLETE',  'SYNCING', 'SYNCING');
                         }
                         
                         catch (\Exception $e) 

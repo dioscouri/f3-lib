@@ -627,6 +627,7 @@ class Theme extends \View
             // an overrides folder exists in this theme, let's check for the presence of an override for the requested view file
             $dir = \Dsc\Filesystem\Path::clean($theme_path . "Overrides/");
             
+            
            
             if ($dir = \Dsc\Filesystem\Path::real($dir))
             {
