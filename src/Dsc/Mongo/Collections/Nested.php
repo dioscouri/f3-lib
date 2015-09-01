@@ -725,7 +725,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         $ids = array();
         // Get the primary keys of descendant nodes, including this node's
         if ($descendants = $this->getDescendants()) {
-            $ids = \DscArrayHelper::getColumn( $descendants, '_id' );
+            $ids = \Dsc\ArrayHelper::getColumn( $descendants, '_id' );
         }
 
         $width = (int) ($this->rgt - $this->lft + 1);
@@ -784,7 +784,7 @@ class Nested extends \Dsc\Mongo\Collections\Nodes
         $ids = array();
         // Get the primary keys of descendant nodes, including this node's
         if ($descendants = $this->getDescendants()) {
-            $ids = \DscArrayHelper::getColumn( $descendants, '_id' );
+            $ids = \Dsc\ArrayHelper::getColumn( $descendants, '_id' );
         }
     
         $width = (int) ($this->rgt - $this->lft + 1);

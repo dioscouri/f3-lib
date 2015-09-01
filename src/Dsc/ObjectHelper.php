@@ -13,7 +13,7 @@ class ObjectHelper extends \Prefab
 	 */
 	public static function get($object, $key, $default=null)
 	{
-	    $array = \DscArrayHelper::fromObject($object);
+	    $array = \Dsc\ArrayHelper::fromObject($object);
 	    return \Dsc\ArrayHelper::get($array, $key, $default);
 	}
 	

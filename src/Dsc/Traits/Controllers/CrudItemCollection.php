@@ -84,7 +84,7 @@ trait CrudItemCollection
             }
             elseif (is_object($item))
             {
-                $item_data = \DscArrayHelper::fromObject($item);
+                $item_data = \Dsc\ArrayHelper::fromObject($item);
             }
             $flash->store($item_data);
         }
@@ -114,7 +114,7 @@ trait CrudItemCollection
         }
         elseif (is_object($item))
         {
-            $item_data = \DscArrayHelper::fromObject($item);
+            $item_data = \Dsc\ArrayHelper::fromObject($item);
         }
         $flash->store($item_data);
         
@@ -196,7 +196,7 @@ trait CrudItemCollection
         }
         else
         {
-            $this->item_data = \DscArrayHelper::fromObject($this->item);
+            $this->item_data = \Dsc\ArrayHelper::fromObject($this->item);
         }
         
         if ($f3->get('AJAX'))
@@ -314,7 +314,7 @@ trait CrudItemCollection
         }
         else
         {
-            $this->item_data = \DscArrayHelper::fromObject($this->item);
+            $this->item_data = \Dsc\ArrayHelper::fromObject($this->item);
         }
         
         if ($f3->get('AJAX'))
