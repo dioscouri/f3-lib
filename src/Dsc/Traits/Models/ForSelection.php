@@ -7,7 +7,8 @@ trait ForSelection
     public $__select2_fields = array(
         'id' => '_id',
         'text' => 'title',
-        'slug' => 'slug'
+        'slug' => 'slug',
+        'brackets' => '',
     );
 
     protected function forSelectionBeforeValidate($field)
@@ -35,10 +36,23 @@ trait ForSelection
     public static function forSelection(array $query = array())
     {
         $model = new static();
-        
-        $cursor = $model->collection()->find($query, array(
-            $model->__select2_fields['text'] => 1
-        ));
+        if( !isset($model->__select2_fields['brackets'] ) ){
+        	$model->__select2_fields['brackets'] = '';
+        }
+		if (empty( $model->__select2_fields['brackets'] ) ){
+        $cursor = $model->collection()->find($query, [
+            $model->__select2_fields['text'] => 1,
+            $model->__select2_fields['id'] => 1,
+            $model->__select2_fields['slug'] => 1,            
+        ]);
+		} else {
+        $cursor = $model->collection()->find($query, [
+            $model->__select2_fields['text'] => 1,
+            $model->__select2_fields['id'] => 1,
+            $model->__select2_fields['slug'] => 1,            
+            $model->__select2_fields['brackets'] => 1,
+        ]);
+		}
         $cursor->sort(array(
             $model->__select2_fields['text'] => 1
         ));
@@ -46,11 +60,19 @@ trait ForSelection
         $result = array();
         foreach ($cursor as $doc)
         {
-            $array = array(
-                'id' => (string) $doc[$model->__select2_fields['id']],
-                'text' => htmlspecialchars($doc[$model->__select2_fields['text']], ENT_QUOTES)
-            );
-            $result[] = $array;
+        	$arr = [];
+			if (empty( $model->__select2_fields['brackets'] ) ){
+	            $arr = [
+	                'id' => (string) $doc[$model->__select2_fields['id']],
+	                'text' => htmlspecialchars($doc[$model->__select2_fields['text']], ENT_QUOTES)
+	            ];
+			} else {
+	            $arr = [
+	                'id' => (string) $doc[$model->__select2_fields['id']],
+	                'text' => htmlspecialchars($doc[$model->__select2_fields['text']], ENT_QUOTES).' ('.htmlspecialchars($doc[$model->__select2_fields['brackets']], ENT_QUOTES).')'
+	            ];
+			}
+            $result[] = $arr;
         }
         
         return $result;
