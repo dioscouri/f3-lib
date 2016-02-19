@@ -5,6 +5,7 @@ trait Auditable
 {
     public function auditableInit() 
     {
+        
         $this->registerHook( 'beforeUpdate', 'auditableBeforeUpdate' );
         $this->registerHook( 'afterUpdate', 'auditableAfterUpdate' );
         $this->registerHook( 'afterCreate', 'auditableAfterCreate' );
@@ -14,7 +15,7 @@ trait Auditable
      * Store the previous copy of $this in __old
      */
     public function auditableBeforeUpdate() 
-    {
+    { 
         if (!empty($this->id) && empty($this->__old)) 
         {
             $this->__old = (new static)->load( array('_id' => new \MongoId( (string) $this->id ) ));
@@ -69,7 +70,7 @@ trait Auditable
     public function auditableDiff() 
     {
         $diff = array();
-        
+       
         if (!empty($this->__old))
         {
             $oldArray = $this->__old->cast();
@@ -193,5 +194,12 @@ trait Auditable
         }
         
         return $keys;
+    }
+    /**
+     * Returns Paginated List of logs for object
+     */
+    public function auditableGetLogs() {
+        
+        return (new \Dsc\Mongo\Collections\AuditLogs)->setState('filter.resource_id', $this->id)->paginate();
     }
 }

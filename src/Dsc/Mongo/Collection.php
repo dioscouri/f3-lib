@@ -1232,12 +1232,14 @@ class Collection extends \Dsc\Models
      */
     public function triggerHooks( $eventName ) 
     {
+       
         if (!empty($this->__hooks[$eventName]))
-        {
+        { 
             foreach ($this->__hooks[$eventName] as $methodName)
-            {
+            { 
                 if (method_exists($this, $methodName))
                 {
+                    
                     $this->$methodName();
                 }
             }
