@@ -48,6 +48,7 @@ class FileHandler
             
             foreach ($output as $line)
             {
+		if (trim($line) == '') continue;
                 try {
                     $job = \Dsc\Cron\Job::parse( $line );
                     $crontab->addJob($job);
