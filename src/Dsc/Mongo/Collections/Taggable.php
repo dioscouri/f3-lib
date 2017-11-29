@@ -22,7 +22,10 @@ class Taggable extends \Dsc\Mongo\Collections\Nodes
         $filter_tags = (array) $this->getState('filter.tags');
         if (!empty($filter_tags)) 
         {
-            $filter_tags = array_filter( array_values( $filter_tags ), function( $var ) {return !empty( trim($var) ); } );
+            $filter_tags = array_filter( array_values( $filter_tags ), function( $var ) {
+                $var = trim($var);
+                return !empty( $var ); 
+            } );
 
             if (!empty($filter_tags)) {
             	if( count( $filter_tags ) == 1 && $filter_tags[0] == '--' ) {
