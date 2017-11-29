@@ -55,7 +55,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
      */
     public function generateSlug( $unique=true )
     {
-        $title = !empty($this->get('title')) ? $this->get('title') : $this->{'metadata.title'};
+        $title = $this->get('title') ? $this->get('title') : $this->{'metadata.title'};
         if (empty($title)) {
             $this->setError('A title is required for generating the slug');
             return $this->checkErrors();
