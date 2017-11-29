@@ -946,7 +946,7 @@ class Assets extends \Dsc\Mongo\Collections\Describable
             }            
         }
                 
-      	if(empty($this->getErrors())) {
+      	if(!$this->getErrors()) {
       		\Dsc\Mongo\Collections\Trash::trash($this);
       	}
 
