@@ -210,7 +210,7 @@ class Collection extends \Dsc\Models
     {
         if (is_null($this->getState('list.sort')))
         {
-            if (!empty($this->getParam('sort'))) {
+            if ($this->getParam('sort')) {
                 $this->setState('list.sort', $this->getParam('sort'));
             } else {
                 $this->setState('list.sort', $this->__config['default_sort']);
@@ -265,7 +265,7 @@ class Collection extends \Dsc\Models
     {
         if (is_null($this->getState('list.sort')))
         {
-            if (!empty($this->getParam('sort'))) {
+            if ($this->getParam('sort')) {
                 $this->setState('list.sort', $this->getParam('sort'));
             } else {
                 $this->setState('list.sort', $this->__config['default_sort']);
