@@ -90,7 +90,7 @@ abstract class Magic implements \ArrayAccess {
 	*	@param $val scalar
 	**/
 	function offsetset($key,$val) {
-		return $this->visible($key)?($this->key=$val):$this->set($key,$val);
+		return $this->visible($key)?($this->$key=$val):$this->set($key,$val);
 	}
 
 	/**
